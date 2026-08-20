@@ -4,6 +4,9 @@ All notable changes to the **DeutschFlow** project will be documented in this fi
 
 ## [Unreleased]
 
+### Changed
+*   Recorded user approval with persistence condition for Product Decision 1 (Multi-Platform Packaging Architecture).
+
 ## [0.3.0] - 2026-08-20
 
 ### Added

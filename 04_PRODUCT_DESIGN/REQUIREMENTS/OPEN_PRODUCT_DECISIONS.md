@@ -5,6 +5,8 @@ This document lists key product, technical, and architectural decisions that req
 ---
 
 ## Decision 1: Multi-Platform Packaging Architecture
+*   **Status:** APPROVED WITH CONDITION
+*   **Condition:** Production native installations (mobile and desktop) must not rely on browser IndexedDB as the sole persistence layer due to OS deletion risks. A durable native persistence layer (such as SQLite or equivalent) must be evaluated under a repository abstraction in the technical architecture phase.
 *   **Context:** DeutschFlow must support installation across iOS, Android, Windows, macOS, Linux, and Web browsers, reusing the same application core and learning logic.
 *   **Options:**
     1.  **PWA-Only Approach:** Deploy as a standard Progressive Web App.

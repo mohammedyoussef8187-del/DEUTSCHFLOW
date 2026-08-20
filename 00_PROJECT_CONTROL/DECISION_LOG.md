@@ -28,3 +28,13 @@ This log is the immutable record of approved design, product, and technical deci
 *   **Decision:**
     *   Reject simple static free-text grammar explanations as the sole grammar feature.
     *   Grammar must eventually be implemented as a structured, programmatically models-driven and interactive learning component.
+
+## [DF-004] Multi-Platform Packaging Architecture
+*   **Status:** APPROVED WITH CONDITION
+*   **Date:** 2026-08-20
+*   **Approving Authority:** User
+*   **Context:** Selection of packaging framework and deploy target architecture for multi-platform delivery (iOS, Android, Windows, macOS, Linux, Web).
+*   **Decision:** Approved the deployment model utilizing a **Shared Web Application Core + Capacitor for iOS/Android + Tauri for Desktop**.
+*   **Storage Condition:** Production native installations (mobile and desktop) must **NOT** rely on browser IndexedDB as the sole production persistence layer due to OS-directed sandbox deletion risks (especially on iOS Safari). A durable native database layer (such as SQLite or equivalent) must be evaluated and implemented during the technical-architecture phase under a repository/persistence abstraction framework:
+    `Learning/Application Core` -> `Data Repository / Persistence Abstraction` -> `Platform-Specific Durable Storage`.
+*   **Rationale:** Maximize shared code reuse (retaining one logical database, one learning engine, and one UI codebase) while guaranteeing durable local data safety and store compatibility across target devices.
