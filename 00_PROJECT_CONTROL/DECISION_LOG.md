@@ -144,3 +144,17 @@ This log is the immutable record of approved design, product, and technical deci
     6.  **No External UI Framework Bundles:** No Material UI, Bootstrap, Ionic, or Tailwind frameworks are introduced.
     7.  **Data & SRS Preservation:** UI modernization must preserve all existing user data, SRS progress, due dates, ease, streaks, and settings.
 *   **Implementation Status:** Implementation is NOT approved yet.
+
+## [DF-013] Learner-State Preservation and Educational Content Lifecycle
+*   **Status:** APPROVED
+*   **Date:** 2026-08-21
+*   **Approving Authority:** User
+*   **Context:** Clarification that preserving runtime behavior and learner data during structural migration must not make weak legacy educational wording authoritative or permanent.
+*   **Decision:**
+    1.  **Migration Preservation Boundary:** Structural and persistence migrations preserve learner progress, SRS state, identifiers, relationships, and references required for safe migration.
+    2.  **Legacy Content Classification:** Existing sentences, translations, explanations, contextual usage, and German/English/Arabic wording are classified as legacy educational content unless separately reviewed and verified.
+    3.  **No Coupled Content Rewrite:** Large-scale content correction remains separate from persistence and architecture changes. Structural migrations must not silently rewrite educational wording.
+    4.  **Replaceable Content:** The canonical model must allow educational content to be reviewed, versioned, verified, and replaced without resetting learner progress or breaking card relationships.
+    5.  **Provenance:** Educational records retain source/provenance references, verification status, content version, and review metadata where applicable.
+    6.  **Dedicated Quality Phase:** A later Educational Content Quality phase will cover natural German, CEFR appropriateness, grammar, realistic context, professional English and Arabic, contextual senses, vocabulary/grammar consistency, and source verification.
+*   **Data Condition:** Learner-state records reference stable educational identities. Content revisions update or supersede educational records independently and must not recalculate or discard SRS history.

@@ -57,6 +57,12 @@ This document defines the physical table schema for the upgraded **DeutschFlow**
     *   `article` (TEXT, Optional): der, die, das.
     *   `plural` (TEXT, Optional)
     *   `level` (TEXT, Required): CEFR level.
+    *   `contentStatus` (TEXT, Required): legacy, draft, reviewed, verified, superseded.
+    *   `contentVersion` (INTEGER, Required): Educational-content revision independent from learner SRS state.
+    *   `sourceReference` (TEXT, Optional): Stable provenance reference for imported or authored content.
+    *   `sourceType` (TEXT, Optional): legacy, textbook, editorial, user, or other controlled source class.
+    *   `verifiedAt` (INTEGER, Optional)
+    *   `verifiedBy` (TEXT, Optional)
     *   `createdAt`, `updatedAt`, `revision`, `deleted` (Metadata)
 *   **Indexes:**
     *   `idx_vocab_german` on `german`
@@ -71,6 +77,7 @@ This document defines the physical table schema for the upgraded **DeutschFlow**
     *   `arabicText` (TEXT, Required): Standard Arabic meaning.
     *   `normalizedArabic` (TEXT, Required)
     *   `explanation` (TEXT, Optional)
+    *   `contentStatus`, `contentVersion`, `sourceReference`, `sourceType`, `verifiedAt`, `verifiedBy` (Educational content lifecycle metadata)
     *   `createdAt`, `updatedAt`, `revision`, `deleted` (Metadata)
 *   **Sync Relevance:** Read-only educational content.
 
@@ -81,6 +88,7 @@ This document defines the physical table schema for the upgraded **DeutschFlow**
     *   `meaningUuid` (TEXT, FK -> `vocabulary_meanings.uuid`, Cascade Delete)
     *   `englishText` (TEXT, Required): Standard English equivalent.
     *   `normalizedEnglish` (TEXT, Required)
+    *   `contentStatus`, `contentVersion`, `sourceReference`, `sourceType`, `verifiedAt`, `verifiedBy` (Educational content lifecycle metadata)
     *   `createdAt`, `updatedAt`, `revision`, `deleted` (Metadata)
 *   **Sync Relevance:** Read-only educational content.
 

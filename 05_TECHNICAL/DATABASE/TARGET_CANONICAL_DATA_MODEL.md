@@ -51,6 +51,12 @@ Stores the scored translation entries in English.
 Contains acceptable alternative synonyms, inflected spellings, or approved minor typo equivalents for a specific `VocabularyMeaning` or `Translation`.
 *   **Attributes:** Text string, language tag (DE, EN), and validation status.
 
+### 1.5 Educational Content Lifecycle
+Educational wording is versioned independently from learner progress. Legacy imports retain stable identity and provenance but are not automatically authoritative.
+*   **Content metadata:** `contentStatus` (`legacy`, `draft`, `reviewed`, `verified`, `superseded`), `contentVersion`, `sourceReference`, `sourceType`, `verifiedAt`, and `verifiedBy`.
+*   **Replacement rule:** Reviewed content may supersede legacy wording while review cards and review events continue to reference the stable vocabulary identity.
+*   **Migration rule:** Persistence migrations copy wording unchanged and classify its origin; educational review and rewriting occur in a separate quality phase.
+
 ---
 
 ## 2. Synchronization Metadata Fields
