@@ -6,6 +6,7 @@ import { createRepositories } from "./data/repositories.js";
 import { createIndexedDbAdapter } from "./platform/indexeddb/adapter.js";
 import { summarizeLearnerState } from "./services/review-summary-service.js";
 import "./ui/components/df-review-summary.js";
+import "./ui/components/df-stat-tile.js";
 
 (function(){
   "use strict";
@@ -609,11 +610,8 @@ async function submitAnswer(state,payload){
   function renderNav(state){const routes=[["home",ICONS.home,"الرئيسية"],["words",ICONS.words,"الكلمات"],["study",ICONS.study,"تعلّم"],["stats",ICONS.stats,"الإحصائيات"],["settings",ICONS.settings,"الإعدادات"]];return `<nav class="bottom-nav">${routes.map(([r,i,l])=>`<button class="nav-btn ${state.route===r?'active':''}" data-action="nav" data-route="${r}">${i}<span>${l}</span></button>`).join("")}</nav>`;}
   function renderPage(state){if(state.route==="words")return renderWords(state);if(state.route==="stats")return renderStats(state);if(state.route==="settings")return renderSettings(state);return renderHome(state);}
 
-  function dashboardStats(state){
-    const counts={new:0,learning:0,due:0,overdue:0,weak:0,mastered:0,ignored:0};
-    for(const w of state.words){counts[DF.wordStatus(w,state.cards)]++;}
-    return counts;
-  }
+  /* حساب حالات الكلمات صار في خدمة التطبيق (review-summary-service) ويستخدمه
+     مكوّن df-review-summary وصفحة الإحصائيات معاً. */
   function renderHome(state){
     /* الإحصاءات التفصيلية تُشتق الآن في df-review-summary عبر خدمة التطبيق. */
     const dueCards=state.cards.filter(x=>!x.suspended&&x.dueAt<=Date.now()).length,quality=state.words.filter(w=>w.qualityStatus==="review").length;
@@ -633,7 +631,13 @@ async function submitAnswer(state,payload){
       </section>
       ${quality?`<div class="section-title">جودة البيانات</div><section class="card"><div class="hero-row"><div><strong>${quality.toLocaleString("ar-EG")} مدخلاً يحتاج إلى مراجعة</strong><p style="color:var(--muted);margin:5px 0 0;font-size:13px">تم اكتشافها بقواعد تحقق هيكلية؛ لا يعني ذلك أن جميعها خاطئة لغوياً.</p></div><button class="ghost-btn" data-action="quality-review">فتح المراجعة</button></div></section>`:""}`;
   }
-  function statCard(icon,n,label,cls=""){return `<div class="card stat-card ${cls}"><span class="stat-icon">${icon}</span><div><strong>${Number(n||0).toLocaleString("ar-EG")}</strong><span>${label}</span></div></div>`;}
+  /* يُصدر الآن المكوّن المشترك df-stat-tile بدل تكرار ترميز البطاقة في كل صفحة.
+     التنسيق الرقمي هنا مطابق تماماً للسلوك السابق. */
+  const TILE_TONES={"metric-blue":"new","metric-amber":"due","metric-red":"weak","metric-green":"mastered"};
+  function statCard(icon,n,label,cls=""){
+    const tone=TILE_TONES[cls]||"neutral";
+    return `<df-stat-tile tone="${tone}" icon="${DF.esc(icon)}" value="${DF.esc(Number(n||0).toLocaleString("ar-EG"))}" label="${DF.esc(label)}"></df-stat-tile>`;
+  }
   function trainingCard(icon,title,desc,mode){return `<button class="card interactive training-card" data-action="start-session" data-mode="${mode}"><span class="training-icon">${icon}</span><span><h3>${title}</h3><p>${desc}</p></span></button>`;}
 
   function getFilteredWords(state){
@@ -660,7 +664,7 @@ async function submitAnswer(state,payload){
   function wordRow(state,w){const status=DF.wordStatus(w,state.cards),mastery=DF.wordMastery(w,state.cards);return `<article class="word-row" data-action="edit-word" data-id="${w.id}"><div class="word-main"><div class="word-german" lang="de">${DF.esc(w.german)}</div><div class="word-arabic">${DF.esc(w.arabic)}${w.pronunciation?` · ${DF.esc(w.pronunciation)}`:""}</div></div><div class="word-side">${w.favorite?'⭐':''}${w.qualityStatus==='review'?'<span class="pill due">بيانات</span>':''}<span class="pill">${mastery}%</span>${statusPill(status)}</div></article>`;}
 
   function renderStats(state){
-    const counts=dashboardStats(state),attempts=state.recentAttempts||[],analytics=DF.attemptAnalytics(attempts),audit=state.audit||DF.dataAudit(state.words),days=[];
+    const counts=summarizeLearnerState({words:state.words,cards:state.cards}).counts,attempts=state.recentAttempts||[],analytics=DF.attemptAnalytics(attempts),audit=state.audit||DF.dataAudit(state.words),days=[];
     for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const key=DF.localDateKey(d),n=attempts.filter(a=>DF.localDateKey(new Date(a.createdAt))===key).length;days.push({label:new Intl.DateTimeFormat("ar-EG",{weekday:"short"}).format(d),n});}
     const max=Math.max(1,...days.map(x=>x.n));
     const skills=["recall","recognition","article"].map(skill=>{const a=analytics.skills[skill]||{total:0,accuracy:0,avgMs:0};const cards=state.cards.filter(c=>c.skill===skill&&!c.suspended);return {skill,value:cards.length?Math.round(cards.reduce((s,c)=>s+DF.cardMastery(c),0)/cards.length):0,count:cards.length,accuracy:a.accuracy,attempts:a.total,avgMs:a.avgMs};});

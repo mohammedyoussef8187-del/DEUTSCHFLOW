@@ -19,6 +19,7 @@
  */
 
 import { LitElement, html, css, nothing } from "../../../vendor/lit.js";
+import "./df-stat-tile.js";
 
 const LABELS = Object.freeze({
   heading: "نظرة عامة",
@@ -61,52 +62,7 @@ export class DfReviewSummary extends LitElement {
       gap: 8px;
     }
 
-    .tile {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 14px 16px;
-      border-radius: 16px;
-      background: var(--surface, #fff);
-      border: 1px solid var(--border, #e2e8f0);
-      box-shadow: var(--shadow, 0 1px 2px rgb(15 23 42 / 6%));
-      /* Comfortable touch target on tablets and phones. */
-      min-height: 64px;
-    }
-
-    .icon {
-      display: grid;
-      place-items: center;
-      inline-size: 38px;
-      block-size: 38px;
-      border-radius: 12px;
-      font-size: 18px;
-      background: var(--metric-bg, rgb(15 118 110 / 12%));
-      color: var(--metric-fg, #0f766e);
-      flex: none;
-    }
-    .tile.due .icon    { background: rgb(217 119 6 / 14%);  color: #b45309; }
-    .tile.new .icon    { background: rgb(37 99 235 / 14%);  color: #1d4ed8; }
-    .tile.weak .icon   { background: rgb(220 38 38 / 14%);  color: #b91c1c; }
-    .tile.mastered .icon { background: rgb(22 163 74 / 14%); color: #15803d; }
-
-    .value {
-      display: flex;
-      flex-direction: column;
-      line-height: 1.25;
-      min-inline-size: 0;
-    }
-    .value strong {
-      font-size: 22px;
-      font-variant-numeric: tabular-nums;
-    }
-    .value span {
-      font-size: 13px;
-      color: var(--muted, #64748b);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
+    /* Tile presentation now lives in <df-stat-tile>; only layout remains here. */
 
     .totals {
       margin-block-start: 10px;
@@ -122,13 +78,10 @@ export class DfReviewSummary extends LitElement {
       font-size: 14px;
     }
 
-    /* Phone portrait: two compact columns rather than a single tall stack. */
+    /* Phone portrait: two compact columns rather than a single tall stack.
+       The tiles themselves shrink via their own internal breakpoint. */
     @media (max-width: 430px) {
       .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-      .tile { padding: 11px 12px; gap: 9px; min-height: 58px; }
-      .icon { inline-size: 32px; block-size: 32px; font-size: 16px; }
-      .value strong { font-size: 19px; }
-      .value span { font-size: 12px; }
     }
 
     /* Large tablet landscape / desktop-width windows: keep tiles from stretching. */
@@ -152,15 +105,14 @@ export class DfReviewSummary extends LitElement {
     return Number(value ?? 0).toLocaleString(NUMBER_LOCALE);
   }
 
-  #tile(kind, icon, value, label) {
+  #tile(tone, icon, value, label) {
     return html`
-      <div class="tile ${kind}" part="tile">
-        <span class="icon" aria-hidden="true">${icon}</span>
-        <span class="value">
-          <strong>${this.#format(value)}</strong>
-          <span>${label}</span>
-        </span>
-      </div>
+      <df-stat-tile
+        tone=${tone}
+        icon=${icon}
+        value=${this.#format(value)}
+        label=${label}
+      ></df-stat-tile>
     `;
   }
 

@@ -23,6 +23,10 @@ const COMPONENT_SOURCE = fs.readFileSync(
   path.resolve(process.cwd(), "01_APPLICATION/CURRENT_APP/src/ui/components/df-review-summary.js"),
   "utf8"
 );
+const TILE_SOURCE = fs.readFileSync(
+  path.resolve(process.cwd(), "01_APPLICATION/CURRENT_APP/src/ui/components/df-stat-tile.js"),
+  "utf8"
+);
 
 async function mount(summary) {
   const el = document.createElement("df-review-summary");
@@ -32,10 +36,15 @@ async function mount(summary) {
   return el;
 }
 
+/** Tiles are now nested <df-stat-tile> components, each with its own shadow root. */
+function tiles(el) {
+  return [...el.shadowRoot.querySelectorAll("df-stat-tile")];
+}
+
 function tileText(el) {
-  return [...el.shadowRoot.querySelectorAll(".tile")].map(tile => ({
-    label: tile.querySelector(".value span").textContent.trim(),
-    value: tile.querySelector("strong").textContent.trim()
+  return tiles(el).map(tile => ({
+    label: tile.shadowRoot.querySelector(".value span").textContent.trim(),
+    value: tile.shadowRoot.querySelector("strong").textContent.trim()
   }));
 }
 
@@ -46,16 +55,16 @@ describe("Lit renders inside the existing application", () => {
     expect(customElements.get("df-review-summary")).toBeTypeOf("function");
     const el = await mount(summarizeLearnerState(snapshot, NOW));
     expect(el.shadowRoot).toBeTruthy();
-    expect(el.shadowRoot.querySelectorAll(".tile")).toHaveLength(4);
+    expect(tiles(el)).toHaveLength(4);
   });
 
   it("renders the real figures produced by the application service", async () => {
     const summary = summarizeLearnerState(snapshot, NOW);
     const el = await mount(summary);
-    const tiles = tileText(el);
+    const rows = tileText(el);
 
     const dueTotal = summary.counts.due + summary.counts.overdue;
-    const byLabel = Object.fromEntries(tiles.map(t => [t.label, t.value]));
+    const byLabel = Object.fromEntries(rows.map(t => [t.label, t.value]));
     expect(byLabel["مستحقة"]).toBe(dueTotal.toLocaleString("ar-EG"));
     expect(byLabel["جديدة"]).toBe(summary.counts.new.toLocaleString("ar-EG"));
     expect(byLabel["ضعيفة"]).toBe(summary.counts.weak.toLocaleString("ar-EG"));
@@ -86,7 +95,7 @@ describe("Lit renders inside the existing application", () => {
   it("shows an empty state instead of fabricating numbers", async () => {
     const el = await mount(null);
     expect(el.shadowRoot.querySelector(".empty")).toBeTruthy();
-    expect(el.shadowRoot.querySelectorAll(".tile")).toHaveLength(0);
+    expect(tiles(el)).toHaveLength(0);
   });
 
   it("scopes its styles so the existing global stylesheet is unaffected", async () => {
@@ -107,22 +116,30 @@ describe("Lit renders inside the existing application", () => {
 
 describe("architectural boundaries hold", () => {
   it("imports nothing from storage, native plugins, or SRS internals", () => {
-    const imports = [...COMPONENT_SOURCE.matchAll(/^import .*?from\s+["']([^"']+)["']/gm)].map(m => m[1]);
-    // The only dependency is Lit itself.
-    expect(imports).toEqual(["../../../vendor/lit.js"]);
+    const importsOf = source => [
+      ...source.matchAll(/^import\s+(?:.*?from\s+)?["']([^"']+)["']/gm)
+    ].map(m => m[1]);
 
-    // Scan executable code only: the file's own documentation legitimately names the
-    // layers the component must not touch.
-    const code = COMPONENT_SOURCE
+    // Only Lit and the shared presentation primitive.
+    expect(importsOf(COMPONENT_SOURCE)).toEqual(["../../../vendor/lit.js", "./df-stat-tile.js"]);
+    // The primitive itself depends on nothing but Lit.
+    expect(importsOf(TILE_SOURCE)).toEqual(["../../../vendor/lit.js"]);
+
+    // Scan executable code only: the files' documentation legitimately names the
+    // layers these components must not touch.
+    const strip = source => source
       .replace(/\/\*[\s\S]*?\*\//g, "")
       .replace(/^\s*\/\/.*$/gm, "")
       .toLowerCase();
 
-    for (const forbidden of [
-      "indexeddb", "sqlite", "capacitor", "scheduler", "repositor",
-      "createcard", "schedulecard", "wordstatus", "localstorage", "fetch("
-    ]) {
-      expect(code, `component code must not reference ${forbidden}`).not.toContain(forbidden);
+    for (const source of [COMPONENT_SOURCE, TILE_SOURCE]) {
+      const code = strip(source);
+      for (const forbidden of [
+        "indexeddb", "sqlite", "capacitor", "scheduler", "repositor",
+        "createcard", "schedulecard", "wordstatus", "localstorage", "fetch("
+      ]) {
+        expect(code, `component code must not reference ${forbidden}`).not.toContain(forbidden);
+      }
     }
   });
 
@@ -150,7 +167,7 @@ describe("architectural boundaries hold", () => {
       counts: Object.freeze({ ...summarizeLearnerState(snapshot, NOW).counts })
     });
     const el = await mount(summary);
-    expect(el.shadowRoot.querySelectorAll(".tile")).toHaveLength(4);
+    expect(tiles(el)).toHaveLength(4);
   });
 });
 
@@ -163,16 +180,19 @@ describe("iPad-first responsive foundation", () => {
   it("adapts for phone portrait and wide tablet landscape", () => {
     expect(COMPONENT_SOURCE).toContain("@media (max-width: 430px)");
     expect(COMPONENT_SOURCE).toContain("@media (min-width: 1180px)");
+    // The tile shrinks itself on small phones.
+    expect(TILE_SOURCE).toContain("@media (max-width: 430px)");
   });
 
   it("inherits the app's existing theme tokens instead of redefining them", () => {
     for (const token of ["--surface", "--border", "--muted", "--text"]) {
-      expect(COMPONENT_SOURCE).toContain(token);
+      expect(TILE_SOURCE).toContain(token);
     }
+    expect(COMPONENT_SOURCE).toContain("--muted");
   });
 
   it("uses logical properties so the app's RTL direction keeps working", () => {
-    expect(COMPONENT_SOURCE).toContain("inline-size");
+    expect(TILE_SOURCE).toContain("inline-size");
     expect(COMPONENT_SOURCE).toContain("margin-block-start");
   });
 });
