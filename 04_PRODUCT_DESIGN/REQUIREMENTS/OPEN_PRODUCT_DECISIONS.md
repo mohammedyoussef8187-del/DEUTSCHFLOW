@@ -47,6 +47,8 @@ This document lists key product, technical, and architectural decisions that req
 ---
 
 ## Decision 4: AI-Assisted Answer Evaluation Policy
+*   **Status:** APPROVED WITH CONDITION AND FUTURE EXTENSION
+*   **Condition:** Authoritative core scoring must remain deterministic, explainable, reproducible, and 100% offline-capable across all platforms. AI/LLM output must NOT determine card correctness, SRS ratings, or mastery. Arabic does not score. Deterministic evaluation will handle casing, punctuation, spelling normalizations, umlauts, and multiple accepted answers via explicit rules. AI-assisted semantic evaluation may be considered only as a non-authoritative advisory assistant (explaining nuances, suggesting synonyms) in future phases. No AI provider is selected, and implementation is NOT approved for this phase.
 *   **Context:** For complex sentence creation, writing prompts, or translation exercises, literal spelling validators (`validateGermanAnswer`) fail to grade correct semantic variations.
 *   **Options:**
     1.  **No AI Grading (Strict Literal Match):** Grade answers strictly against list of predefined `acceptedAnswers`.

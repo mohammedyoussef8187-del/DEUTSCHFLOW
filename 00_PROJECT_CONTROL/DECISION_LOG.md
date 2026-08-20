@@ -60,3 +60,16 @@ This log is the immutable record of approved design, product, and technical deci
     2.  **Optional Accounts:** Introduced in a future stage solely to support backup recovery and central cloud synchronization.
     3.  **Authentication Providers:** Undecided in this phase (e.g. Google, Apple, passwordless); no auth SDKs are approved.
 *   **Storage & Schema Condition:** The next database schema design must support a durable local profile identifier (local user ID) even for anonymous guests, ensuring that guest-to-account migrations are safe and preserve historical streaks, SRS card progress, error logs, and settings without data loss or duplication when an account is linked.
+
+## [DF-007] AI-Assisted Answer Evaluation Policy
+*   **Status:** APPROVED WITH CONDITION AND FUTURE EXTENSION
+*   **Date:** 2026-08-20
+*   **Approving Authority:** User
+*   **Context:** Grading mechanism rules for lexical evaluation, spelling checks, and synonym validation during active study sessions.
+*   **Decision:** Approved the **Deterministic Core Scoring** model with future optional advisory AI extensions:
+    1.  **Authoritative Scoring:** Core evaluation must remain deterministic, explainable, reproducible, and 100% offline-capable. AI/LLM models must **NOT** dictate correct/incorrect grading, SRS due dates, intervals, or masteries.
+    2.  **Linguistic Grading Rules:** Deterministic validators will evaluate spellings, normalization filters, casings, punctuation, umlaut/ss alternatives, article modifiers, and multiple accepted answers.
+    3.  **Arabic Grading Constraint:** Arabic must **NOT** participate in active scored grading. Incorrect Arabic input or semantic synonyms in Arabic must never penalize user score.
+    4.  **Advisory AI Role:** AI-assisted grading is approved in future phases as a non-authoritative assistant only (providing semantic tips, suggesting new synonyms for user confirmation, explaining syntax errors). AI must never silently alter scoring history.
+    5.  **No AI Provider:** No cloud or local AI model is selected, and implementation is NOT approved.
+*   **Storage & Schema Condition:** The next database schema design must allow educational items (vocabulary, sentences) to store grading configuration metadata, such as primary answers, synonym lists, accepted alternatives, and item-specific evaluation rules.
