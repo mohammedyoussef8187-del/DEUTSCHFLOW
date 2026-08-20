@@ -90,3 +90,30 @@ within the approved architecture and exist to preserve learner state exactly and
     parity round-trip stay exact during structural migration.
 *   **Stable identifiers** are deterministic name-based UUIDs derived from legacy identity, so
     re-running migration is idempotent and child rows link to parents without a shared counter.
+
+### 2.1 Loss-Prevention Refinements (from the real-data dry-run)
+
+Dry-running the mapping against the real exported learner state (2026-08-20 export) revealed
+source fields that the first mapping pass did not read. They are now preserved:
+
+*   **Word-scoped fields kept on `vocabulary_items`:** `tags`, `qualityIssues`, `qualityNote`,
+    and `favorite` / `userFlagged` / `qualityStatus`. These were originally assigned to
+    `vocabulary_meanings` (anticipating multi-meaning support), but a word without a meaning row
+    would then lose them. They are carried on the item, which always exists. Per-meaning
+    favouriting can be introduced later as a forward migration without risking loss now.
+*   **All settings preserved:** the settings the engine reads directly remain typed columns; every
+    other stored preference is preserved verbatim in `settings.extras` (JSON).
+*   **Full review history preserved:** `review_events` also carries `skill`, `item_type`,
+    `correct_answer`, `initial`, `retry_count`, `used_hint`, `revealed`, and the originating
+    `vocab_uuid`.
+*   **Profile:** `lastSessionAt` and `sessions` preserved.
+
+### 2.2 Table: `migration_quarantine`
+
+Unresolved source records are quarantined, reported, **and preserved verbatim** rather than
+dropped. The real export contains one SRS card (`2691:recall`) whose vocabulary word no longer
+exists, plus the one attempt referencing it; discarding them would destroy learner state
+(3 lapses, 3 wrong answers, ease 1.9). They are written to `migration_quarantine` with entity,
+source id, reasons, and the original record as JSON. Active tables keep clean referential
+integrity, the rows are inert (nothing in the learning path reads them), and the state stays
+recoverable.

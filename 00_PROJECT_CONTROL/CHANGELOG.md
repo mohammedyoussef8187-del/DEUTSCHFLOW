@@ -5,6 +5,13 @@ All notable changes to the **DeutschFlow** project will be documented in this fi
 ## [Unreleased]
 
 ### Added
+*   Completed the backup/restore safety gate and the real-data migration dry-run (no learner data modified):
+    *   Added explicit-call backup, structure/version validation, restore, and learner-state parity comparison (`src/data/backup.js`) over the repository abstraction, reusing the existing export format. Restores target whichever repositories the caller supplies, so verification restores into an isolated database. No launch-time hook is installed, so running the app produces no automatic backup side effect.
+    *   Added a read-only migration dry-run (`src/migration/dry-run.js`) and CLI runner (`tools/migration-dry-run.mjs`): READ -> VALIDATE -> TRANSFORM -> VALIDATE CANONICAL -> REPORT, with an optional write/read-back check against a throwaway in-memory SQLite database. Reports contain counts, field names, and identities only, never learner study content.
+    *   Closed data-loss gaps the dry-run exposed in real learner state: word `tags`/`qualityIssues`/`qualityNote` and word-scoped `favorite`/`userFlagged`/`qualityStatus` now live on `vocabulary_items`; all non-typed settings are preserved in `settings.extras`; `review_events` carries the full attempt record; profile `lastSessionAt`/`sessions` preserved.
+    *   Added `migration_quarantine` so unresolved records (an SRS card whose word was deleted, an event that can no longer be linked) are quarantined, reported, AND preserved verbatim instead of dropped.
+    *   Dry-run against the real 2026-08-20 export (2811 words / 337 cards / 2528 attempts): 0 lost cards, 0 SRS mismatches, 0 unmapped fields, clean integrity, successful SQLite round-trip, 2 records preserved in quarantine, source file byte-identical afterwards.
+    *   Expanded the passing regression suite from 45 to 61 tests.
 *   Implemented the Phase 4 migration-mapping and SQLite-parity milestone (isolated; real learner storage not switched):
     *   Added a pure current->canonical migration transform (`src/migration/canonical-migration.js`) with deterministic, platform-neutral identifiers (`src/migration/uuid.js`). SRS state is copied verbatim (due dates, interval, ease, reps, lapses, streak, mastery, state, and correct/wrong/stability/difficulty/lastResult/suspended); legacy wording is preserved unchanged and marked with legacy provenance.
     *   Malformed/incomplete legacy records are quarantined with reasons and a preserved copy; out-of-bounds ease is reported as a warning rather than silently clamped; no missing educational values are invented.

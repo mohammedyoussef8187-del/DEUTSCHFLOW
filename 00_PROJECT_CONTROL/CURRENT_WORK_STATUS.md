@@ -9,15 +9,26 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
 *   **audit Git commit:** `103970456900e24f6a8f6c85346248d34812aaa5`
 *   **design Git commit:** `afb480b6d069dc756d0318552e31aa892ab014a4`
 *   **phase 4 parity Git commit:** `d622413` (test: verify indexeddb to sqlite migration parity)
-*   **Last Update Timestamp:** 2026-08-21T01:22:00+03:00
+*   **backup gate Git commit:** `486e47b` (feat: add verified backup and restore safety gate)
+*   **real-data dry-run Git commit:** `bb91fd6` (test: add read-only real-data migration dry-run)
+*   **Last Update Timestamp:** 2026-08-21T01:38:00+03:00
 
 ## Current Context
 *   **Current Phase:** PHASE 4 — MIGRATION MAPPING + SQLITE PARITY VALIDATION
 *   **Current Delivery Priority:** MOBILE FIRST — iOS/iPadOS + Android
-*   **Phase Status:** PHASE 2 AND PHASE 3 COMPLETE; PHASE 4 MIGRATION/SQLITE PARITY IMPLEMENTED AND VERIFIED (isolated). Stop Gate 3 (SQLite Storage Parity) criteria met against fixtures; real learner storage NOT switched.
+*   **Phase Status:** PHASE 2 AND PHASE 3 COMPLETE. PHASE 4 COMPLETE for migration mapping, SQLite parity, backup/restore (Gate 2), and the real-data read-only dry-run. Real learner storage NOT switched.
 *   **Implementation Status:** ACTIVE ON `mobile-foundation`
-*   **Current Task:** Phase 4 core deliverables complete. Next: extend malformed-corpus coverage as new legacy shapes appear, and prepare the Capacitor-backed SQLite executor at the native build gate (Gate 5). Do not switch real learner persistence until backup + parity gates are approved.
-*   **Last Completed Task:** Implemented the current->canonical migration transform (pure, with quarantine/warnings reporting and deterministic identifiers), the Version 1 canonical SQLite schema, a platform-neutral SQLite persistence adapter behind a canonical repository facade, and end-to-end IndexedDB->migration->SQLite parity tests proving exact SRS preservation. Regression suite 24 -> 45, all passing. No real learner data modified.
+*   **Current Task:** Awaiting the Capacitor stage. Per the approved execution order, the `@capacitor-community/sqlite` version must NOT be selected or installed until the supported Capacitor target/version and iOS/Android requirements are established.
+*   **Last Completed Task:** Implemented backup/validate/restore/parity comparison (explicit-call, no launch-time side effect) and a read-only migration dry-run, then ran it against the real 2026-08-20 learner export. The dry-run exposed genuine unmapped fields and one orphan SRS card; both were closed by preserving all remaining fields and adding a `migration_quarantine` table so unresolved records are preserved rather than dropped. Regression suite 45 -> 61, all passing. No learner data modified (source export verified byte-identical by sha256 and mtime).
+
+## Real-Data Dry-Run Result (2026-08-21, source: `DeutschFlow-backup-2026-08-20.json`, READ-ONLY)
+*   Source: 2811 words / 337 cards / 2528 attempts. Canonical: 2811 items, 2811 meanings, 60 accepted answers, 336 active cards, 2527 events, 2 quarantined.
+*   SRS: 0 lost cards, 0 field mismatches, 0 ease values out of bounds.
+*   Relationship integrity: clean (no orphan meanings, answers, cards, or events; no duplicate card identity).
+*   Isolated SQLite write/read-back: PASS.
+*   Unmapped source fields: NONE.
+*   Quarantined and preserved: 1 SRS card (`2691:recall`, word deleted by learner) and its 1 attempt.
+*   Verdict: no blocking risks; persistence switch APPEARS SAFE (advisory only — the switch itself remains a separate approved step).
 
 ## Decision Status
 *   **Decision 1 (Packaging):** RESOLVED (APPROVED WITH CONDITION)
@@ -46,8 +57,13 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
 *   **last agent:** OpenAI Codex
 
 ## Next Approved Action
-*   Phase 4 isolated migration mapping and parity checks are DONE (stable identity/provenance, exact SRS preservation, content fidelity, quarantine of malformed records — all verified against fixtures). Remaining before storage switch:
-    1.  Wire the automated JSON backup export/verify step (Gate 2) into the runtime launch path.
-    2.  Provide the `@capacitor-community/sqlite`-backed executor implementing the same executor contract as `tests/support/sqlite-node-executor.js` (native build gate).
-    3.  Add a live-data dry-run migration behind a feature flag (READ OLD -> TRANSFORM -> WRITE NEW -> VERIFY) that does NOT switch persistence until parity passes on real learner data.
-*   Do NOT switch real learner persistence, delete IndexedDB support, or install Lit until the backup + parity gates are approved.
+*   Steps 1 (backup/restore gate) and 2 (real-data read-only dry-run) are COMPLETE and green. The next stage is the Capacitor / native SQLite step, which must run in this order:
+    1.  Establish the supported Capacitor target/version.
+    2.  Verify iOS/iPadOS and Android requirements against that target.
+    3.  Only then select a compatible `@capacitor-community/sqlite` version.
+    4.  Implement the native SQLite executor behind the existing adapter, satisfying the same executor contract as `tests/support/sqlite-node-executor.js` (`exec`, `run`, `all`, `transaction`, `pragma`).
+*   Do NOT pin or install the SQLite mobile plugin before that compatibility check.
+*   Do NOT switch real learner persistence, delete IndexedDB support, or install Lit until the approved sequence reaches those gates.
+
+## Open Observation (non-blocking)
+*   The deployed RC build writes backups with `schemaVersion: 6` plus `appVersion` / `build` / `dbVersion` / `engineVersion`, while `src/app.js` `exportBackup` writes `schemaVersion: 5` without them. The backup module accepts both and preserves the extra metadata, so nothing is at risk; the source/deploy divergence is simply recorded here for a later reconciliation task.
