@@ -73,3 +73,17 @@ This log is the immutable record of approved design, product, and technical deci
     4.  **Advisory AI Role:** AI-assisted grading is approved in future phases as a non-authoritative assistant only (providing semantic tips, suggesting new synonyms for user confirmation, explaining syntax errors). AI must never silently alter scoring history.
     5.  **No AI Provider:** No cloud or local AI model is selected, and implementation is NOT approved.
 *   **Storage & Schema Condition:** The next database schema design must allow educational items (vocabulary, sentences) to store grading configuration metadata, such as primary answers, synonym lists, accepted alternatives, and item-specific evaluation rules.
+
+## [DF-008] Speaking / Pronunciation Feature Scope
+*   **Status:** APPROVED WITH STAGED IMPLEMENTATION
+*   **Date:** 2026-08-20
+*   **Approving Authority:** User
+*   **Context:** Integration of speech/pronunciation training module and device microphone permission boundaries.
+*   **Decision:** Approved a **staged speaking / pronunciation approach**:
+    1.  **Initial Approved Capability:** Self-Evaluation Recording and Playback (user records voice, plays it back, and manually compares to native speaker audio).
+    2.  **No Authoritative Scoring Impact:** Self-evaluation practice exercises serve purely for learning drills and must **NOT** affect authoritative SRS card state, intervals, or masteries.
+    3.  **Local by Default:** Learner audio recordings must remain stored locally on the device by default (no automatic cloud upload).
+    4.  **Automated Pronunciation Scoring:** Deferred as a future optional enhancement (non-authoritative STT/phoneme checks for feedback only). No provider/model is selected.
+    5.  **Microphone Support:** Required across iOS, Android, and Desktop wrapper layers, requested explicitly and dynamically only upon using speaking exercises. Core features must remain functional if microphone access is denied.
+    6.  **Offline Support:** Basic pronunciation exercises and local audio recording must operate fully offline.
+*   **Storage & Schema Condition:** The future database schema must support optional relationships mapping vocabulary, sentences, and exercises to reference audio records and practice metadata.

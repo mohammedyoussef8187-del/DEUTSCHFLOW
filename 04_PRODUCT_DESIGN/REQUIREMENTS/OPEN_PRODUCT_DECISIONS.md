@@ -61,6 +61,8 @@ This document lists key product, technical, and architectural decisions that req
 ---
 
 ## Decision 5: Speaking/Pronunciation Feature Scope
+*   **Status:** APPROVED WITH STAGED IMPLEMENTATION
+*   **Condition:** Staged implementation: initial release utilizes Self-Evaluation Recording and Playback (record user voice, play back, and manually compare with native reference audio). This practice does not affect core SRS or mastery scoring. Microphone permissions are required across iOS/Android/Desktop, requested dynamically on use. Voice recordings are strictly local by default (no automatic cloud upload). Automated pronunciation scoring is deferred as a future optional learning feedback check. No speech/AI provider is selected, and implementation is NOT approved for this phase.
 *   **Context:** Incorporating oral practice is requested for the target German Learning System.
 *   **Options:**
     1.  **Out of Scope:** Exclude voice recording and pronunciation checks.

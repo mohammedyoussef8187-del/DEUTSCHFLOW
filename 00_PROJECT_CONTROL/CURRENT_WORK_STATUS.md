@@ -7,21 +7,22 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
 *   **baseline Git commit:** `80599f5bf1aa9ea6dcd52aa42339df2c8bb67e27`
 *   **second pass Git commit:** `2ce3631946f6fe962c48488048a7eaf4ac144e68`
 *   **audit Git commit:** `103970456900e24f6a8f6c85346248d34812aaa5`
-*   **design Git commit:** `ced92bd12f7cb73c283f4c2b22c88a8dc3337472`
-*   **Last Update Timestamp:** 2026-08-20T23:44:00+03:00
+*   **design Git commit:** `42cd323c60b452f68a70e87143ae266ec08f597a`
+*   **Last Update Timestamp:** 2026-08-20T23:47:00+03:00
 
 ## Current Context
 *   **Current Phase:** TARGET PRODUCT REQUIREMENTS AND LEARNING MODEL
 *   **Phase Status:** IN_PROGRESS
 *   **Current Task:** Resolve open product decisions (Decisions 1–6).
-*   **Last Completed Task:** Recorded user approval of Decision 4 (AI-Assisted Answer Evaluation Policy) with deterministic scoring as authoritative and AI as advisory condition under [DF-007] in the decision log.
+*   **Last Completed Task:** Recorded user approval of Decision 5 (Speaking / Pronunciation Feature Scope) with self-evaluation recording/playback condition under [DF-008] in the decision log.
 
 ## Decision Status
 *   **Decision 1 (Packaging):** RESOLVED (APPROVED WITH CONDITION)
 *   **Decision 2 (Synchronization):** RESOLVED (APPROVED WITH STAGED IMPLEMENTATION)
 *   **Decision 3 (Cloud Account):** RESOLVED (APPROVED WITH STAGED IMPLEMENTATION)
 *   **Decision 4 (AI Grading):** RESOLVED (APPROVED WITH CONDITION AND FUTURE EXTENSION)
-*   **Decisions 5–6:** OPEN
+*   **Decision 5 (Pronunciation):** RESOLVED (APPROVED WITH STAGED IMPLEMENTATION)
+*   **Decision 6:** OPEN
 *   **Technical Implementation:** NONE APPROVED
 *   **Architecture Phase:** NONE APPROVED YET
 
@@ -32,8 +33,8 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
     *   `04_PRODUCT_DESIGN/LEARNING_MODEL/TARGET_LEARNING_MODEL.md`
     *   `04_PRODUCT_DESIGN/FEATURE_MATRIX/CURRENT_TO_TARGET_MATRIX.md`
     *   `04_PRODUCT_DESIGN/REQUIREMENTS/OPEN_PRODUCT_DECISIONS.md`
-*   **unresolved questions:** Decisions 5–6 remain open.
+*   **unresolved questions:** Decision 6 remains open.
 *   **last agent:** Antigravity
 
 ## Next Approved Action
-*   "User review of remaining open product decisions (Decisions 5–6) before database schema and technical architecture design."
+*   "User review of remaining open product decision (Decision 6) before database schema and technical architecture design."

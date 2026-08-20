@@ -9,6 +9,7 @@ All notable changes to the **DeutschFlow** project will be documented in this fi
 *   Recorded user approval with staged implementation condition for Product Decision 2 (Cross-Device Synchronization Strategy).
 *   Recorded user approval with optional cloud account and default local-only condition for Product Decision 3 (Cloud Account Requirement vs Local-Only Mode).
 *   Recorded user approval with deterministic scoring as authoritative and AI as advisory condition for Product Decision 4 (AI-Assisted Answer Evaluation Policy).
+*   Recorded user approval with self-evaluation recording/playback condition for Product Decision 5 (Speaking / Pronunciation Feature Scope).
 
 ## [0.3.0] - 2026-08-20
 
