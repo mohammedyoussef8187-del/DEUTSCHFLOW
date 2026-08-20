@@ -15,7 +15,8 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
 *   **migration controller Git commit:** `0fe22dc` (feat: wire persistence bootstrap with automatic indexeddb fallback)
 *   **Gate 4 Lit Git commit:** `da6993e` (feat: add iPad-first app shell layout foundation)
 *   **UI consolidation Git commit:** `91f5804` (feat: migrate study progress strip to Lit)
-*   **Last Update Timestamp:** 2026-08-21T02:40:00+03:00
+*   **study presentation Git commit:** `c7a58ba` (feat: migrate the study teaching panel to Lit)
+*   **Last Update Timestamp:** 2026-08-21T02:48:00+03:00
 
 ## Current Context
 *   **Current Phase:** PHASE 4 — MIGRATION MAPPING + SQLITE PARITY VALIDATION
@@ -39,6 +40,9 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
 *   **Bug fixed:** statistics tiles rendered `ليس رقمًا` (NaN) for accuracy and average answer time, because `statCard` coerced pre-formatted strings with `Number()`. Pre-existing, not a regression — the refactor reproduced it byte-identically and it was fixed in a separate commit.
 *   **Study/SRS interaction tests added** (10 tests) driving the real app through the DOM: introduce → answer → rate, asserting card creation values, that evaluation does not commit until rated, SRS scheduling outcomes, attempt-log fields, session coherence, and that a wrong answer never deletes cards or pushes ease below 1.3.
 *   **`<df-study-progress>`** is the first migrated study-screen slice, and deliberately the read-only part (progress bar, retry badge, correct/wrong/hint tally). It renders no controls and no `data-action`, so answering, revealing, hinting, and rating remain vanilla. Browser-verified.
+*   **`<df-word-panel>`** is the second slice: the read-only teaching panel (German form, pronunciation, Arabic meaning, descriptive pills). Intro action buttons remain vanilla outside it. German text is marked `lang="de"` and bidi-isolated so it renders correctly inside the RTL page. Browser-verified with real seeded data; introducing a word still creates exactly one card.
+*   **Study route safe areas:** the study screen renders full-screen outside `.layout`, so the shell insets did not reach it. It now has its own inline/top/bottom safe-area padding for notched iPhones and iPad landscape.
+*   **Remaining study migration order:** session-end summary next (read-only), then the answer input, reveal, hint, and rating controls LAST, one at a time, re-running the study interaction suite after each.
 
 ## iPad-First App Shell Foundation
 *   Additive CSS layer only; existing rules and phone layouts unchanged.

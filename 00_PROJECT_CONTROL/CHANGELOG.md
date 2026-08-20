@@ -11,7 +11,9 @@ All notable changes to the **DeutschFlow** project will be documented in this fi
     *   Fixed a pre-existing bug where statistics tiles showed "ليس رقمًا" (NaN) for first-attempt accuracy and average answer time, because pre-formatted strings were coerced with Number().
     *   Added 10 study/SRS interaction tests that drive the real application through the DOM (introduce, answer, rate) and assert card creation, deferred commit, scheduling outcomes, attempt-log fields, session coherence, and that wrong answers never delete cards.
     *   Migrated the study progress strip to `<df-study-progress>`, deliberately the read-only part; all SRS-mutating controls remain vanilla.
-    *   Expanded the passing regression suite from 124 to 146 tests.
+    *   Migrated the study teaching panel to `<df-word-panel>` (German form, pronunciation, meaning, descriptive pills), keeping the intro action buttons vanilla; German text is bidi-isolated and marked `lang="de"` for the RTL page.
+    *   Gave the full-screen study route its own safe-area padding, which the shell insets did not reach.
+    *   Expanded the passing regression suite from 124 to 155 tests.
 *   Passed Gate 4 (Lit proof of architecture) with a real component and began the iPad-first UI foundation (no learner data modified):
     *   Added Lit 3.3.3, vendored as a single ESM bundle (`npm run build:vendor`) so the app stays a no-bundler static site that Capacitor serves directly.
     *   Added `<df-review-summary>`, which replaced the dashboard's hand-built stat grid with a real read-only view of learner state (due, new, weak, mastered, vocabulary and learning totals). Every figure comes from the existing SRS `wordStatus` engine; nothing is invented.
