@@ -1,0 +1,16 @@
+{
+  "name": "deutschflow",
+  "version": "1.0.0",
+  "description": "DeutschFlow is a structured German Learning System that progressively upgrades an existing vocabulary trainer into a comprehensive educational platform.",
+  "main": "index.js",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "vitest": "^4.1.11"
+  }
+}

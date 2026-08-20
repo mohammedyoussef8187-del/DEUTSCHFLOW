@@ -5,6 +5,11 @@ All notable changes to the **DeutschFlow** project will be documented in this fi
 ## [Unreleased]
 
 ### Added
+*   Established the Phase 1 regression safety net on branch `mobile-foundation`:
+    *   Added Vitest test execution via `npm test`.
+    *   Added `tests/fixtures/golden_vocab_dataset.json` with representative vocabulary and new/review/mastered cards.
+    *   Added legacy characterization coverage for normalization, deterministic German evaluation, Levenshtein behavior, and SRS state/math.
+    *   Verified 12/12 assertions pass; runtime `src/app.js` was not modified.
 *   Complete technical architecture and physical database schema design documentation:
     *   `05_TECHNICAL/ARCHITECTURE/TARGET_ARCHITECTURE.md`
     *   `05_TECHNICAL/ARCHITECTURE/MODULE_BOUNDARIES.md`

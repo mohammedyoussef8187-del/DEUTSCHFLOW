@@ -3,20 +3,20 @@
 This is the single canonical handoff file for **DeutschFlow** to track progress across sequential agent invocations.
 
 ## Metadata
-*   **Last AI/Agent Used:** Antigravity (Gemini 3.6 Flash)
+*   **Last AI/Agent Used:** OpenAI Codex
 *   **baseline Git commit:** `80599f5bf1aa9ea6dcd52aa42339df2c8bb67e27`
 *   **second pass Git commit:** `2ce3631946f6fe962c48488048a7eaf4ac144e68`
 *   **audit Git commit:** `103970456900e24f6a8f6c85346248d34812aaa5`
 *   **design Git commit:** `afb480b6d069dc756d0318552e31aa892ab014a4`
-*   **Last Update Timestamp:** 2026-08-21T00:08:00+03:00
+*   **Last Update Timestamp:** 2026-08-21T00:46:00+03:00
 
 ## Current Context
-*   **Current Phase:** MOBILE-FIRST IMPLEMENTATION PLANNING
+*   **Current Phase:** PHASE 1 — BASELINE CHARACTERIZATION & REGRESSION PROTECTION
 *   **Current Delivery Priority:** MOBILE FIRST — iOS/iPadOS + Android
-*   **Phase Status:** COMPLETE
-*   **Implementation Status:** NOT STARTED / NOT APPROVED
-*   **Current Task:** Completed 8-phase Mobile-First Implementation Plan and deliverables under `05_TECHNICAL/DOCUMENTATION/`.
-*   **Last Completed Task:** Authored comprehensive implementation roadmap, regression protection plan, data preservation/rollback procedures, Lit migration strategy, mobile rollout plan, and First Implementation Task specification.
+*   **Phase Status:** COMPLETE — GATE 0 BASELINE PASSED
+*   **Implementation Status:** ACTIVE ON `mobile-foundation`
+*   **Current Task:** Establish and maintain the Vitest characterization harness before structural refactoring.
+*   **Last Completed Task:** Added the Vitest harness, golden vocabulary/card fixture, and characterization coverage for legacy normalization, German answer evaluation, Levenshtein behavior, and SRS scheduling.
 
 ## Decision Status
 *   **Decision 1 (Packaging):** RESOLVED (APPROVED WITH CONDITION)
@@ -28,7 +28,7 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
 *   **Technical Decision 1 (Mobile SQLite):** RESOLVED (APPROVED WITH CONDITIONS)
 *   **Technical Decision 2 (Desktop SQLite):** DEFERRED UNTIL DESKTOP PHASE
 *   **Technical Decision 3 (UI Framework):** RESOLVED (APPROVED WITH STAGED MIGRATION)
-*   **Technical Implementation:** NOT STARTED / NOT APPROVED
+*   **Technical Implementation:** ACTIVE — PHASE 1 COMPLETE
 *   **Architecture Phase:** COMPLETE (DESIGN & PLANNING ONLY)
 
 ## Audit & Design Metrics
@@ -45,4 +45,4 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
 *   **last agent:** Antigravity
 
 ## Next Approved Action
-*   "USER REVIEW OF IMPLEMENTATION PLAN AND APPROVAL OF FIRST IMPLEMENTATION TASK"
+*   Continue with the smallest safe Phase 2 extraction after preserving the passing baseline; keep `src/app.js` behaviorally unchanged and run `npm test` after each extraction.

@@ -1,0 +1,13 @@
+{
+  "vocabulary": [
+    { "id": 1, "german": "Haus", "article": "das", "plural": "Häuser", "arabic": "بيت", "acceptedAnswers": ["das Haus", "Haus", "das haus"], "itemType": "noun", "level": "A1" },
+    { "id": 2, "german": "fahren", "article": null, "plural": null, "arabic": "قاد / سافر", "acceptedAnswers": ["fahren", "to drive", "to travel"], "itemType": "word", "level": "A2" },
+    { "id": 3, "german": "groß", "article": null, "plural": null, "arabic": "كبير", "acceptedAnswers": ["gross", "groß"], "itemType": "word", "level": "A1" },
+    { "id": 4, "german": "Das ist ein schönes Haus.", "article": null, "plural": null, "arabic": "هذا منزل جميل", "acceptedAnswers": ["Das ist ein schönes Haus."], "itemType": "sentence", "level": "A1" }
+  ],
+  "cards": [
+    { "key": "1:recall", "wordId": 1, "skill": "recall", "state": "review", "dueAt": 1771497600000, "intervalDays": 3.5, "ease": 2.5, "reps": 2, "lapses": 0, "streak": 2, "mastery": 50 },
+    { "key": "2:recall", "wordId": 2, "skill": "recall", "state": "new", "dueAt": 1771497600000, "intervalDays": 0, "ease": 2.5, "reps": 0, "lapses": 0, "streak": 0, "mastery": 0 },
+    { "key": "3:recall", "wordId": 3, "skill": "recall", "state": "mastered", "dueAt": 1771497600000, "intervalDays": 45, "ease": 3.2, "reps": 6, "lapses": 0, "streak": 6, "mastery": 100 }
+  ]
+}
