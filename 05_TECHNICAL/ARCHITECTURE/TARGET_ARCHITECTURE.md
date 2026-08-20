@@ -39,6 +39,9 @@ DeutschFlow is designed as a **local-first, offline-capable application** utiliz
     *   **Desktop (Tauri):** Writes to a native SQLite file utilizing Rust-based Tauri database APIs.
     *   **Web (Standard Browser):** Falls back to browser IndexedDB storage.
 
+### 1.4 Presentation & UI Component Architecture
+*   **Lit Web Components:** The UI layer utilizes lightweight Lit Web Components for responsive mobile/tablet layout rendering, reactive state management, and component lifecycles. Lit is strictly restricted to presentation rendering. Learning domain logic, SRS schedulers, answer evaluation, data repositories, and persistence adapters remain entirely framework-independent in Vanilla ES modules.
+
 ---
 
 ## 2. Shared Core Subsystems

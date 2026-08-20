@@ -129,3 +129,18 @@ This log is the immutable record of approved design, product, and technical deci
     5.  **Offline-First:** Core mobile learning functions (vocabulary, grammar, SRS, progress, exercises) must operate completely offline.
     6.  **Data & SRS Preservation:** Mandatory migration strategy preserving existing cards, SRS intervals, streaks, user flags, and settings.
 *   **Technical Decision Status:** Technical Decision 2 (Desktop SQLite Wrapper for Tauri) marked as DEFERRED — DESKTOP PHASE. Implementation is NOT approved yet.
+
+## [DF-012] Technical Decision 3 — Mobile-First UI Rendering Architecture
+*   **Status:** APPROVED WITH STAGED MIGRATION
+*   **Date:** 2026-08-21
+*   **Approving Authority:** User
+*   **Context:** Selection of modular presentation and UI component architecture for DeutschFlow mobile/tablet applications.
+*   **Decision:** Approved **Lit-based Web Component Architecture** for future UI rendering with an **incremental migration strategy**:
+    1.  **Framework Selection:** Lit Web Components approved for presentation-layer rendering. Lit provides standard Web Components, reactive state management, lifecycle hooks, and mobile/tablet responsive layout handling without adding heavy application framework bundles.
+    2.  **Vanilla ES Modules Retained:** Vanilla ES Modules remain the standard for non-UI domain modules, application services, SRS calculation, exercise logic, repositories, and platform adapters.
+    3.  **No Full Rewrite:** Incremental migration from current application screens. Existing working functionality must not be discarded.
+    4.  **Presentation-Layer Isolation:** Lit components are restricted to presentation rendering. Learning/domain logic, SRS schedulers, answer evaluation, data repositories, and native plugins must remain framework-independent. Lit components must never query database or native APIs directly.
+    5.  **Mobile/Tablet Priority:** UI architecture prioritizes iPad/iPhone and Android tablets/phones (portrait/landscape, touch, split layouts, study controls, virtual keyboard behavior).
+    6.  **No External UI Framework Bundles:** No Material UI, Bootstrap, Ionic, or Tailwind frameworks are introduced.
+    7.  **Data & SRS Preservation:** UI modernization must preserve all existing user data, SRS progress, due dates, ease, streaks, and settings.
+*   **Implementation Status:** Implementation is NOT approved yet.
