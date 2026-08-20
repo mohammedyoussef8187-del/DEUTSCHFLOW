@@ -634,9 +634,18 @@ async function submitAnswer(state,payload){
   /* يُصدر الآن المكوّن المشترك df-stat-tile بدل تكرار ترميز البطاقة في كل صفحة.
      التنسيق الرقمي هنا مطابق تماماً للسلوك السابق. */
   const TILE_TONES={"metric-blue":"new","metric-amber":"due","metric-red":"weak","metric-green":"mastered"};
+  /* بعض البطاقات تمرر قيماً منسّقة مسبقاً مثل «—» أو «٨٥٪» أو «١٫٢ث».
+     تُعرض هذه كما هي، بينما تُنسَّق الأرقام محلياً كالسابق. */
+  function tileValue(n){
+    if(n==null)return (0).toLocaleString("ar-EG");
+    if(typeof n==="number")return Number.isFinite(n)?n.toLocaleString("ar-EG"):"—";
+    const s=String(n).trim();
+    if(s==="")return (0).toLocaleString("ar-EG");
+    return Number.isFinite(Number(s))?Number(s).toLocaleString("ar-EG"):s;
+  }
   function statCard(icon,n,label,cls=""){
     const tone=TILE_TONES[cls]||"neutral";
-    return `<df-stat-tile tone="${tone}" icon="${DF.esc(icon)}" value="${DF.esc(Number(n||0).toLocaleString("ar-EG"))}" label="${DF.esc(label)}"></df-stat-tile>`;
+    return `<df-stat-tile tone="${tone}" icon="${DF.esc(icon)}" value="${DF.esc(tileValue(n))}" label="${DF.esc(label)}"></df-stat-tile>`;
   }
   function trainingCard(icon,title,desc,mode){return `<button class="card interactive training-card" data-action="start-session" data-mode="${mode}"><span class="training-icon">${icon}</span><span><h3>${title}</h3><p>${desc}</p></span></button>`;}
 
