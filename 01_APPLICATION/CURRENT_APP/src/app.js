@@ -2,6 +2,7 @@ import { DAY, MINUTE, DEFAULT_SETTINGS, esc, clamp, round, randomUnit, randomInt
 import { ARTICLES, normalizeGerman, normalizeArabic, foldGerman, splitArticle, inferItemType } from "./core/text.js";
 import { levenshtein, validateGermanAnswer, validateArticleAnswer, validateArabicAnswer, arabicTokenScore } from "./exercises/answer-evaluator.js";
 import { createCard, scheduleCard, cardMastery, automaticRating, skillLabel, skillWeight, wordMastery, wordStatus, cardStatus, preferredSkills, nextSkillUnlocks } from "./srs/scheduler.js";
+import { createRepositories } from "./data/repositories.js";
 
 (function(){
   "use strict";
@@ -347,7 +348,8 @@ import { createCard, scheduleCard, cardMastery, automaticRating, skillLabel, ski
     await transactionDone(tx);
   }
 
-  Object.assign(DF,{DB:{open,get,getAll,put,add,delete:del,clear,bulkPut,bulkDelete,getByIndex,getAttemptsSince,getMeta,setMeta,initialize,replaceAll,DB_NAME}});
+  const database={open,get,getAll,put,add,delete:del,clear,bulkPut,bulkDelete,getByIndex,getAttemptsSince,getMeta,setMeta,initialize,replaceAll,DB_NAME};
+  Object.assign(DF,{DB:database,Repositories:createRepositories(database)});
 })();
 
 (function(){
@@ -363,7 +365,7 @@ import { createCard, scheduleCard, cardMastery, automaticRating, skillLabel, ski
   async function persistCard(state,card){
     card.updatedAt=Date.now();state.cardsMap.set(card.key,card);
     const idx=state.cards.findIndex(c=>c.key===card.key);if(idx>=0)state.cards[idx]=card;else state.cards.push(card);
-    await DF.DB.put("cards",card);
+    await DF.Repositories.cards.save(card);
   }
 function questionFor(state,entry){
     const word=state.wordsMap.get(entry.wordId);
@@ -499,12 +501,12 @@ function pickNewWords(state,limit){
     }
     if(settings.randomizeSession!==false)s.queue=interleaveEntries(state,s.queue);
     if(settings.avoidRecentSessionOrder!==false){
-      const previous=await DF.DB.getMeta("lastSessionWordOrder",[]);
+      const previous=await DF.Repositories.metadata.get("lastSessionWordOrder",[]);
       s.queue=avoidPreviousOrder(s.queue,previous);
-      await DF.DB.setMeta("lastSessionWordOrder",s.queue.map(x=>x.wordId));
+      await DF.Repositories.metadata.set("lastSessionWordOrder",s.queue.map(x=>x.wordId));
     }
     s.initialWords=new Set(s.queue.map(x=>x.wordId)).size;
-    await DF.DB.setMeta("session",s);
+    await DF.Repositories.metadata.set("session",s);
     return s;
   }
 
@@ -519,7 +521,7 @@ function progress(session){
     const s=state.session;if(!s)return null;
     if(s.result)return s.current;
     if(!s.queue.length){s.done=true;s.current=null;s.updatedAt=Date.now();await completeSession(state);return null;}
-    s.current=questionFor(state,s.queue[0]);s.current.startedAt=Date.now();s.current.usedHint=false;s.current.revealed=false;s.result=null;s.updatedAt=Date.now();await DF.DB.setMeta("session",s);return s.current;
+    s.current=questionFor(state,s.queue[0]);s.current.startedAt=Date.now();s.current.usedHint=false;s.current.revealed=false;s.result=null;s.updatedAt=Date.now();await DF.Repositories.metadata.set("session",s);return s.current;
   }
 
   function evaluateChoice(question,id){
@@ -541,17 +543,17 @@ async function submitAnswer(state,payload){
     const elapsed=Date.now()-q.startedAt;
     const suggestedRating=DF.automaticRating(answer,{usedHint:q.usedHint,revealed:false,elapsedMs:elapsed});
     s.result={answer,elapsedMs:elapsed,suggestedRating,revealed:false};
-    s.updatedAt=Date.now();await DF.DB.setMeta("session",s);
+    s.updatedAt=Date.now();await DF.Repositories.metadata.set("session",s);
   }
   async function revealAnswer(state){
     const s=state.session,q=s?.current;if(!s||!q||s.result||q.kind!=="test")return;
     q.revealed=true;
     s.result={answer:{type:"revealed",isCorrect:false,correctAnswer:q.skill==="article"?q.word.article:q.skill==="recognition"?q.word.arabic:q.expected||q.word.german,userAnswer:"",note:"تم عرض الإجابة. ستعاد البطاقة داخل الجلسة.",quality:0},elapsedMs:Date.now()-q.startedAt,suggestedRating:1,revealed:true};
-    s.updatedAt=Date.now();await DF.DB.setMeta("session",s);
+    s.updatedAt=Date.now();await DF.Repositories.metadata.set("session",s);
   }
   async function useHint(state){
     const s=state.session,q=s?.current;if(!s||!q||q.usedHint)return;
-    q.usedHint=true;s.hints++;s.updatedAt=Date.now();await DF.DB.setMeta("session",s);
+    q.usedHint=true;s.hints++;s.updatedAt=Date.now();await DF.Repositories.metadata.set("session",s);
   }
 
   async function introduceWord(state,known=false){
@@ -568,7 +570,7 @@ async function submitAnswer(state,payload){
       const test={id:DF.makeId("q"),kind:"test",wordId:word.id,skill:"recall",initial:true,retryCount:0};
       const at=randomGap(state.settings,s.queue.length);s.queue.splice(at,0,test);
     }
-    s.current=null;s.result=null;s.updatedAt=Date.now();await DF.DB.setMeta("session",s);await beginCurrent(state);
+    s.current=null;s.result=null;s.updatedAt=Date.now();await DF.Repositories.metadata.set("session",s);await beginCurrent(state);
   }
 
   function ratingName(r){return({1:"again",2:"hard",3:"good",4:"easy"})[r]||"good";}
@@ -587,7 +589,7 @@ async function submitAnswer(state,payload){
     if(entry.initial){s.initialCompleted++;if(correct)s.firstPassCorrect++;else s.firstPassWrong++;}
     else s.retriesCompleted++;
 
-    await DF.DB.add("attempts",{
+    await DF.Repositories.attempts.add({
       sessionId:s.id,wordId:q.word.id,cardKey:card.key,skill:q.skill,correct,answerType:r.answer.type,rating:finalRating,
       initial:!!entry.initial,retryCount:Number(entry.retryCount)||0,itemType:q.word.itemType||"word",
       usedHint:!!q.usedHint,revealed:!!r.revealed,elapsedMs:r.elapsedMs,userAnswer:r.answer.userAnswer||"",correctAnswer:r.answer.correctAnswer||"",createdAt:Date.now()
@@ -605,7 +607,7 @@ async function submitAnswer(state,payload){
       const retry={id:DF.makeId("retry"),kind:"test",wordId:q.word.id,skill:q.skill,initial:false,retryCount:(entry.retryCount||0)+1};
       const at=randomGap(state.settings,s.queue.length);s.queue.splice(at,0,retry);
     }
-    s.current=null;s.result=null;s.updatedAt=Date.now();await DF.DB.setMeta("session",s);await beginCurrent(state);
+    s.current=null;s.result=null;s.updatedAt=Date.now();await DF.Repositories.metadata.set("session",s);await beginCurrent(state);
   }
 
   async function completeSession(state){
@@ -617,14 +619,14 @@ async function submitAnswer(state,payload){
       profile.lastStudyDate=today;
     }
     profile.totalXP=(profile.totalXP||0)+(s.xp||0);profile.lastSessionAt=Date.now();profile.sessions=(profile.sessions||0)+1;
-    state.profile=profile;await DF.DB.setMeta("profile",profile);await DF.DB.setMeta("session",s);
+    state.profile=profile;await DF.Repositories.metadata.set("profile",profile);await DF.Repositories.metadata.set("session",s);
   }
   async function abandonSession(state,{discard=false}={}){
-    if(discard){state.session=null;await DF.DB.setMeta("session",null);}
-    else if(state.session){state.session.updatedAt=Date.now();await DF.DB.setMeta("session",state.session);}
+    if(discard){state.session=null;await DF.Repositories.metadata.set("session",null);}
+    else if(state.session){state.session.updatedAt=Date.now();await DF.Repositories.metadata.set("session",state.session);}
   }
   async function resumeSession(state){
-    const s=await DF.DB.getMeta("session",null);if(s&&!s.done){state.session=s;await beginCurrent(state);return s;}return null;
+    const s=await DF.Repositories.metadata.get("session",null);if(s&&!s.done){state.session=s;await beginCurrent(state);return s;}return null;
   }
 
   function sessionAccuracy(session){
@@ -740,24 +742,24 @@ async function submitAnswer(state,payload){
     return mapRows(rows,state);
   }
   async function commitImport(state,preview){
-    if(!preview?.items?.length)return 0;await DF.DB.bulkPut("words",preview.items);
+    if(!preview?.items?.length)return 0;await DF.Repositories.vocabulary.saveMany(preview.items);
     state.words.push(...preview.items);for(const w of preview.items)state.wordsMap.set(w.id,w);return preview.items.length;
   }
 
   async function exportBackup(state){
-    const attempts=await DF.DB.getAll("attempts");
+    const attempts=await DF.Repositories.attempts.all();
     const payload={app:"DeutschFlow",schemaVersion:5,exportedAt:Date.now(),words:state.words,cards:state.cards,attempts,settings:state.settings,profile:state.profile};
     DF.downloadBlob(new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}),`DeutschFlow-backup-${DF.localDateKey()}.json`);
   }
   async function savePreRestoreSnapshot(){
-    try{await DF.DB.setMeta("preRestoreSnapshot",{app:"DeutschFlow",schemaVersion:5,exportedAt:Date.now(),reason:"automatic-pre-restore",words:await DF.DB.getAll("words"),cards:await DF.DB.getAll("cards"),attempts:await DF.DB.getAll("attempts"),settings:await DF.DB.getMeta("settings",{}),profile:await DF.DB.getMeta("profile",{})});}
+    try{await DF.Repositories.metadata.set("preRestoreSnapshot",{app:"DeutschFlow",schemaVersion:5,exportedAt:Date.now(),reason:"automatic-pre-restore",words:await DF.Repositories.vocabulary.all(),cards:await DF.Repositories.cards.all(),attempts:await DF.Repositories.attempts.all(),settings:await DF.Repositories.metadata.get("settings",{}),profile:await DF.Repositories.metadata.get("profile",{})});}
     catch(e){console.warn("تعذر حفظ لقطة ما قبل الاستعادة",e);}
   }
   async function restoreBackup(file){
     if(!file)throw new Error("لم يتم اختيار ملف.");let payload;
     try{payload=JSON.parse(await file.text());}catch{throw new Error("ملف النسخة الاحتياطية غير صالح.");}
     if(payload.app!=="DeutschFlow"||!Array.isArray(payload.words)||!Array.isArray(payload.cards))throw new Error("هذا الملف ليس نسخة DeutschFlow صحيحة.");
-    await savePreRestoreSnapshot();await DF.DB.replaceAll(payload);return payload;
+    await savePreRestoreSnapshot();await DF.Repositories.lifecycle.replaceAll(payload);return payload;
   }
   function exportCSV(state,filter="all"){
     let words=state.words;
@@ -948,20 +950,20 @@ function afterRender(state){
   };
 
   async function loadState(){
-    const init=await DF.DB.initialize();state.settings=init.settings;
-    state.words=await DF.DB.getAll("words");state.cards=await DF.DB.getAll("cards");
+    const init=await DF.Repositories.lifecycle.initialize();state.settings=init.settings;
+    state.words=await DF.Repositories.vocabulary.all();state.cards=await DF.Repositories.cards.all();
     state.wordsMap=new Map(state.words.map(w=>[w.id,w]));state.cardsMap=new Map(state.cards.map(c=>[c.key,c]));
-    const patched=DF.applyPatchesToExistingWords(state.words);if(patched.length)await DF.DB.bulkPut("words",patched);
+    const patched=DF.applyPatchesToExistingWords(state.words);if(patched.length)await DF.Repositories.vocabulary.saveMany(patched);
     state.wordsMap=new Map(state.words.map(w=>[w.id,w]));
-    state.profile=await DF.DB.getMeta("profile",{streak:0,totalXP:0});
-    const engineVersion=await DF.DB.getMeta("engineVersion",0);
-    if(engineVersion<6){await DF.DB.setMeta("session",null);await DF.DB.setMeta("engineVersion",6);state.session=null;}else state.session=await DF.DB.getMeta("session",null);
-    state.recentAttempts=await DF.DB.getAttemptsSince(Date.now()-30*DF.DAY);
+    state.profile=await DF.Repositories.metadata.get("profile",{streak:0,totalXP:0});
+    const engineVersion=await DF.Repositories.metadata.get("engineVersion",0);
+    if(engineVersion<6){await DF.Repositories.metadata.set("session",null);await DF.Repositories.metadata.set("engineVersion",6);state.session=null;}else state.session=await DF.Repositories.metadata.get("session",null);
+    state.recentAttempts=await DF.Repositories.attempts.since(Date.now()-30*DF.DAY);
     state.audit=DF.dataAudit(state.words);
     if(state.session?.done)state.session=null;
     if(init.migration?.type==="legacy")setTimeout(()=>DF.UI.toast(`تم نقل ${init.migration.count.toLocaleString("ar-EG")} كلمة وتقدمها من النسخة السابقة.`,"success"),350);
   }
-  async function refreshAttempts(){state.recentAttempts=await DF.DB.getAttemptsSince(Date.now()-30*DF.DAY);state.audit=DF.dataAudit(state.words);}
+  async function refreshAttempts(){state.recentAttempts=await DF.Repositories.attempts.since(Date.now()-30*DF.DAY);state.audit=DF.dataAudit(state.words);}
   function render(){DF.UI.render(state);}
   async function withBusy(fn){if(state.busy)return;state.busy=true;try{await fn();}catch(e){console.error(e);DF.UI.toast(e?.message||"حدث خطأ غير متوقع.","error");}finally{state.busy=false;render();}}
 
@@ -974,7 +976,7 @@ function afterRender(state){
   async function resumeSession(){
     const s=await DF.Learning.resumeSession(state);if(s){state.route="study";}else{await startSession("daily");}
   }
-  async function saveSettings(){await DF.DB.setMeta("settings",state.settings);DF.UI.applyTheme(state.settings);}
+  async function saveSettings(){await DF.Repositories.metadata.set("settings",state.settings);DF.UI.applyTheme(state.settings);}
 
   function formObject(form){const fd=new FormData(form),o={};for(const [k,v] of fd)o[k]=typeof v==="string"?v.trim():v;return o;}
   async function saveWord(form){
@@ -986,24 +988,24 @@ function afterRender(state){
     const split=DF.splitArticle(data.german),now=Date.now();
     const word={...(existing||{}),id:id||state.words.reduce((m,w)=>Math.max(m,Number(w.id)||0),0)+1,german:data.german,arabic:data.arabic,pronunciation:data.pronunciation||"",plural:data.plural||"",level:data.level||"",tags:(data.tags||"").split(/[;,|]/).map(x=>x.trim()).filter(Boolean),acceptedAnswers:(data.acceptedAnswers||"").split(/\n/).map(x=>x.trim()).filter(Boolean),acceptedArabicAnswers:(data.acceptedArabicAnswers||"").split(/\n/).map(x=>x.trim()).filter(Boolean),normalizedGerman:normG,normalizedArabic:normA,article:split.article,itemType:DF.inferItemType(data.german,split.article),favorite:data.favorite==="on",ignored:data.ignored==="on",userFlagged:existing?.userFlagged&&data.ignored==="on",sourceRow:existing?.sourceRow??null,createdAt:existing?.createdAt||now,updatedAt:now,qualityNote:existing?.qualityNote||""};
     word.qualityIssues=DF.qualityIssues(word);word.qualityStatus=word.qualityIssues.length?"review":"ok";
-    await DF.DB.put("words",word);state.wordsMap.set(word.id,word);
+    await DF.Repositories.vocabulary.save(word);state.wordsMap.set(word.id,word);
     const idx=state.words.findIndex(w=>w.id===word.id);if(idx>=0)state.words[idx]=word;else state.words.push(word);
     // Suspend card types that no longer apply after editing.
     const related=state.cards.filter(c=>c.wordId===word.id);for(const c of related){const invalid=(c.skill==="article"&&!(word.itemType==="noun"&&word.article))||(c.skill==="order"&&word.itemType!=="sentence");if(invalid){c.suspended=true;await DF.Learning.persistCard(state,c);}}
     DF.UI.closeModal();DF.UI.toast(existing?"تم تحديث الكلمة.":"تمت إضافة الكلمة.","success");
   }
   async function deleteWord(id){
-    const related=state.cards.filter(c=>c.wordId===id),attempts=await DF.DB.getByIndex("attempts","wordId",id);
-    await DF.DB.delete("words",id);await DF.DB.bulkDelete("cards",related.map(c=>c.key));await DF.DB.bulkDelete("attempts",attempts.map(a=>a.id));
+    const related=state.cards.filter(c=>c.wordId===id),attempts=await DF.Repositories.attempts.byWordId(id);
+    await DF.Repositories.vocabulary.remove(id);await DF.Repositories.cards.removeMany(related.map(c=>c.key));await DF.Repositories.attempts.removeMany(attempts.map(a=>a.id));
     state.words=state.words.filter(w=>w.id!==id);state.wordsMap.delete(id);state.cards=state.cards.filter(c=>c.wordId!==id);for(const c of related)state.cardsMap.delete(c.key);
     DF.UI.closeModal();DF.UI.toast("تم حذف الكلمة وسجلها.");
   }
   async function resetWordProgress(id){
-    const related=state.cards.filter(c=>c.wordId===id);await DF.DB.bulkDelete("cards",related.map(c=>c.key));state.cards=state.cards.filter(c=>c.wordId!==id);for(const c of related)state.cardsMap.delete(c.key);DF.UI.closeModal();DF.UI.toast("تم تصفير تقدم الكلمة.");
+    const related=state.cards.filter(c=>c.wordId===id);await DF.Repositories.cards.removeMany(related.map(c=>c.key));state.cards=state.cards.filter(c=>c.wordId!==id);for(const c of related)state.cardsMap.delete(c.key);DF.UI.closeModal();DF.UI.toast("تم تصفير تقدم الكلمة.");
   }
 
   async function resetApp(){
-    await DF.DB.clear("words");await DF.DB.clear("cards");await DF.DB.clear("attempts");await DF.DB.setMeta("session",null);await DF.DB.setMeta("profile",{streak:0,lastStudyDate:null,totalXP:0,createdAt:Date.now()});location.reload();
+    await DF.Repositories.vocabulary.clear();await DF.Repositories.cards.clear();await DF.Repositories.attempts.clear();await DF.Repositories.metadata.set("session",null);await DF.Repositories.metadata.set("profile",{streak:0,lastStudyDate:null,totalXP:0,createdAt:Date.now()});location.reload();
   }
 
   document.addEventListener("click",e=>{
@@ -1024,7 +1026,7 @@ function afterRender(state){
     if(action==="flag-current-word")return withBusy(async()=>{
       const w=state.session?.current?.word;if(!w)return;
       w.userFlagged=true;w.ignored=true;w.qualityIssues=DF.qualityIssues(w);w.qualityStatus="review";w.updatedAt=Date.now();
-      await DF.DB.put("words",w);state.audit=DF.dataAudit(state.words);
+      await DF.Repositories.vocabulary.save(w);state.audit=DF.dataAudit(state.words);
       for(const c of state.cards.filter(c=>c.wordId===w.id)){c.suspended=true;await DF.Learning.persistCard(state,c);}
       DF.UI.toast("تم استبعاد المدخل ووضعه في مراجعة الجودة.");
       render();
@@ -1056,7 +1058,7 @@ function afterRender(state){
         const unique=[...new Set(issues)];
         if(JSON.stringify(unique)!==JSON.stringify(w.qualityIssues||[])){w.qualityIssues=unique;w.qualityStatus=unique.length?"review":"ok";w.updatedAt=Date.now();changed.push(w);}
       }
-      if(changed.length)await DF.DB.bulkPut("words",changed);state.audit=DF.dataAudit(state.words);DF.UI.toast(`اكتمل التدقيق: ${state.audit.review.toLocaleString("ar-EG")} مدخلاً يحتاج مراجعة.`,"success");
+      if(changed.length)await DF.Repositories.vocabulary.saveMany(changed);state.audit=DF.dataAudit(state.words);DF.UI.toast(`اكتمل التدقيق: ${state.audit.review.toLocaleString("ar-EG")} مدخلاً يحتاج مراجعة.`,"success");
     });
     if(action==="export-data-audit")return (()=>{const a=state.audit||DF.dataAudit(state.words),rows=[["الفئة","المعرفات","الألمانية","العربية/المعاني","العدد"]];
       for(const x of a.exactDuplicates)rows.push(["تكرار مطابق",x.ids.join("|"),x.german,x.arabic,x.count]);
