@@ -8,6 +8,7 @@ import { summarizeLearnerState } from "./services/review-summary-service.js";
 import "./ui/components/df-review-summary.js";
 import "./ui/components/df-stat-tile.js";
 import "./ui/components/df-study-progress.js";
+import "./ui/components/df-word-panel.js";
 
 (function(){
   "use strict";
@@ -707,7 +708,11 @@ async function submitAnswer(state,payload){
     if(!q)return `<div class="study-layout"><div class="boot-screen"><p>جارٍ إعداد السؤال…</p></div></div>`;
     return `<main class="study-layout"><header class="study-head"><button class="pill" data-action="exit-study">إنهاء</button><div class="study-title">${modeLabel(s.mode)}</div><div class="study-meta">أساسي ${p.completed}/${p.planned}<br>${q.kind==='intro'?`عرض ${s.introduced+1}`:`محاولة ${s.attempts+1}`}</div></header><df-study-progress percent="${p.percent}" completed="${p.completed}" planned="${p.planned}" retries="${p.pendingRetries||0}" correct="${s.correctAttempts}" wrong="${s.wrongAttempts}" hints="${s.hints}"></df-study-progress>${q.kind==="intro"?renderIntro(state,q):renderQuestion(state,q)}</main>`;
   }
-  function renderIntro(state,q){const w=q.word;return `<section class="card question-card intro-card"><span class="pill new">كلمة جديدة · عرض تعليمي</span><div class="question-de" lang="de">${DF.esc(w.german)}</div>${state.settings.showPronunciation&&w.pronunciation?`<div class="pronunciation">${DF.esc(w.pronunciation)}</div>`:""}<div class="intro-meaning">${DF.esc(w.arabic)}</div><div class="word-details">${w.article?`<span class="pill">الأداة: <b lang="de">${w.article}</b></span>`:""}${w.itemType?`<span class="pill">${itemTypeLabel(w.itemType)}</span>`:""}${w.level?`<span class="pill">${DF.esc(w.level)}</span>`:""}</div></section><div class="intro-actions"><button class="ghost-btn large" data-action="intro-known">أعرفها مسبقاً</button><button class="primary-btn large" data-action="intro-learned">فهمتها — اختبرني لاحقاً</button></div>`;}
+  function renderIntro(state,q){
+    const w=q.word,showPron=state.settings.showPronunciation&&w.pronunciation;
+    /* لوحة العرض للقراءة فقط؛ أزرار الإجراء تبقى خارجها دون تغيير. */
+    return `<df-word-panel badge="كلمة جديدة · عرض تعليمي" german="${DF.esc(w.german)}" pronunciation="${showPron?DF.esc(w.pronunciation):""}" meaning="${DF.esc(w.arabic)}" article="${DF.esc(w.article||"")}" typelabel="${w.itemType?DF.esc(itemTypeLabel(w.itemType)):""}" level="${DF.esc(w.level||"")}"></df-word-panel><div class="intro-actions"><button class="ghost-btn large" data-action="intro-known">أعرفها مسبقاً</button><button class="primary-btn large" data-action="intro-learned">فهمتها — اختبرني لاحقاً</button></div>`;
+  }
   function itemTypeLabel(t){return({noun:"اسم",word:"كلمة",phrase:"تركيب",sentence:"جملة"})[t]||t;}
 function renderQuestion(state,q){
     const result=state.session.result;let prompt=`<section class="card question-card"><div class="question-label">${q.label}</div><div class="${q.promptLang==='de'?'question-de':'question-ar'}" ${q.promptLang==='de'?'lang="de"':''}>${DF.esc(q.prompt)}</div>`;

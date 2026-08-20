@@ -39,6 +39,15 @@ describe("iPad-first app shell foundation", () => {
     expect(shell).not.toMatch(/\bright:\s*\d/);
   });
 
+  it("gives the full-screen study route its own safe-area padding", () => {
+    // The study route renders outside .layout, so it needs insets of its own.
+    const study = CSS.slice(CSS.indexOf("The study route renders full-screen"));
+    expect(study).toContain("env(safe-area-inset-left)");
+    expect(study).toContain("env(safe-area-inset-top)");
+    expect(study).toContain("env(safe-area-inset-bottom)");
+    expect(study).toContain("padding-inline");
+  });
+
   it("keeps phone and tablet-portrait layouts on the existing bottom bar", () => {
     // The side-rail rules live only inside the >=900px query, so narrower
     // viewports keep the original bottom navigation untouched.

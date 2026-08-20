@@ -159,3 +159,11 @@ body,button,select,textarea,.question-ar,.question-label,.intro-meaning,.feedbac
   .grid-3{grid-template-columns:repeat(3,1fr)}
   .grid-4{grid-template-columns:repeat(4,1fr)}
 }
+
+/* The study route renders full-screen, outside .layout, so it needs its own
+   safe-area handling for notched iPhones and iPad landscape. */
+.study-layout{
+  padding-inline:max(20px,env(safe-area-inset-left)) max(20px,env(safe-area-inset-right));
+  padding-block-start:max(18px,env(safe-area-inset-top));
+  padding-block-end:max(34px,env(safe-area-inset-bottom));
+}
