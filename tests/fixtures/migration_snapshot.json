@@ -1,0 +1,158 @@
+{
+  "description": "Isolated migration fixture: a representative baseline deutschflow_v2 runtime snapshot (words/cards/attempts/meta) covering new/review/mastered SRS states, favorites, ignored/excluded state, user flags, German and Arabic accepted answers, and legacy wording preserved verbatim.",
+  "clean": {
+    "words": [
+      {
+        "id": 1,
+        "german": "Haus",
+        "arabic": "بيت",
+        "pronunciation": "هاوس",
+        "normalizedGerman": "haus",
+        "normalizedArabic": "بيت",
+        "itemType": "noun",
+        "article": "das",
+        "plural": "Häuser",
+        "level": "A1",
+        "tags": ["wohnen"],
+        "acceptedAnswers": ["das Haus", "Haus"],
+        "acceptedArabicAnswers": ["بيت", "منزل"],
+        "sourceRow": 44,
+        "favorite": true,
+        "ignored": false,
+        "userFlagged": false,
+        "qualityStatus": "ok",
+        "createdAt": 1700000000000,
+        "updatedAt": 1700000100000
+      },
+      {
+        "id": 2,
+        "german": "fahren",
+        "arabic": "قاد / سافر",
+        "pronunciation": "فاهرن",
+        "normalizedGerman": "fahren",
+        "normalizedArabic": "قاد سافر",
+        "itemType": "word",
+        "article": null,
+        "plural": null,
+        "level": "A2",
+        "tags": [],
+        "acceptedAnswers": ["fahren"],
+        "acceptedArabicAnswers": [],
+        "sourceRow": 45,
+        "favorite": false,
+        "ignored": false,
+        "userFlagged": false,
+        "qualityStatus": "ok",
+        "createdAt": 1700000000000,
+        "updatedAt": 1700000000000
+      },
+      {
+        "id": 3,
+        "german": "groß",
+        "arabic": "كبير",
+        "pronunciation": "غروس",
+        "normalizedGerman": "gross",
+        "normalizedArabic": "كبير",
+        "itemType": "word",
+        "article": null,
+        "plural": null,
+        "level": "A1",
+        "tags": [],
+        "acceptedAnswers": ["gross", "groß"],
+        "acceptedArabicAnswers": [],
+        "sourceRow": 46,
+        "favorite": false,
+        "ignored": true,
+        "userFlagged": true,
+        "qualityStatus": "review",
+        "createdAt": 1700000000000,
+        "updatedAt": 1700000200000
+      },
+      {
+        "id": 4,
+        "german": "Das ist ein schönes Haus.",
+        "arabic": "هذا منزل جميل",
+        "pronunciation": "",
+        "normalizedGerman": "das ist ein schones haus",
+        "normalizedArabic": "هذا منزل جميل",
+        "itemType": "sentence",
+        "article": null,
+        "plural": null,
+        "level": "A1",
+        "tags": [],
+        "acceptedAnswers": ["Das ist ein schönes Haus."],
+        "acceptedArabicAnswers": ["هذا منزل جميل"],
+        "sourceRow": 47,
+        "favorite": false,
+        "ignored": false,
+        "userFlagged": false,
+        "qualityStatus": "ok",
+        "createdAt": 1700000000000,
+        "updatedAt": 1700000000000
+      }
+    ],
+    "cards": [
+      {
+        "key": "1:recall", "wordId": 1, "skill": "recall", "state": "review",
+        "dueAt": 1771497600000, "intervalDays": 3.5, "ease": 2.5, "reps": 2,
+        "lapses": 0, "streak": 2, "mastery": 50, "correct": 3, "wrong": 1,
+        "stability": 4.2, "difficulty": 5, "lastResult": 3, "suspended": false,
+        "lastReviewedAt": 1771200000000, "createdAt": 1700000000000, "updatedAt": 1771200000000
+      },
+      {
+        "key": "1:article", "wordId": 1, "skill": "article", "state": "learning",
+        "dueAt": 1771497600000, "intervalDays": 1, "ease": 2.3, "reps": 1,
+        "lapses": 1, "streak": 0, "mastery": 20, "correct": 1, "wrong": 1,
+        "stability": 1.1, "difficulty": 6, "lastResult": 1, "suspended": false,
+        "lastReviewedAt": 1771100000000, "createdAt": 1700000000000, "updatedAt": 1771100000000
+      },
+      {
+        "key": "2:recall", "wordId": 2, "skill": "recall", "state": "new",
+        "dueAt": 1771497600000, "intervalDays": 0, "ease": 2.5, "reps": 0,
+        "lapses": 0, "streak": 0, "mastery": 0, "correct": 0, "wrong": 0,
+        "stability": 0, "difficulty": 5, "lastResult": null, "suspended": false,
+        "lastReviewedAt": null, "createdAt": 1700000000000, "updatedAt": 1700000000000
+      },
+      {
+        "key": "3:recall", "wordId": 3, "skill": "recall", "state": "mastered",
+        "dueAt": 1774000000000, "intervalDays": 45, "ease": 3.2, "reps": 6,
+        "lapses": 0, "streak": 6, "mastery": 100, "correct": 8, "wrong": 0,
+        "stability": 60, "difficulty": 3, "lastResult": 4, "suspended": true,
+        "lastReviewedAt": 1770000000000, "createdAt": 1700000000000, "updatedAt": 1770000000000
+      }
+    ],
+    "attempts": [
+      { "id": 1, "cardKey": "1:recall", "wordId": 1, "sessionId": "s-100", "correct": true, "answerType": "perfect", "userAnswer": "das Haus", "elapsedMs": 4200, "rating": 4, "createdAt": 1771100000000 },
+      { "id": 2, "cardKey": "1:recall", "wordId": 1, "sessionId": "s-100", "correct": false, "answerType": "incorrect", "userAnswer": "Hause", "elapsedMs": 9100, "rating": 1, "createdAt": 1771150000000 },
+      { "id": 3, "cardKey": "3:recall", "wordId": 3, "sessionId": "s-101", "correct": true, "answerType": "perfect", "userAnswer": "gross", "elapsedMs": 3000, "rating": 4, "createdAt": 1770000000000 }
+    ],
+    "settings": {
+      "theme": "dark", "sessionSize": 15, "dailyGoal": 30,
+      "showPronunciation": true, "acceptAeOeUe": true, "acceptSs": false,
+      "requireArticle": true, "ignoreSentencePunctuation": true
+    },
+    "profile": { "streak": 8, "lastStudyDate": "2026-08-20", "totalXP": 1240, "createdAt": 1700000000000 }
+  },
+  "malformed": {
+    "words": [
+      { "id": 10, "german": "Tisch", "arabic": "طاولة", "acceptedAnswers": ["Tisch"], "itemType": "noun", "article": "der", "level": "A1" },
+      { "id": null, "german": "Stuhl", "arabic": "كرسي" },
+      { "id": 12, "german": "", "arabic": "لا شيء" },
+      { "id": 13, "german": "Wort ohne Bedeutung", "arabic": "" },
+      { "id": 10, "german": "TischDuplikat", "arabic": "طاولة مكررة" }
+    ],
+    "cards": [
+      { "key": "10:recall", "wordId": 10, "skill": "recall", "state": "review", "dueAt": 1771497600000, "intervalDays": 2, "ease": 2.5, "reps": 1, "lapses": 0, "streak": 1, "mastery": 30 },
+      { "key": "99:recall", "wordId": 99, "skill": "recall", "state": "new", "dueAt": 1771497600000, "intervalDays": 0, "ease": 2.5, "reps": 0, "lapses": 0, "streak": 0, "mastery": 0 },
+      { "key": "10:broken", "wordId": 10, "skill": "", "state": "new", "dueAt": 1771497600000, "ease": 2.5 },
+      { "key": "10:badease", "wordId": 10, "skill": "recognition", "state": "review", "dueAt": 1771497600000, "intervalDays": 5, "ease": 9.9, "reps": 3, "lapses": 0, "streak": 3, "mastery": 40 }
+    ],
+    "attempts": [
+      { "id": 50, "cardKey": "10:recall", "wordId": 10, "sessionId": "s-9", "correct": true, "answerType": "perfect", "elapsedMs": 2000, "rating": 4, "createdAt": 1771100000000 },
+      { "id": 51, "cardKey": "does-not-exist", "wordId": 10, "sessionId": "s-9", "correct": true, "answerType": "perfect", "elapsedMs": 2200, "rating": 3, "createdAt": 1771100000000 },
+      { "id": 52, "wordId": 10, "sessionId": "s-9", "correct": false, "answerType": "incorrect", "elapsedMs": 5000, "rating": 1, "createdAt": 1771100000000 }
+    ],
+    "settings": null,
+    "profile": null
+  }
+}
