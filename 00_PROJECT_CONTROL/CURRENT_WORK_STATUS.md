@@ -12,14 +12,24 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
 *   **backup gate Git commit:** `486e47b` (feat: add verified backup and restore safety gate)
 *   **real-data dry-run Git commit:** `bb91fd6` (test: add read-only real-data migration dry-run)
 *   **capacitor foundation Git commit:** `63b5226` (feat: add capacitor native sqlite executor)
-*   **Last Update Timestamp:** 2026-08-21T01:55:00+03:00
+*   **migration controller Git commit:** `0fe22dc` (feat: wire persistence bootstrap with automatic indexeddb fallback)
+*   **Last Update Timestamp:** 2026-08-21T02:04:00+03:00
 
 ## Current Context
 *   **Current Phase:** PHASE 4 — MIGRATION MAPPING + SQLITE PARITY VALIDATION
 *   **Current Delivery Priority:** MOBILE FIRST — iOS/iPadOS + Android
 *   **Phase Status:** PHASE 2 AND PHASE 3 COMPLETE. PHASE 4 COMPLETE (migration mapping, SQLite parity, backup/restore Gate 2, real-data dry-run). PHASE 5 STARTED: Capacitor 8 mobile foundation and native SQLite executor implemented and contract-tested. Real learner storage NOT switched; on-device verification (Gate 5) NOT yet performed.
 *   **Implementation Status:** ACTIVE ON `mobile-foundation`
-*   **Current Task:** Capacitor target and SQLite plugin version resolved and recorded as DF-014. Native executor implemented behind the existing adapter. Next work is blocked only on user-only device actions (see below) or can proceed with the runtime storage-selection seam.
+*   **Current Task:** First-launch migration controller and persistence bootstrap are implemented and fully tested, including a rehearsal at real learner-data scale. Native storage remains GATED OFF. The remaining work before a live switch is on-device verification, which requires user-only device actions.
+
+## First-Launch Migration Controller (implemented, gated OFF)
+*   Sequence enforced: **BACKUP -> READ OLD -> VALIDATE -> TRANSFORM -> WRITE SQLITE -> VERIFY -> SWITCH**.
+*   Refuses to start without a durable backup sink. The IndexedDB source is read-only for the whole run and is never cleared, rewritten, or repaired.
+*   The target must be empty before writing, so an interrupted or repeated run cannot double-import.
+*   ANY failure at ANY stage aborts without switching; the app remains on IndexedDB automatically. The switch flag is written only after verification passes. A failed verify or failed switch clears only the NEW database.
+*   Verification compares the read-back field-for-field against the transformed dataset, checks referential integrity, requires identical SRS state, and requires every source word to be accounted for.
+*   `bootstrap-persistence.js` composes detection + selection + migration so the fallback is guaranteed by the wiring: on any failure the learner still gets a working IndexedDB store.
+*   **Real-scale rehearsal:** the full sequence was run against the real 2026-08-20 export loaded into a throwaway IndexedDB (2811 words / 337 cards / 2528 attempts) and completed with 0 lost cards, 0 SRS mismatches, integrity OK, and the source unchanged. The real export file was only ever read (sha256 unchanged).
 
 ## Mobile Foundation (DF-014, verified against official docs 2026-08-21)
 *   Capacitor **8.5.0** (core/cli/ios/android); `@capacitor-community/sqlite` **8.1.1** (peer `@capacitor/core >=8.0.0`).
@@ -67,13 +77,14 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
 *   **last agent:** OpenAI Codex
 
 ## Next Approved Action
-*   Capacitor target, plugin version, and the native executor are DONE (DF-014). Remaining, in order:
-    1.  **Runtime storage selection seam:** choose the persistence adapter at startup (native -> SQLite, web -> existing IndexedDB) behind the repository layer, with IndexedDB retained as the recoverable source. Implementable now without a device.
-    2.  **First-launch migration controller:** READ OLD -> VALIDATE -> TRANSFORM -> WRITE NEW -> VERIFY -> SWITCH, with backup taken first and rollback to IndexedDB on any verification failure. Must not run automatically against real learner data until Gate 5 verification passes.
-    3.  **USER-ONLY:** `npx cap add ios` on macOS with Xcode 26; `npx cap add android` with the Android SDK; Apple Developer enrollment, signing, provisioning.
-    4.  **Gate 5 on-device verification:** offline launch on iPad/iPhone, touch study controls, virtual keyboard behavior, and native SQLite persistence across app restarts.
+*   Storage selection seam, migration controller, and bootstrap wiring are DONE and gated OFF. Remaining, in order:
+    1.  **USER-ONLY (iOS first):** run `npx cap add ios` on macOS with Xcode 26.0+, then `npx cap sync ios`. Android is explicitly deprioritized for now.
+    2.  **Gate 5 on-device verification (iPad/iPhone):** offline launch, native SQLite persistence across app restarts and force-quit, touch study controls, and virtual-keyboard behavior over the answer input.
+    3.  **Device-side migration rehearsal:** run the controller on-device with `nativeStorageEnabled` still OFF for the app, verifying the backup sink writes to native storage and the verification stage passes with real data on the device.
+    4.  **Live switch (requires approval):** only after 2 and 3 pass, enable `nativeStorageEnabled` and keep IndexedDB as the recovery source until parity is confirmed in production.
+*   Before iOS signing/release (NOT blockers for the stages above): confirm the real bundle identifier (currently placeholder `com.deutschflow.app`) and complete the SQLCipher export-compliance review if encryption is to be enabled.
 *   Do NOT switch real learner persistence or delete IndexedDB support until Gate 5 passes.
-*   Do NOT install Lit until Gate 4 is reached.
+*   Do NOT install Lit until Gate 4 is reached. Do NOT start educational-content rewriting.
 
 ## Open Observation (non-blocking)
 *   The deployed RC build writes backups with `schemaVersion: 6` plus `appVersion` / `build` / `dbVersion` / `engineVersion`, while `src/app.js` `exportBackup` writes `schemaVersion: 5` without them. The backup module accepts both and preserves the extra metadata, so nothing is at risk; the source/deploy divergence is simply recorded here for a later reconciliation task.

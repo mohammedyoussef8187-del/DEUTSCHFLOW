@@ -5,6 +5,14 @@ All notable changes to the **DeutschFlow** project will be documented in this fi
 ## [Unreleased]
 
 ### Added
+*   Implemented the first-launch migration controller and persistence bootstrap (gated OFF; no learner data modified):
+    *   `src/migration/first-launch-controller.js` enforces the approved sequence BACKUP -> READ OLD -> VALIDATE -> TRANSFORM -> WRITE SQLITE -> VERIFY -> SWITCH, and only that sequence.
+    *   Refuses to start without a durable backup sink. The IndexedDB source is read-only for the whole run and remains the recovery source; the target must be empty before writing so a repeated run cannot double-import.
+    *   Any failure at any stage aborts without switching and the app remains on IndexedDB. The switch flag is written only after verification passes; a failed verify or failed switch clears only the new database.
+    *   Verification compares the read-back field-for-field against the transformed dataset, checks referential integrity, requires identical SRS state, and requires every source word to be accounted for.
+    *   `src/platform/bootstrap-persistence.js` composes platform detection, backend selection, and migration so the automatic IndexedDB fallback is guaranteed by the wiring; there is no path that leaves the learner without a working store.
+    *   Verified by an end-to-end rehearsal at real learner-data scale (2811 words / 337 cards / 2528 attempts): full sequence completed with 0 lost cards, 0 SRS mismatches, integrity OK, and the real export file only ever read.
+    *   Expanded the passing regression suite from 78 to 98 tests.
 *   Established the Capacitor 8 mobile foundation and native SQLite path (DF-014; no learner data modified):
     *   Verified the target against current official documentation before implementing: Capacitor 8 requires Xcode 26.0+, iOS deployment target 15.0, Android Studio Otter 2025.2.1+, minSdk 24 / compileSdk 36 / targetSdk 36, and NodeJS 22+; `@capacitor-community/sqlite` 8.1.1 declares peer `@capacitor/core >=8.0.0`.
     *   Installed Capacitor 8.5.0 (`core`, `cli`, `ios`, `android`) and `@capacitor-community/sqlite` 8.1.1, and added `capacitor.config.json` with `webDir` pointing at the existing PWA and `iosDatabaseLocation` = `Library/CapacitorDatabase`, keeping learner data out of WebView storage subject to OS purge.
