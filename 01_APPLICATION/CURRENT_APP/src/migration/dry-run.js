@@ -150,7 +150,7 @@ export function detectUnmappedFields(snapshot) {
  * Every source card must survive with identical SRS state, either as an active review
  * card or preserved verbatim in quarantine. A card present in neither is data loss.
  */
-function compareSrsState(sourceCards, canonicalCards, quarantineRows = []) {
+export function compareSrsState(sourceCards, canonicalCards, quarantineRows = []) {
   const byLegacyKey = new Map(canonicalCards.map(card => [card.legacyKey, card]));
   const quarantinedIds = new Set(
     quarantineRows.filter(row => row.entity === "review_card").map(row => String(row.sourceId))
