@@ -18,6 +18,9 @@ All notable changes to the **DeutschFlow** project will be documented in this fi
     *   `06_AUDIT/AUDIT_REPORTS/CURRENT_STATE_EXECUTIVE_SUMMARY.md`
     *   `06_AUDIT/LEARNING_GAP_ANALYSIS/CURRENT_LEARNING_CAPABILITY_MATRIX.md`
     *   `04_PRODUCT_DESIGN/REQUIREMENTS/TARGET_PRODUCT_REQUIREMENTS.md`
+    *   `04_PRODUCT_DESIGN/LEARNING_MODEL/TARGET_LEARNING_MODEL.md`
+    *   `04_PRODUCT_DESIGN/FEATURE_MATRIX/CURRENT_TO_TARGET_MATRIX.md`
+    *   `04_PRODUCT_DESIGN/REQUIREMENTS/OPEN_PRODUCT_DECISIONS.md`
 *   Second-pass intake of newly discovered A2 course PDFs (Netzwerk Neu A2 Workbook and alternate Kursbuch PDF).
 
 ## [0.2.0] - 2026-08-20
