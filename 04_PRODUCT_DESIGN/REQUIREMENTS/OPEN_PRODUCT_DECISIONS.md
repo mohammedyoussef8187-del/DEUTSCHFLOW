@@ -19,6 +19,8 @@ This document lists key product, technical, and architectural decisions that req
 ---
 
 ## Decision 2: Cross-Device Synchronization Strategy
+*   **Status:** APPROVED WITH STAGED IMPLEMENTATION
+*   **Condition:** Staged approach: baseline release utilizes manual JSON backup/restore (which remains a permanent product capability). Target future release is Central Cloud Sync. Peer-to-peer Wi-Fi sync is rejected. The database schema must be designed as sync-ready from the start (requiring globally unique record IDs, modification timestamps, versioning, and tombstone handling). Cloud sync implementation is NOT approved for the current phase.
 *   **Context:** Learners want to study across multiple devices (e.g., iPhone during transit, laptop at home) without losing progress.
 *   **Options:**
     1.  **No Automated Sync (Manual Backup Portability):** Users export a JSON database backup from device A and import it to device B manually.

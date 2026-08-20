@@ -6,6 +6,7 @@ All notable changes to the **DeutschFlow** project will be documented in this fi
 
 ### Changed
 *   Recorded user approval with persistence condition for Product Decision 1 (Multi-Platform Packaging Architecture).
+*   Recorded user approval with staged implementation condition for Product Decision 2 (Cross-Device Synchronization Strategy).
 
 ## [0.3.0] - 2026-08-20
 

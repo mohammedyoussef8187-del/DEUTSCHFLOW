@@ -38,3 +38,14 @@ This log is the immutable record of approved design, product, and technical deci
 *   **Storage Condition:** Production native installations (mobile and desktop) must **NOT** rely on browser IndexedDB as the sole production persistence layer due to OS-directed sandbox deletion risks (especially on iOS Safari). A durable native database layer (such as SQLite or equivalent) must be evaluated and implemented during the technical-architecture phase under a repository/persistence abstraction framework:
     `Learning/Application Core` -> `Data Repository / Persistence Abstraction` -> `Platform-Specific Durable Storage`.
 *   **Rationale:** Maximize shared code reuse (retaining one logical database, one learning engine, and one UI codebase) while guaranteeing durable local data safety and store compatibility across target devices.
+
+## [DF-005] Cross-Device Synchronization Strategy
+*   **Status:** APPROVED WITH STAGED IMPLEMENTATION
+*   **Date:** 2026-08-20
+*   **Approving Authority:** User
+*   **Context:** Design and scheduling strategy for synchronizing learning progress (cards, statistics, history, settings) across multiple user devices (mobile and desktop).
+*   **Decision:** Approved a **staged synchronization approach**:
+    1.  **Baseline / Initial Release:** Retain and improve manual JSON backup/restore exports as the primary portability layer. Manual backup remains a permanent, non-negotiable product feature.
+    2.  **Target Future Release:** Central Cloud Synchronization (incremental REST API sync). Cloud sync is **NOT** approved for active implementation in the current phase.
+    3.  **Peer-to-Peer Wi-Fi Sync:** Rejected as the primary synchronization method.
+*   **Storage & Schema Condition:** The logical database schema redesigned in the next phase must be sync-ready from the start. It must include fields for globally unique record identifiers (UUIDs), creation/modification timestamps, revision versions, and tombstone deletion states for all syncable learning tables (vocabulary, cards, progress, history, settings). Conflict resolution policies (such as append-only merges or version-based overrides) must be supported by the database architecture.
