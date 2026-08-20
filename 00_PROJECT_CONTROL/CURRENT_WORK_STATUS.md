@@ -6,31 +6,39 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
 *   **Last AI/Agent Used:** Antigravity (Gemini 3.5 Flash)
 *   **baseline Git commit:** `80599f5bf1aa9ea6dcd52aa42339df2c8bb67e27`
 *   **second pass Git commit:** `2ce3631946f6fe962c48488048a7eaf4ac144e68`
-*   **Last Update Timestamp:** 2026-08-20T23:21:00+03:00
+*   **audit Git commit:** `2b30aaea410e93a9c6f2c7fbff553be71ce6b890`
+*   **Last Update Timestamp:** 2026-08-20T23:28:00+03:00
 
 ## Current Context
-*   **Current Phase:** GERMAN LIBRARY INTAKE — SECOND PASS
+*   **Current Phase:** APPLICATION AUDIT
 *   **Phase Status:** COMPLETE
-*   **Current Task:** Second-pass German library resource intake (focused on locating missed Netzwerk A2 materials).
-*   **Last Completed Task:** Executed deep filesystem search across C:\ drive and user folders. Discovered and moved the missing A2 workbook (UB) and an alternate Kursbuch PDF into the consolidated repository.
+*   **Current Task:** Perform complete evidence-based audit of current DeutschFlow application.
+*   **Last Completed Task:** Audited `01_APPLICATION/CURRENT_APP/src/app.js` and `seed-data.js`. Created all 9 required audit and technical documentation files.
 
-## Intake Metrics (Second Pass)
-*   **additional resources found:** 2 PDFs (Netzwerk Neu A2 Workbook and alternate Netzwerk Neu A2 Kursbuch)
-*   **additional resources moved:** 2 PDFs
-*   **Netzwerk A2 result:** NO original/separate Netzwerk A2 edition found; only Netzwerk Neu A2 materials exist.
-*   **exact Netzwerk A2 filenames:**
-    *   `Netzwerk neu A2 UB.pdf` (Workbook)
-    *   `Netzwerk neu A2 Kursbuch.pdf` (Alternate Kursbuch, 179 pages)
-*   **original locations:**
-    *   `C:\Users\mabdu\Downloads\Telegram Desktop\Netzwerk neu A2 UB.pdf`
-    *   `C:\Users\mabdu\iCloudDrive\Downloads\Netzwerk neu A2 Kursbuch.pdf`
-*   **final destinations:**
-    *   `03_COURSE_CONTENT\NETZWERK_NEU_A2\Netzwerk neu A2 UB.pdf`
-    *   `03_COURSE_CONTENT\NETZWERK_NEU_A2\Netzwerk neu A2 Kursbuch.pdf`
-*   **any other missed German resources:** None
-*   **duplicates detected:** Audio files in `Downloads\Telegram Desktop\Netzwerk Neu A2 audio` were verified as duplicates of the 189 already moved audio files (not copied).
-*   **unresolved items:** None
+## Audit Metrics
+*   **files inspected:**
+    *   `01_APPLICATION/CURRENT_APP/index.html`
+    *   `01_APPLICATION/CURRENT_APP/src/app.js`
+    *   `01_APPLICATION/CURRENT_APP/src/register-sw.js`
+    *   `01_APPLICATION/CURRENT_APP/data/seed-data.js`
+    *   `01_APPLICATION/CURRENT_APP/CLAUDE-HANDOFF.md`
+*   **current application version:** DeutschFlow Pro RC4 (`pro-rc1-2026-07-25`)
+*   **confirmed features:** Dashboard, Review, Word Bank, Add Word, Search, Filters, Statistics, Progress, Session Size, Review Scheduling, Favorites, Ignore, User Flagged Items, Pronunciation Display, Recognition Testing, Recall Testing, Noun Article Testing, spelling tolerance, German special-character tolerance, Arabic-answer handling, accepted answers, CSV/XLSX import, CSV export, JSON backup/restore, Theme switching, Data-quality flags.
+*   **confirmed defects count:** 5
+*   **potential issues count:** 4
+*   **product/learning gaps count:** 6
+*   **audit outputs created:**
+    *   `06_AUDIT/APPLICATION_AUDIT/APPLICATION_FEATURE_INVENTORY.md`
+    *   `06_AUDIT/APPLICATION_AUDIT/CURRENT_APPLICATION_AUDIT.md`
+    *   `06_AUDIT/APPLICATION_AUDIT/CONFIRMED_DEFECTS.md`
+    *   `06_AUDIT/APPLICATION_AUDIT/POTENTIAL_ISSUES.md`
+    *   `06_AUDIT/LEARNING_GAP_ANALYSIS/CURRENT_LEARNING_CAPABILITY_MATRIX.md`
+    *   `05_TECHNICAL/ARCHITECTURE/CURRENT_ARCHITECTURE.md`
+    *   `05_TECHNICAL/DATABASE/CURRENT_DATA_MODEL.md`
+    *   `05_TECHNICAL/TESTING/CURRENT_TESTING_STATUS.md`
+    *   `06_AUDIT/AUDIT_REPORTS/CURRENT_STATE_EXECUTIVE_SUMMARY.md`
+*   **unresolved questions:** None
 *   **last agent:** Antigravity
 
 ## Next Approved Action
-*   "Continue repository verification after second-pass intake. No application implementation is approved yet."
+*   "Review audit findings and define target product requirements. No implementation approved yet."

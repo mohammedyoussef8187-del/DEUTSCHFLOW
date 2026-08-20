@@ -4,6 +4,21 @@ All notable changes to the **DeutschFlow** project will be documented in this fi
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-08-20
+
+### Added
+*   Complete technical and educational audit documentation for the current DeutschFlow application:
+    *   `05_TECHNICAL/ARCHITECTURE/CURRENT_ARCHITECTURE.md`
+    *   `05_TECHNICAL/DATABASE/CURRENT_DATA_MODEL.md`
+    *   `05_TECHNICAL/TESTING/CURRENT_TESTING_STATUS.md`
+    *   `06_AUDIT/APPLICATION_AUDIT/APPLICATION_FEATURE_INVENTORY.md`
+    *   `06_AUDIT/APPLICATION_AUDIT/CURRENT_APPLICATION_AUDIT.md`
+    *   `06_AUDIT/APPLICATION_AUDIT/CONFIRMED_DEFECTS.md`
+    *   `06_AUDIT/APPLICATION_AUDIT/POTENTIAL_ISSUES.md`
+    *   `06_AUDIT/AUDIT_REPORTS/CURRENT_STATE_EXECUTIVE_SUMMARY.md`
+    *   `06_AUDIT/LEARNING_GAP_ANALYSIS/CURRENT_LEARNING_CAPABILITY_MATRIX.md`
+*   Second-pass intake of newly discovered A2 course PDFs (Netzwerk Neu A2 Workbook and alternate Kursbuch PDF).
+
 ## [0.2.0] - 2026-08-20
 
 ### Added
