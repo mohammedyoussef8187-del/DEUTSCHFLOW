@@ -33,6 +33,8 @@ This document lists key product, technical, and architectural decisions that req
 ---
 
 ## Decision 3: Cloud Account Requirement vs. Local-Only Mode
+*   **Status:** APPROVED WITH STAGED IMPLEMENTATION
+*   **Condition:** Optional cloud account, default local-only/offline-first. No mandatory sign-up, registration, or internet connection required for core learning features (vocabulary, grammar, SRS cards, local stats, backup/restore). Future optional accounts are strictly for cloud synchronization and recovery. Local anonymous profiles must be durable and support seamless guest-to-account migration without losing history or progress. Authentication providers are not selected, and implementation is NOT approved for this phase.
 *   **Context:** Accessing cloud features requires user identification.
 *   **Options:**
     1.  **Cloud Account Mandatory:** Users must sign up (email, social login) before using the application.

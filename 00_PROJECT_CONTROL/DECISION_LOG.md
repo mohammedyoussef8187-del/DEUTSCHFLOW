@@ -49,3 +49,14 @@ This log is the immutable record of approved design, product, and technical deci
     2.  **Target Future Release:** Central Cloud Synchronization (incremental REST API sync). Cloud sync is **NOT** approved for active implementation in the current phase.
     3.  **Peer-to-Peer Wi-Fi Sync:** Rejected as the primary synchronization method.
 *   **Storage & Schema Condition:** The logical database schema redesigned in the next phase must be sync-ready from the start. It must include fields for globally unique record identifiers (UUIDs), creation/modification timestamps, revision versions, and tombstone deletion states for all syncable learning tables (vocabulary, cards, progress, history, settings). Conflict resolution policies (such as append-only merges or version-based overrides) must be supported by the database architecture.
+
+## [DF-006] Cloud Account Requirement vs. Local-Only Mode
+*   **Status:** APPROVED WITH STAGED IMPLEMENTATION
+*   **Date:** 2026-08-20
+*   **Approving Authority:** User
+*   **Context:** Selection of authentication, registration requirements, and local user profiling constraints.
+*   **Decision:** Approved the **Optional Cloud Account — Default Local-Only** model:
+    1.  **Local-Only / Offline-First:** Default operational mode. Users can install and immediately run the app without internet connection, sign-up forms, login walls, subscription requirements, or profiles.
+    2.  **Optional Accounts:** Introduced in a future stage solely to support backup recovery and central cloud synchronization.
+    3.  **Authentication Providers:** Undecided in this phase (e.g. Google, Apple, passwordless); no auth SDKs are approved.
+*   **Storage & Schema Condition:** The next database schema design must support a durable local profile identifier (local user ID) even for anonymous guests, ensuring that guest-to-account migrations are safe and preserve historical streaks, SRS card progress, error logs, and settings without data loss or duplication when an account is linked.
