@@ -4,7 +4,8 @@
   "description": "DeutschFlow is a structured German Learning System that progressively upgrades an existing vocabulary trainer into a comprehensive educational platform.",
   "main": "index.js",
   "scripts": {
-    "test": "vitest run"
+    "test": "vitest run",
+    "build:vendor": "esbuild node_modules/lit/index.js --bundle --format=esm --minify --legal-comments=inline --outfile=01_APPLICATION/CURRENT_APP/vendor/lit.js"
   },
   "keywords": [],
   "author": "",
@@ -14,11 +15,15 @@
     "@capacitor/android": "^8.5.0",
     "@capacitor/cli": "^8.5.0",
     "@capacitor/ios": "^8.5.0",
+    "esbuild": "^0.28.2",
     "fake-indexeddb": "^6.2.5",
+    "happy-dom": "^20.11.6",
+    "jsdom": "^30.0.1",
     "vitest": "^4.1.11"
   },
   "dependencies": {
     "@capacitor-community/sqlite": "^8.1.1",
-    "@capacitor/core": "^8.5.0"
+    "@capacitor/core": "^8.5.0",
+    "lit": "^3.3.3"
   }
 }

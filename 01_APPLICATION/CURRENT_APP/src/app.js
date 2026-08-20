@@ -4,6 +4,8 @@ import { levenshtein, validateGermanAnswer, validateArticleAnswer, validateArabi
 import { createCard, scheduleCard, cardMastery, automaticRating, skillLabel, skillWeight, wordMastery, wordStatus, cardStatus, preferredSkills, nextSkillUnlocks } from "./srs/scheduler.js";
 import { createRepositories } from "./data/repositories.js";
 import { createIndexedDbAdapter } from "./platform/indexeddb/adapter.js";
+import { summarizeLearnerState } from "./services/review-summary-service.js";
+import "./ui/components/df-review-summary.js";
 
 (function(){
   "use strict";
@@ -613,14 +615,14 @@ async function submitAnswer(state,payload){
     return counts;
   }
   function renderHome(state){
-    const c=dashboardStats(state),dueCards=state.cards.filter(x=>!x.suspended&&x.dueAt<=Date.now()).length,quality=state.words.filter(w=>w.qualityStatus==="review").length;
+    /* الإحصاءات التفصيلية تُشتق الآن في df-review-summary عبر خدمة التطبيق. */
+    const dueCards=state.cards.filter(x=>!x.suspended&&x.dueAt<=Date.now()).length,quality=state.words.filter(w=>w.qualityStatus==="review").length;
     const resume=state.session&&!state.session.done?`<div class="card" style="margin-bottom:14px;border-inline-start:4px solid var(--warning)"><div class="hero-row"><div><strong>جلسة غير مكتملة</strong><p style="margin:4px 0 0;color:var(--muted);font-size:13px">${modeLabel(state.session.mode)} · ${state.session.initialCompleted} من ${state.session.initialCards} عناصر أساسية</p></div><button class="primary-btn" data-action="resume-session">متابعة</button></div></div>`:"";
     return `<section class="page-head"><div><h1>مرحباً، لنبدأ المراجعة</h1><p>الأسئلة والتكرار يتكيفان مع مستوى كل مهارة بصورة مستقلة.</p></div></section>
       ${resume}
       <section class="card hero"><div class="hero-row"><div><h2>جلسة اليوم</h2><p>المستحق أولاً، ثم الكلمات الجديدة. النطق لا يظهر في سؤال الاستدعاء إلا عند طلب التلميح.</p><div class="hero-metrics"><div class="hero-metric"><strong>${dueCards.toLocaleString("ar-EG")}</strong><span>بطاقة مستحقة</span></div><div class="hero-metric"><strong>${state.settings.newPerDay}</strong><span>كلمة جديدة مستهدفة</span></div><div class="hero-metric"><strong>${state.profile.streak||0}</strong><span>يوم متتالٍ</span></div></div></div><button class="primary-btn large" data-action="start-session" data-mode="daily">ابدأ الجلسة</button></div></section>
-      <div class="section-title">نظرة عامة</div><section class="grid grid-4">
-        ${statCard("✦",c.new,"جديدة","metric-blue")}${statCard("↻",c.due+c.overdue,"مستحقة","metric-amber")}${statCard("!",c.weak,"ضعيفة","metric-red")}${statCard("✓",c.mastered,"متقنة","metric-green")}
-      </section>
+      <div class="section-title">نظرة عامة</div>
+      <df-review-summary id="review-summary"></df-review-summary>
       <div class="section-title">تدريبات مخصصة</div><section class="grid grid-3 training-grid">
         ${trainingCard("✍","اختبار الكتابة","استدعاء العربية وكتابة الألمانية دون كشف الإجابة","writing")}
         ${trainingCard("D","اختبار الأدوات","تدريب مستقل على der / die / das","article")}
@@ -722,6 +724,14 @@ function renderFeedback(state,q,r){const a=r.answer,correct=a.isCorrect,lang=q.s
   function renderSessionEnd(state,s){const acc=DF.Learning.sessionAccuracy(s);return `<main class="study-layout"><section class="session-end"><div class="end-icon">✓</div><h1>اكتملت الجلسة</h1><p>تم فصل الكلمات الأساسية عن المحاولات والإعادات، لذلك الأرقام أدناه لا تتداخل.</p><div class="end-grid"><div class="end-stat"><strong>${s.initialCards}</strong><span>عناصر أساسية</span></div><div class="end-stat"><strong>${s.attempts}</strong><span>إجمالي المحاولات</span></div><div class="end-stat"><strong>${acc.first==null?'—':acc.first+'%'}</strong><span>دقة أول محاولة</span></div><div class="end-stat"><strong>${acc.attempts==null?'—':acc.attempts+'%'}</strong><span>دقة كل المحاولات</span></div><div class="end-stat"><strong>${s.reveals}</strong><span>عرض إجابة</span></div><div class="end-stat"><strong>${s.hints}</strong><span>تلميحات</span></div><div class="end-stat"><strong>${s.retriesCompleted}</strong><span>إعادات مكتملة</span></div><div class="end-stat"><strong>+${s.xp}</strong><span>نقطة خبرة</span></div></div><div class="grid grid-2"><button class="ghost-btn large" data-action="session-home">العودة للرئيسية</button><button class="primary-btn large" data-action="start-session" data-mode="${s.mode}">جلسة أخرى</button></div></section></main>`;}
 function afterRender(state){
     if(state.route==="study"&&state.session?.current?.kind==="test"&&!state.session.result&&!state.session.current.choices&&state.session.current.skill!=="order")setTimeout(()=>document.getElementById("answer-input")?.focus(),10);
+    hydrateReviewSummary(state);
+  }
+  /* Hand the Lit component derived data from the application service. The component
+     never reads state, storage, or SRS internals itself. */
+  function hydrateReviewSummary(state){
+    const el=document.getElementById("review-summary");
+    if(!el)return;
+    el.summary=summarizeLearnerState({words:state.words,cards:state.cards});
   }
 
   function openWordModal(state,word=null){
