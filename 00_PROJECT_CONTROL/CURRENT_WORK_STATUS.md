@@ -14,7 +14,8 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
 *   **capacitor foundation Git commit:** `63b5226` (feat: add capacitor native sqlite executor)
 *   **migration controller Git commit:** `0fe22dc` (feat: wire persistence bootstrap with automatic indexeddb fallback)
 *   **Gate 4 Lit Git commit:** `da6993e` (feat: add iPad-first app shell layout foundation)
-*   **Last Update Timestamp:** 2026-08-21T02:23:00+03:00
+*   **UI consolidation Git commit:** `91f5804` (feat: migrate study progress strip to Lit)
+*   **Last Update Timestamp:** 2026-08-21T02:40:00+03:00
 
 ## Current Context
 *   **Current Phase:** PHASE 4 — MIGRATION MAPPING + SQLITE PARITY VALIDATION
@@ -30,6 +31,14 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
 *   Boundary enforced and tested: the component imports Lit and nothing else — no IndexedDB, SQLite, Capacitor, repositories, or SRS internals — renders no interactive controls, and works against a frozen summary object, so it cannot mutate learner/SRS state.
 *   Coexistence: styles are scoped in shadow DOM and inherit the existing CSS custom properties, so the global stylesheet, theming, and RTL are untouched. `app.js` gained two imports plus one hydrate call in the existing `afterRender` hook.
 *   **Browser-verified** against the seeded app: element upgraded, 2820 real words rendered, reactive re-render without reload, existing topbar/nav/routing/training cards intact, and IndexedDB unchanged (2820 words / 0 cards / 0 attempts before and after).
+
+## UI Consolidation and First Study-Screen Slice
+*   **`<df-stat-tile>`** extracted as a shared presentation primitive. `<df-review-summary>` composes it, and `statCard()` emits it, so the statistics page and import preview migrated in one change. No `.stat-card` markup remains.
+*   **`dashboardStats()` deleted** — it duplicated the review-summary application service. The statistics page now derives counts from the same `summarizeLearnerState()` service as the dashboard.
+*   **Scope note:** `<df-review-summary>` was NOT placed on the statistics page. That page shows different metrics (first-attempt accuracy, attempt count, average answer time) and only "mastered" overlaps, so reusing it there would have added unrelated tiles and changed behavior. The genuine duplication was the tile primitive and the counts service; both are now shared.
+*   **Bug fixed:** statistics tiles rendered `ليس رقمًا` (NaN) for accuracy and average answer time, because `statCard` coerced pre-formatted strings with `Number()`. Pre-existing, not a regression — the refactor reproduced it byte-identically and it was fixed in a separate commit.
+*   **Study/SRS interaction tests added** (10 tests) driving the real app through the DOM: introduce → answer → rate, asserting card creation values, that evaluation does not commit until rated, SRS scheduling outcomes, attempt-log fields, session coherence, and that a wrong answer never deletes cards or pushes ease below 1.3.
+*   **`<df-study-progress>`** is the first migrated study-screen slice, and deliberately the read-only part (progress bar, retry badge, correct/wrong/hint tally). It renders no controls and no `data-action`, so answering, revealing, hinting, and rating remain vanilla. Browser-verified.
 
 ## iPad-First App Shell Foundation
 *   Additive CSS layer only; existing rules and phone layouts unchanged.
@@ -99,7 +108,7 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
     3.  **Device-side migration rehearsal:** run the controller on-device with `nativeStorageEnabled` still OFF for the app, verifying the backup sink writes to native storage and the verification stage passes with real data on the device.
     4.  **Live switch (requires approval):** only after 2 and 3 pass, enable `nativeStorageEnabled` and keep IndexedDB as the recovery source until parity is confirmed in production.
 *   Before iOS signing/release (NOT blockers for the stages above): confirm the real bundle identifier (currently placeholder `com.deutschflow.app`) and complete the SQLCipher export-compliance review if encryption is to be enabled.
-*   Next UI increments (no device needed), in order: migrate the **Stats page summary tiles** to reuse `<df-review-summary>`, then extract a shared `<df-stat-tile>`/shell primitive as a second component. The **Study/SRS interaction screen stays on vanilla UI** until it has dedicated interaction tests.
+*   Next UI increments (no device needed), in order: migrate the study **question card** presentation (word, pronunciation, meaning, detail pills) — read-only, so still no interaction risk; then the **session-end summary**, which can reuse `<df-stat-tile>`. Answer input, reveal, hint, and rating controls migrate LAST, one at a time, each re-running the study interaction suite.
 *   Do NOT switch real learner persistence or delete IndexedDB support until Gate 5 passes.
 *   Do NOT start educational-content rewriting. Do NOT big-bang rewrite `app.js`.
 

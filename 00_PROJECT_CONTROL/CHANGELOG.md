@@ -5,6 +5,13 @@ All notable changes to the **DeutschFlow** project will be documented in this fi
 ## [Unreleased]
 
 ### Added
+*   Consolidated the UI onto shared Lit components and took the first study-screen slice (no learner data modified):
+    *   Extracted `<df-stat-tile>` as a shared presentation primitive; `<df-review-summary>` composes it and `statCard()` emits it, migrating the statistics page and import preview in one change.
+    *   Deleted `dashboardStats()`, which duplicated the review-summary application service; the statistics page now uses the same service as the dashboard.
+    *   Fixed a pre-existing bug where statistics tiles showed "ليس رقمًا" (NaN) for first-attempt accuracy and average answer time, because pre-formatted strings were coerced with Number().
+    *   Added 10 study/SRS interaction tests that drive the real application through the DOM (introduce, answer, rate) and assert card creation, deferred commit, scheduling outcomes, attempt-log fields, session coherence, and that wrong answers never delete cards.
+    *   Migrated the study progress strip to `<df-study-progress>`, deliberately the read-only part; all SRS-mutating controls remain vanilla.
+    *   Expanded the passing regression suite from 124 to 146 tests.
 *   Passed Gate 4 (Lit proof of architecture) with a real component and began the iPad-first UI foundation (no learner data modified):
     *   Added Lit 3.3.3, vendored as a single ESM bundle (`npm run build:vendor`) so the app stays a no-bundler static site that Capacitor serves directly.
     *   Added `<df-review-summary>`, which replaced the dashboard's hand-built stat grid with a real read-only view of learner state (due, new, weak, mastered, vocabulary and learning totals). Every figure comes from the existing SRS `wordStatus` engine; nothing is invented.
