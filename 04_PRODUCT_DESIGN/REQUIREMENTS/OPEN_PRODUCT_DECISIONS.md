@@ -75,6 +75,8 @@ This document lists key product, technical, and architectural decisions that req
 ---
 
 ## Decision 6: Notification and Review Reminder Policy
+*   **Status:** APPROVED WITH CONDITION
+*   **Condition:** Native local review notifications are approved as an optional, user-controlled, opt-in capability. Notifications must not be required for core study, SRS schedule operations, or app startup. Reminders must work offline (using OS-native local scheduling) without requiring push servers or cloud services. iOS/Android will utilize wrapper APIs, while Desktop behavior is evaluated separately (avoiding continuous background tasks). Web Push is deferred. SRS remains authoritative; notifications must never alter card states. Implementation is NOT approved for this phase.
 *   **Context:** Daily practice reminders increase user retention and consistency.
 *   **Options:**
     1.  **No Notifications:** Rely entirely on user initiative.

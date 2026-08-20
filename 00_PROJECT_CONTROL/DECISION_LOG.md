@@ -87,3 +87,17 @@ This log is the immutable record of approved design, product, and technical deci
     5.  **Microphone Support:** Required across iOS, Android, and Desktop wrapper layers, requested explicitly and dynamically only upon using speaking exercises. Core features must remain functional if microphone access is denied.
     6.  **Offline Support:** Basic pronunciation exercises and local audio recording must operate fully offline.
 *   **Storage & Schema Condition:** The future database schema must support optional relationships mapping vocabulary, sentences, and exercises to reference audio records and practice metadata.
+
+## [DF-009] Notification and Review Reminder Policy
+*   **Status:** APPROVED WITH CONDITION
+*   **Date:** 2026-08-20
+*   **Approving Authority:** User
+*   **Context:** Design and strategy rules for push notifications, background scheduling, and practice reminders.
+*   **Decision:** Approved the **Native Local Review Notifications** approach:
+    1.  **Optional & Opt-In:** Notifications are helper triggers. Users have full setting controls (reminder time, target options) to disable or enable notifications. App startup, core learning, and SRS features must run fully if notifications are denied or disabled.
+    2.  **Offline Native Scheduling:** Reminders must run without internet connections, central push-notification servers, cloud accounts, or FCM/APNs backend wrappers, utilising native OS local alarm/scheduler APIs.
+    3.  **SRS Authority:** The SRS scheduler remains the sole source of truth for card due-dates. Notifications consume this data and must **NOT** modify learning logs or card metrics. If a notification is delayed or missed, card states remain intact.
+    4.  **Privacy-Preserving:** Lock-screen text should avoid exposing specific dictionary items (e.g. default to `"DeutschFlow — You have reviews due."`).
+    5.  **Desktop Evaluation:** Windows/macOS/Linux systems will be evaluated separately during the technical architecture phase to design app-running alerts or local tray alarms, avoiding background daemon resource locks.
+    6.  **Web Push Deferred:** Web-browser push notifications are deferred. Web versions will use local in-app warnings.
+*   **Storage & Schema Condition:** None directly impacting core data, but platform wrappers must expose notification status queries through clean, abstract interfaces.
