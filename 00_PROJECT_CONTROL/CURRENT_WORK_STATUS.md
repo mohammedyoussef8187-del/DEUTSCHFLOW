@@ -3,18 +3,19 @@
 This is the single canonical handoff file for **DeutschFlow** to track progress across sequential agent invocations.
 
 ## Metadata
-*   **Last AI/Agent Used:** Antigravity (Gemini 3.5 Flash)
+*   **Last AI/Agent Used:** Antigravity (Gemini 3.6 Flash)
 *   **baseline Git commit:** `80599f5bf1aa9ea6dcd52aa42339df2c8bb67e27`
 *   **second pass Git commit:** `2ce3631946f6fe962c48488048a7eaf4ac144e68`
 *   **audit Git commit:** `103970456900e24f6a8f6c85346248d34812aaa5`
-*   **design Git commit:** `be955fd8b2915afacbb247a9a3779650de617717`
-*   **Last Update Timestamp:** 2026-08-20T23:55:00+03:00
+*   **design Git commit:** `0a2ee2a57b20e18af9d60dc9f76af1b38a21dbbf`
+*   **Last Update Timestamp:** 2026-08-21T00:02:00+03:00
 
 ## Current Context
 *   **Current Phase:** TECHNICAL ARCHITECTURE AND DATABASE SCHEMA DESIGN
+*   **Current Delivery Priority:** MOBILE FIRST — iOS/iPadOS + Android
 *   **Phase Status:** IN_PROGRESS
-*   **Current Task:** Resolve remaining open technical decisions (Technical Decisions 1–3).
-*   **Last Completed Task:** Recorded user approval of Technical Decision 1 (Mobile SQLite Plugin Selection) with `@capacitor-community/sqlite` and repository boundary conditions under [DF-010] in the decision log.
+*   **Current Task:** Review Mobile UI Architecture (Technical Decision 3).
+*   **Last Completed Task:** Recorded user approval of Mobile-First delivery priority under [DF-011] in the decision log, explicitly prioritizing iPad/iPhone and Android while deferring Technical Decision 2 (Tauri/Desktop) to the Desktop delivery phase.
 
 ## Decision Status
 *   **Decision 1 (Packaging):** RESOLVED (APPROVED WITH CONDITION)
@@ -24,7 +25,8 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
 *   **Decision 5 (Pronunciation):** RESOLVED (APPROVED WITH STAGED IMPLEMENTATION)
 *   **Decision 6 (Notifications):** RESOLVED (APPROVED WITH CONDITION)
 *   **Technical Decision 1 (Mobile SQLite):** RESOLVED (APPROVED WITH CONDITIONS)
-*   **Technical Decisions 2–3:** OPEN
+*   **Technical Decision 2 (Desktop SQLite):** DEFERRED UNTIL DESKTOP PHASE
+*   **Technical Decision 3 (UI Framework):** OPEN
 *   **Technical Implementation:** NONE APPROVED
 *   **Architecture Phase:** COMPLETE (DESIGN ONLY)
 
@@ -44,8 +46,8 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
     *   `06_AUDIT/AUDIT_REPORTS/ARCHITECTURE_RISK_REGISTER.md`
     *   `05_TECHNICAL/ARCHITECTURE/ARCHITECTURE_REVIEW_SUMMARY.md`
     *   `05_TECHNICAL/ARCHITECTURE/OPEN_TECHNICAL_DECISIONS.md`
-*   **unresolved questions:** Technical Decisions 2–3 remain open.
+*   **unresolved questions:** Technical Decision 3 remains open.
 *   **last agent:** Antigravity
 
 ## Next Approved Action
-*   "User review and approval of remaining open technical decisions (Technical Decisions 2–3) before start of implementation phase."
+*   "Review Technical Decision 3 from a Mobile/iPad-first perspective before implementation planning."

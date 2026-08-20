@@ -17,13 +17,14 @@ This document lists key technical choices requiring developer/user approval befo
 ---
 
 ## Decision 2: Desktop SQLite Wrapper for Tauri
+*   **Status:** DEFERRED — DESKTOP PHASE
+*   **Note:** Implementation sequencing decision prioritizes native Mobile/Tablet (iOS/iPadOS and Android) delivery first. Desktop/Tauri evaluation remains approved in long-term architecture but is deferred until the Desktop delivery phase.
 *   **Context:** Tauri requires a Rust-to-JS bridge to query SQLite database files.
 *   **Options:**
     1.  **`tauri-plugin-sql`:** Official plugin exposing database execution APIs directly to JavaScript.
     2.  **Custom Rust Commands:** Hand-code custom Rust command functions in `src-tauri/src/main.rs` to handle SQL statements.
 *   **Impact:** Option 1 requires zero custom Rust code, accelerating development. Option 2 provides granular control over database connection pools but increases Tauri build management overhead.
 *   **Recommendation:** **Option 1 (`tauri-plugin-sql`)** to minimize Rust-side maintenance and maintain layout consistency with Capacitor queries.
-*   **Status:** **OPEN**
 
 ---
 

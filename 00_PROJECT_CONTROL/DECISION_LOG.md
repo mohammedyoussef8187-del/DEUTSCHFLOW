@@ -115,3 +115,17 @@ This log is the immutable record of approved design, product, and technical deci
     5.  **Progress Preservation:** Migrations to the new SQLite database must fully preserve existing card schedules, streaks, and user settings.
     6.  **SQLCipher Compliance:** Export compliance and regulatory checks for SQLCipher must be completed before app store releases.
 *   **Storage & Schema Condition:** Data queries must be standard SQL compliant, enabling transition or schema modifications without touching the core learning engine. Implementation is NOT approved for this phase.
+
+## [DF-011] DeutschFlow Mobile-First Delivery Priority
+*   **Status:** APPROVED
+*   **Date:** 2026-08-21
+*   **Approving Authority:** User
+*   **Context:** Implementation sequencing and platform prioritization strategy for the DeutschFlow development roadmap.
+*   **Decision:** Approved **Mobile-First Delivery Priority** focusing initial development on native mobile/tablet targets:
+    1.  **Primary Targets:** iPad / iPhone and Android phones/tablets are the initial priority.
+    2.  **iPad/Tablet Requirement:** Interface design must explicitly accommodate tablet layouts (portrait/landscape, touch, larger workspace, study controls) without relying on stretched phone layouts.
+    3.  **Platform Deferrals:** Desktop/Tauri packaging and full Web deployment are deferred to later phases. Long-term multi-platform architecture remains unchanged.
+    4.  **Mobile Architecture Baseline:** Retains shared learning core -> repository layer -> `@capacitor-community/sqlite` -> native SQLite.
+    5.  **Offline-First:** Core mobile learning functions (vocabulary, grammar, SRS, progress, exercises) must operate completely offline.
+    6.  **Data & SRS Preservation:** Mandatory migration strategy preserving existing cards, SRS intervals, streaks, user flags, and settings.
+*   **Technical Decision Status:** Technical Decision 2 (Desktop SQLite Wrapper for Tauri) marked as DEFERRED — DESKTOP PHASE. Implementation is NOT approved yet.
