@@ -8,6 +8,8 @@ This inventory records all German-language learning resources discovered in the 
 |---|---|---|---|---|---|---|---|
 | **Netzwerk Neu A1 - Kursbuch.pdf** | `C:\ENGINEERING AI KNOWLEDGE BASE\Netzwerk Neu A1 - Kursbuch.pdf` | PDF | 15,984,256 | A1 | Netzwerk Neu A1 | `03_COURSE_CONTENT\NETZWERK_A1\` | MOVED |
 | **Netzwerk neu A2 KB.pdf** | `C:\ENGINEERING AI KNOWLEDGE BASE\Netzwerk neu A2 KB.pdf` | PDF | 59,080,275 | A2 | Netzwerk Neu A2 | `03_COURSE_CONTENT\NETZWERK_NEU_A2\` | MOVED |
+| **Netzwerk neu A2 UB.pdf** | `C:\Users\mabdu\Downloads\Telegram Desktop\Netzwerk neu A2 UB.pdf` | PDF | 30,418,217 | A2 | Netzwerk Neu A2 | `03_COURSE_CONTENT\NETZWERK_NEU_A2\` | MOVED |
+| **Netzwerk neu A2 Kursbuch.pdf** | `C:\Users\mabdu\iCloudDrive\Downloads\Netzwerk neu A2 Kursbuch.pdf` | PDF | 58,771,601 | A2 | Netzwerk Neu A2 | `03_COURSE_CONTENT\NETZWERK_NEU_A2\` | MOVED |
 | **Nicos-Weg-A2-E2-L1-Lehrerhandreichung-und-Uebungen.pdf** | `C:\ENGINEERING AI KNOWLEDGE BASE\Nicos-Weg-A2-E2-L1-Lehrerhandreichung-und-Uebungen.pdf` | PDF | 63,924 | A2 | DW Nicos Weg A2 | `03_COURSE_CONTENT\REFERENCE\` | MOVED |
 | **Nicos-Weg-A2-E2-L1-Manuskript-und-Wortschatz-Arabisch.pdf** | `C:\ENGINEERING AI KNOWLEDGE BASE\Nicos-Weg-A2-E2-L1-Manuskript-und-Wortschatz-Arabisch.pdf` | PDF | 306,604 | A2 | DW Nicos Weg A2 | `03_COURSE_CONTENT\VOCABULARY\` | MOVED |
 | **NWn_A2_KB_Audio_1-001.mp3** to **NWn_A2_KB_Audio_2-059.mp3** (22 files) | `C:\ENGINEERING AI KNOWLEDGE BASE\` | MP3 | Various | A2 | Netzwerk Neu A2 (Kursbuch) | `03_COURSE_CONTENT\NETZWERK_NEU_A2\AUDIO\` | MOVED |
@@ -25,8 +27,13 @@ This inventory records all German-language learning resources discovered in the 
 | **verify_u04.py** | `C:\ENGINEERING AI KNOWLEDGE BASE\SHARED_AUTOMATION\Global_Intake_Controller\quarantine\` | PY | 21,121 | N/A | HVACR Verification Script | N/A | REVIEW (Keep in place) |
 | **.GLOBAL_GLOSSARY.md.bak-before-U02** | `C:\ENGINEERING AI KNOWLEDGE BASE\SHARED_AUTOMATION\Global_Intake_Controller\quarantine\` | MD | 17,508 | N/A | HVACR Glossary Backup | N/A | REVIEW (Keep in place) |
 
-## Duplicate Summary
+## Duplicate Summary & File Hashes
 *   `backup_NWn_A2_KB_Audio_1-025.mp3` matches quarantined `NWn_A2_KB_Audio_1-025.mp3` size exactly (1,834,836 bytes).
 *   `backup_NWn_A2_KB_Audio_2-022.mp3` matches quarantined `NWn_A2_KB_Audio_2-022.mp3` size exactly (1,227,791 bytes).
 *   `backup_NWn_A2_KB_Audio_1-033.mp3` matches root `NWn_A2_KB_Audio_1-033.mp3` size exactly (1,596,026 bytes).
 *   All three backup files were verified as exact duplicates and deleted from the source after keeping their canonical copies.
+
+### Newly Discovered File Hashes (Second Pass)
+*   **Netzwerk neu A2 UB.pdf:** `F03893C91A08477B1141EB9173C3480B5C1CC7659416A20C50476081466B2DF1`
+*   **Netzwerk neu A2 Kursbuch.pdf:** `F9EB63A6DA62D4884E816C6C34564377733BD7ECEB32BA84455479D1840810DC`
+
