@@ -239,13 +239,18 @@ describe("study session interaction", () => {
     ).catch(() => false);
     if (!reached) return; // session exhausted; the assertions above already cover scheduling
 
-    const input = document.getElementById("answer-input");
     const beforeCards = await cards();
-    input.value = "definitiv-falsch";
-    input.dispatchEvent(new Event("input", { bubbles: true }));
-    q('[data-action="submit-writing"]').click();
-
-    await until(async () => (await session())?.result, { label: "wrong result" });
+    // Re-query immediately before use: a render between lookup and submit would
+    // otherwise leave us holding a detached input.
+    await until(async () => {
+      const input = document.getElementById("answer-input");
+      if (!input) return false;
+      input.value = "definitiv-falsch";
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+      q('[data-action="submit-writing"]')?.click();
+      await wait(80);
+      return (await session())?.result;
+    }, { label: "wrong result" });
     expect((await session()).result.answer.isCorrect).toBe(false);
 
     await until(() => q('[data-action="rate-answer"]'), { label: "rating controls" });

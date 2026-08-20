@@ -7,6 +7,7 @@ import { createIndexedDbAdapter } from "./platform/indexeddb/adapter.js";
 import { summarizeLearnerState } from "./services/review-summary-service.js";
 import "./ui/components/df-review-summary.js";
 import "./ui/components/df-stat-tile.js";
+import "./ui/components/df-study-progress.js";
 
 (function(){
   "use strict";
@@ -704,7 +705,7 @@ async function submitAnswer(state,payload){
     if(s.done)return renderSessionEnd(state,s);
     const p=DF.Learning.progress(s),q=s.current;
     if(!q)return `<div class="study-layout"><div class="boot-screen"><p>جارٍ إعداد السؤال…</p></div></div>`;
-    return `<main class="study-layout"><header class="study-head"><button class="pill" data-action="exit-study">إنهاء</button><div class="study-title">${modeLabel(s.mode)}</div><div class="study-meta">أساسي ${p.completed}/${p.planned}<br>${q.kind==='intro'?`عرض ${s.introduced+1}`:`محاولة ${s.attempts+1}`}</div></header><div class="progress-wrap"><div class="progress"><span style="width:${p.percent}%"></span></div>${p.pendingRetries?`<span class="retry-badge">إعادات ${p.pendingRetries}</span>`:""}</div><div class="score-strip"><span class="ok">صحيح ${s.correctAttempts}</span><span class="no">خطأ ${s.wrongAttempts}</span><span class="hint">تلميحات ${s.hints}</span></div>${q.kind==="intro"?renderIntro(state,q):renderQuestion(state,q)}</main>`;
+    return `<main class="study-layout"><header class="study-head"><button class="pill" data-action="exit-study">إنهاء</button><div class="study-title">${modeLabel(s.mode)}</div><div class="study-meta">أساسي ${p.completed}/${p.planned}<br>${q.kind==='intro'?`عرض ${s.introduced+1}`:`محاولة ${s.attempts+1}`}</div></header><df-study-progress percent="${p.percent}" completed="${p.completed}" planned="${p.planned}" retries="${p.pendingRetries||0}" correct="${s.correctAttempts}" wrong="${s.wrongAttempts}" hints="${s.hints}"></df-study-progress>${q.kind==="intro"?renderIntro(state,q):renderQuestion(state,q)}</main>`;
   }
   function renderIntro(state,q){const w=q.word;return `<section class="card question-card intro-card"><span class="pill new">كلمة جديدة · عرض تعليمي</span><div class="question-de" lang="de">${DF.esc(w.german)}</div>${state.settings.showPronunciation&&w.pronunciation?`<div class="pronunciation">${DF.esc(w.pronunciation)}</div>`:""}<div class="intro-meaning">${DF.esc(w.arabic)}</div><div class="word-details">${w.article?`<span class="pill">الأداة: <b lang="de">${w.article}</b></span>`:""}${w.itemType?`<span class="pill">${itemTypeLabel(w.itemType)}</span>`:""}${w.level?`<span class="pill">${DF.esc(w.level)}</span>`:""}</div></section><div class="intro-actions"><button class="ghost-btn large" data-action="intro-known">أعرفها مسبقاً</button><button class="primary-btn large" data-action="intro-learned">فهمتها — اختبرني لاحقاً</button></div>`;}
   function itemTypeLabel(t){return({noun:"اسم",word:"كلمة",phrase:"تركيب",sentence:"جملة"})[t]||t;}
