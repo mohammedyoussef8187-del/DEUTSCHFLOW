@@ -26,12 +26,48 @@ const SOURCE_TYPE_LEGACY = "legacy";
 const EASE_MIN = 1.3;
 const EASE_MAX = 3.2;
 
+/*
+ * Source fields this transform reads. Anything present in real learner data but absent
+ * here is unmapped and would be lost by a persistence switch, so the dry-run compares
+ * actual record keys against these sets and reports the difference.
+ */
+export const CONSUMED_FIELDS = Object.freeze({
+  words: Object.freeze([
+    "id", "german", "arabic", "pronunciation", "normalizedGerman", "normalizedArabic",
+    "itemType", "article", "plural", "level", "tags", "acceptedAnswers",
+    "acceptedArabicAnswers", "sourceRow", "favorite", "ignored", "userFlagged",
+    "qualityStatus", "qualityIssues", "qualityNote", "createdAt", "updatedAt"
+  ]),
+  cards: Object.freeze([
+    "key", "wordId", "skill", "state", "dueAt", "intervalDays", "ease", "stability",
+    "difficulty", "reps", "lapses", "correct", "wrong", "streak", "mastery",
+    "lastReviewedAt", "lastResult", "suspended", "createdAt", "updatedAt"
+  ]),
+  attempts: Object.freeze([
+    "id", "sessionId", "wordId", "cardKey", "skill", "correct", "answerType", "rating",
+    "initial", "retryCount", "itemType", "usedHint", "revealed", "elapsedMs",
+    "userAnswer", "correctAnswer", "createdAt"
+  ]),
+  profile: Object.freeze([
+    "username", "streak", "lastStudyDate", "totalXP", "cloudUserId", "createdAt",
+    "lastSessionAt", "sessions"
+  ])
+});
+
 function isBlank(value) {
   return value === undefined || value === null || String(value).trim() === "";
 }
 
 function boolInt(value) {
   return value ? 1 : 0;
+}
+
+// Arrays and structured values are preserved verbatim as JSON text so nothing is
+// dropped; empty/absent values stay NULL rather than becoming a misleading "[]".
+function jsonOrNull(value) {
+  if (value === undefined || value === null) return null;
+  if (Array.isArray(value) && value.length === 0) return null;
+  return JSON.stringify(value);
 }
 
 function metaFields(now) {
@@ -57,13 +93,33 @@ export function migrateToCanonical(snapshot = {}, options = {}) {
     vocabularyMeanings: [],
     acceptedAnswers: [],
     reviewCards: [],
-    reviewEvents: []
+    reviewEvents: [],
+    quarantine: []
   };
   const quarantine = [];
   const warnings = [];
 
-  const quarantineRecord = (entity, sourceId, reasons, record) =>
-    quarantine.push({ entity, sourceId: sourceId ?? null, reasons, record });
+  /*
+   * Unresolved records are quarantined, reported, AND preserved: the source record is
+   * carried into a quarantine table verbatim so a structural migration never destroys
+   * learner state (e.g. an SRS card whose word was deleted). `preserve: false` is used
+   * only when the same source record is already stored elsewhere in the dataset.
+   */
+  const quarantineRecord = (entity, sourceId, reasons, record, { preserve = true } = {}) => {
+    quarantine.push({ entity, sourceId: sourceId ?? null, reasons, record, preserved: preserve });
+    if (!preserve) return;
+    dataset.quarantine.push({
+      uuid: deterministicUuid(NS.quarantine, `${entity}:${sourceId ?? "unknown"}:${reasons.join("+")}`),
+      entity,
+      sourceId: sourceId == null ? null : String(sourceId),
+      reasons: JSON.stringify(reasons),
+      payload: JSON.stringify(record ?? null),
+      createdAt: now,
+      updatedAt: now,
+      revision: 1,
+      deleted: 0
+    });
+  };
 
   // ---- Profile (single local learner) --------------------------------------
   const profileUuid = options.profileUuid || deterministicUuid(NS.profile, "local");
@@ -74,6 +130,8 @@ export function migrateToCanonical(snapshot = {}, options = {}) {
     lastStudyDate: profile?.lastStudyDate ?? null,
     totalXP: Number.isFinite(profile?.totalXP) ? profile.totalXP : 0,
     cloudUserId: profile?.cloudUserId ?? null,
+    lastSessionAt: profile?.lastSessionAt ?? null,
+    sessions: jsonOrNull(profile?.sessions),
     createdAt: profile?.createdAt ?? now,
     updatedAt: now,
     revision: 1,
@@ -82,6 +140,16 @@ export function migrateToCanonical(snapshot = {}, options = {}) {
 
   // ---- Settings ------------------------------------------------------------
   if (settings) {
+    // The approved schema types the settings the engine reads directly. Every other
+    // stored preference is preserved verbatim in extras so no setting is lost.
+    const TYPED_SETTINGS = [
+      "theme", "sessionSize", "dailyGoal", "showPronunciation", "acceptAeOeUe",
+      "acceptSs", "requireArticle", "ignoreSentencePunctuation"
+    ];
+    const extras = {};
+    for (const [key, value] of Object.entries(settings)) {
+      if (!TYPED_SETTINGS.includes(key)) extras[key] = value;
+    }
     dataset.settings.push({
       uuid: deterministicUuid(NS.settings, profileUuid),
       profileUuid,
@@ -93,6 +161,7 @@ export function migrateToCanonical(snapshot = {}, options = {}) {
       acceptSs: boolInt(settings.acceptSs ?? true),
       requireArticle: boolInt(settings.requireArticle ?? true),
       ignoreSentencePunctuation: boolInt(settings.ignoreSentencePunctuation ?? true),
+      extras: Object.keys(extras).length ? JSON.stringify(extras) : null,
       ...metaFields(now)
     });
   }
@@ -125,7 +194,15 @@ export function migrateToCanonical(snapshot = {}, options = {}) {
       article: word.article ?? null,
       plural: word.plural ?? null,
       level: word.level ?? "",
+      tags: jsonOrNull(word.tags),
+      // Word-scoped learner and quality state is kept on the item, which always exists,
+      // so it survives even when a word carries no meaning row.
       ignored: boolInt(word.ignored),
+      favorite: boolInt(word.favorite),
+      userFlagged: boolInt(word.userFlagged),
+      qualityStatus: word.qualityStatus ?? null,
+      qualityIssues: jsonOrNull(word.qualityIssues),
+      qualityNote: word.qualityNote ?? null,
       contentStatus: CONTENT_STATUS_LEGACY,
       contentVersion: 1,
       sourceReference: word.sourceRow == null ? null : String(word.sourceRow),
@@ -141,7 +218,9 @@ export function migrateToCanonical(snapshot = {}, options = {}) {
     // One primary Arabic meaning per legacy word. Preserve wording even if the
     // learner never verified it; do not invent a meaning when none exists.
     if (isBlank(word.arabic)) {
-      quarantineRecord("vocabulary_meaning", legacyId, ["missing-arabic-meaning"], word);
+      // The item itself is already stored; only the absent meaning is reported, and no
+      // meaning text is invented for it.
+      quarantineRecord("vocabulary_meaning", legacyId, ["missing-arabic-meaning"], word, { preserve: false });
     } else {
       const meaningUuid = deterministicUuid(NS.meaning, vocabUuid);
       dataset.vocabularyMeanings.push({
@@ -151,9 +230,6 @@ export function migrateToCanonical(snapshot = {}, options = {}) {
         normalizedArabic: word.normalizedArabic ?? "",
         explanation: null,
         pronunciation: word.pronunciation ?? "",
-        favorite: boolInt(word.favorite),
-        userFlagged: boolInt(word.userFlagged),
-        qualityStatus: word.qualityStatus ?? CONTENT_STATUS_LEGACY,
         contentStatus: CONTENT_STATUS_LEGACY,
         contentVersion: 1,
         sourceReference: word.sourceRow == null ? null : String(word.sourceRow),
@@ -239,13 +315,22 @@ export function migrateToCanonical(snapshot = {}, options = {}) {
     }
     dataset.reviewEvents.push({
       uuid: deterministicUuid(NS.event, String(attempt.id)),
+      legacyId: String(attempt.id),
       cardUuid,
+      vocabUuid: wordUuidByLegacyId.get(String(attempt.wordId)) ?? null,
       sessionId: attempt.sessionId ?? null,
+      skill: attempt.skill ?? null,
+      itemType: attempt.itemType ?? null,
       correct: boolInt(attempt.correct),
       answerType: attempt.answerType ?? null,
       userAnswer: attempt.userAnswer ?? null,
+      correctAnswer: attempt.correctAnswer ?? null,
       elapsedMs: Number.isFinite(attempt.elapsedMs) ? attempt.elapsedMs : 0,
       rating: Number.isFinite(attempt.rating) ? attempt.rating : null,
+      initial: attempt.initial === undefined || attempt.initial === null ? null : boolInt(attempt.initial),
+      retryCount: Number.isFinite(attempt.retryCount) ? attempt.retryCount : null,
+      usedHint: attempt.usedHint === undefined || attempt.usedHint === null ? null : boolInt(attempt.usedHint),
+      revealed: attempt.revealed === undefined || attempt.revealed === null ? null : boolInt(attempt.revealed),
       createdAt: attempt.createdAt ?? now,
       updatedAt: attempt.createdAt ?? now,
       revision: 1,
@@ -262,7 +347,8 @@ export function migrateToCanonical(snapshot = {}, options = {}) {
       vocabularyMeanings: dataset.vocabularyMeanings.length,
       acceptedAnswers: dataset.acceptedAnswers.length,
       reviewCards: dataset.reviewCards.length,
-      reviewEvents: dataset.reviewEvents.length
+      reviewEvents: dataset.reviewEvents.length,
+      quarantine: dataset.quarantine.length
     },
     source: {
       words: words.length,

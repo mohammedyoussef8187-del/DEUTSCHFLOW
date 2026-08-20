@@ -24,6 +24,8 @@ export const SCHEMA_STATEMENTS = [
     last_study_date TEXT,
     total_xp INTEGER NOT NULL DEFAULT 0,
     cloud_user_id TEXT,
+    last_session_at INTEGER,
+    sessions TEXT,
     created_at INTEGER NOT NULL,
     updated_at INTEGER NOT NULL,
     revision INTEGER NOT NULL DEFAULT 1,
@@ -41,6 +43,7 @@ export const SCHEMA_STATEMENTS = [
     accept_ss INTEGER NOT NULL DEFAULT 1,
     require_article INTEGER NOT NULL DEFAULT 1,
     ignore_sentence_punctuation INTEGER NOT NULL DEFAULT 1,
+    extras TEXT,
     created_at INTEGER NOT NULL,
     updated_at INTEGER NOT NULL,
     revision INTEGER NOT NULL DEFAULT 1,
@@ -57,7 +60,13 @@ export const SCHEMA_STATEMENTS = [
     article TEXT,
     plural TEXT,
     level TEXT NOT NULL DEFAULT '',
+    tags TEXT,
     ignored INTEGER NOT NULL DEFAULT 0,
+    favorite INTEGER NOT NULL DEFAULT 0,
+    user_flagged INTEGER NOT NULL DEFAULT 0,
+    quality_status TEXT,
+    quality_issues TEXT,
+    quality_note TEXT,
     content_status TEXT NOT NULL DEFAULT 'legacy',
     content_version INTEGER NOT NULL DEFAULT 1,
     source_reference TEXT,
@@ -79,9 +88,6 @@ export const SCHEMA_STATEMENTS = [
     normalized_arabic TEXT NOT NULL,
     explanation TEXT,
     pronunciation TEXT,
-    favorite INTEGER NOT NULL DEFAULT 0,
-    user_flagged INTEGER NOT NULL DEFAULT 0,
-    quality_status TEXT NOT NULL DEFAULT 'legacy',
     content_status TEXT NOT NULL DEFAULT 'legacy',
     content_version INTEGER NOT NULL DEFAULT 1,
     source_reference TEXT,
@@ -139,15 +145,42 @@ export const SCHEMA_STATEMENTS = [
 
   `CREATE INDEX IF NOT EXISTS idx_cards_due ON review_cards (profile_uuid, due_at, state)`,
 
+  /*
+   * Unresolved source records are preserved here verbatim rather than dropped, so a
+   * structural migration is never destructive (e.g. an SRS card whose vocabulary word
+   * was deleted keeps its repetitions, ease, and lapses and stays recoverable). Rows
+   * are inert: nothing in the learning path reads them.
+   */
+  `CREATE TABLE IF NOT EXISTS migration_quarantine (
+    uuid TEXT PRIMARY KEY,
+    entity TEXT NOT NULL,
+    source_id TEXT,
+    reasons TEXT NOT NULL,
+    payload TEXT,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    revision INTEGER NOT NULL DEFAULT 1,
+    deleted INTEGER NOT NULL DEFAULT 0
+  )`,
+
   `CREATE TABLE IF NOT EXISTS review_events (
     uuid TEXT PRIMARY KEY,
+    legacy_id TEXT,
     card_uuid TEXT NOT NULL,
+    vocab_uuid TEXT,
     session_id TEXT,
+    skill TEXT,
+    item_type TEXT,
     correct INTEGER NOT NULL DEFAULT 0,
     answer_type TEXT,
     user_answer TEXT,
+    correct_answer TEXT,
     elapsed_ms INTEGER NOT NULL DEFAULT 0,
     rating INTEGER,
+    initial INTEGER,
+    retry_count INTEGER,
+    used_hint INTEGER,
+    revealed INTEGER,
     created_at INTEGER NOT NULL,
     updated_at INTEGER NOT NULL,
     revision INTEGER NOT NULL DEFAULT 1,
@@ -168,7 +201,8 @@ export const TABLE_SPECS = [
     columns: [
       ["uuid", "uuid"], ["username", "username"], ["streak", "streak"],
       ["last_study_date", "lastStudyDate"], ["total_xp", "totalXP"],
-      ["cloud_user_id", "cloudUserId"], ["created_at", "createdAt"],
+      ["cloud_user_id", "cloudUserId"], ["last_session_at", "lastSessionAt"],
+      ["sessions", "sessions"], ["created_at", "createdAt"],
       ["updated_at", "updatedAt"], ["revision", "revision"], ["deleted", "deleted"]
     ]
   },
@@ -181,6 +215,7 @@ export const TABLE_SPECS = [
       ["show_pronunciation", "showPronunciation"], ["accept_ae_oe_ue", "acceptAeOeUe"],
       ["accept_ss", "acceptSs"], ["require_article", "requireArticle"],
       ["ignore_sentence_punctuation", "ignoreSentencePunctuation"],
+      ["extras", "extras"],
       ["created_at", "createdAt"], ["updated_at", "updatedAt"],
       ["revision", "revision"], ["deleted", "deleted"]
     ]
@@ -192,7 +227,10 @@ export const TABLE_SPECS = [
       ["uuid", "uuid"], ["legacy_id", "legacyId"], ["german", "german"],
       ["normalized_german", "normalizedGerman"], ["item_type", "itemType"],
       ["article", "article"], ["plural", "plural"], ["level", "level"],
-      ["ignored", "ignored"], ["content_status", "contentStatus"],
+      ["tags", "tags"], ["ignored", "ignored"], ["favorite", "favorite"],
+      ["user_flagged", "userFlagged"], ["quality_status", "qualityStatus"],
+      ["quality_issues", "qualityIssues"], ["quality_note", "qualityNote"],
+      ["content_status", "contentStatus"],
       ["content_version", "contentVersion"], ["source_reference", "sourceReference"],
       ["source_type", "sourceType"], ["verified_at", "verifiedAt"],
       ["verified_by", "verifiedBy"], ["created_at", "createdAt"],
@@ -205,8 +243,7 @@ export const TABLE_SPECS = [
     columns: [
       ["uuid", "uuid"], ["vocab_uuid", "vocabUuid"], ["arabic_text", "arabicText"],
       ["normalized_arabic", "normalizedArabic"], ["explanation", "explanation"],
-      ["pronunciation", "pronunciation"], ["favorite", "favorite"],
-      ["user_flagged", "userFlagged"], ["quality_status", "qualityStatus"],
+      ["pronunciation", "pronunciation"],
       ["content_status", "contentStatus"], ["content_version", "contentVersion"],
       ["source_reference", "sourceReference"], ["source_type", "sourceType"],
       ["verified_at", "verifiedAt"], ["verified_by", "verifiedBy"],
@@ -243,10 +280,22 @@ export const TABLE_SPECS = [
     entity: "reviewEvents",
     table: "review_events",
     columns: [
-      ["uuid", "uuid"], ["card_uuid", "cardUuid"], ["session_id", "sessionId"],
-      ["correct", "correct"], ["answer_type", "answerType"],
-      ["user_answer", "userAnswer"], ["elapsed_ms", "elapsedMs"],
-      ["rating", "rating"], ["created_at", "createdAt"],
+      ["uuid", "uuid"], ["legacy_id", "legacyId"], ["card_uuid", "cardUuid"],
+      ["vocab_uuid", "vocabUuid"], ["session_id", "sessionId"], ["skill", "skill"],
+      ["item_type", "itemType"], ["correct", "correct"], ["answer_type", "answerType"],
+      ["user_answer", "userAnswer"], ["correct_answer", "correctAnswer"],
+      ["elapsed_ms", "elapsedMs"], ["rating", "rating"], ["initial", "initial"],
+      ["retry_count", "retryCount"], ["used_hint", "usedHint"], ["revealed", "revealed"],
+      ["created_at", "createdAt"],
+      ["updated_at", "updatedAt"], ["revision", "revision"], ["deleted", "deleted"]
+    ]
+  },
+  {
+    entity: "quarantine",
+    table: "migration_quarantine",
+    columns: [
+      ["uuid", "uuid"], ["entity", "entity"], ["source_id", "sourceId"],
+      ["reasons", "reasons"], ["payload", "payload"], ["created_at", "createdAt"],
       ["updated_at", "updatedAt"], ["revision", "revision"], ["deleted", "deleted"]
     ]
   }

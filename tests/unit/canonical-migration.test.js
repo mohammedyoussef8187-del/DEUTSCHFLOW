@@ -70,12 +70,14 @@ describe("current -> canonical migration mapping", () => {
     expect(gross.ignored).toBe(1);
     expect(haus.ignored).toBe(0);
 
-    const hausMeaning = dataset.vocabularyMeanings.find(m => m.vocabUuid === haus.uuid);
-    expect(hausMeaning.favorite).toBe(1);
-    const grossMeaning = dataset.vocabularyMeanings.find(m => m.vocabUuid === gross.uuid);
-    expect(grossMeaning.userFlagged).toBe(1);
-    expect(grossMeaning.qualityStatus).toBe("review");
+    // Word-scoped learner/quality state lives on the item, so it survives even for
+    // words that carry no meaning row.
+    expect(haus.favorite).toBe(1);
+    expect(gross.userFlagged).toBe(1);
+    expect(gross.qualityStatus).toBe("review");
+    expect(haus.tags).toBe(JSON.stringify(["wohnen"]));
 
+    const hausMeaning = dataset.vocabularyMeanings.find(m => m.vocabUuid === haus.uuid);
     const hausAnswers = dataset.acceptedAnswers.filter(a => a.meaningUuid === hausMeaning.uuid);
     expect(hausAnswers.filter(a => a.language === "de").map(a => a.text)).toEqual(["das Haus", "Haus"]);
     expect(hausAnswers.filter(a => a.language === "ar").map(a => a.text)).toEqual(["بيت", "منزل"]);

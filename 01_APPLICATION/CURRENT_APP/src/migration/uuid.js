@@ -63,5 +63,6 @@ export const NS = Object.freeze({
   meaning: "deutschflow/vocabulary_meaning",
   acceptedAnswer: "deutschflow/accepted_answer",
   card: "deutschflow/review_card",
-  event: "deutschflow/review_event"
+  event: "deutschflow/review_event",
+  quarantine: "deutschflow/migration_quarantine"
 });
