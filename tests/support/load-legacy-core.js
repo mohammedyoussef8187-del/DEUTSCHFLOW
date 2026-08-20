@@ -1,6 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import vm from "node:vm";
+import * as utils from "../../01_APPLICATION/CURRENT_APP/src/core/utils.js";
+import * as text from "../../01_APPLICATION/CURRENT_APP/src/core/text.js";
 
 const appPath = path.resolve(process.cwd(), "01_APPLICATION/CURRENT_APP/src/app.js");
 const source = fs.readFileSync(appPath, "utf8");
@@ -10,6 +12,7 @@ if (coreEnd < 0) throw new Error("Could not locate the legacy core boundary in a
 
 export function loadLegacyCore() {
   const window = {};
-  vm.runInNewContext(source.slice(0, coreEnd), { window }, { filename: appPath });
+  const coreSource = source.slice(0, coreEnd).replace(/^import .*;\r?\n/gm, "");
+  vm.runInNewContext(coreSource, { window, ...utils, ...text }, { filename: appPath });
   return window.DF;
 }
