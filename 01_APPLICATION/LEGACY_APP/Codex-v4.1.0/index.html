@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
+<meta content="#0f766e" name="theme-color"/>
+<meta content="تطبيق احترافي لتعلّم الكلمات الألمانية بالعربية، يعمل دون إنترنت." name="description"/>
+<title>DeutschFlow — تعلّم الألمانية</title>
+<meta content="yes" name="apple-mobile-web-app-capable"/>
+<meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"/>
+<meta content="DeutschFlow" name="apple-mobile-web-app-title"/>
+<meta content="yes" name="mobile-web-app-capable"/>
+<!-- النسخة تُكتب وقت التشغيل من version.js — لا تضع رقم نسخة ثابتاً هنا. -->
+<meta name="deutschflow-build" content=""/>
+<link rel="stylesheet" href="./styles.css"/>
+<link rel="manifest" href="./manifest.webmanifest"/>
+<link rel="apple-touch-icon" href="./icon-192.png"/>
+<link rel="icon" href="./icon-192.png"/>
+</head>
+<body>
+<noscript>يحتاج التطبيق إلى تفعيل JavaScript.</noscript>
+<div class="app-shell" id="app"><main class="boot-screen"><div aria-hidden="true" class="brand-mark">DF</div><h1>DeutschFlow</h1><p>جارٍ تجهيز قاعدة الكلمات ومحرك التعلّم…</p></main></div>
+<div aria-atomic="true" aria-live="polite" id="toast-root"></div><div id="modal-root"></div>
+<script src="./version.js"></script>
+<script src="./data/seed-data.js"></script>
+<script src="./src/core.js"></script>
+<script src="./src/db.js"></script>
+<script src="./src/learning.js"></script>
+<script src="./src/io.js"></script>
+<script src="./src/ui.js"></script>
+<script src="./src/controller.js"></script>
+<script src="./src/register-sw.js"></script>
+</body>
+</html>

@@ -1,0 +1,70 @@
+{
+  "product": "DeutschFlow Pro",
+  "release": "RC4 Final Technical Build",
+  "source_format": "split vanilla web source",
+  "recommended_read_order": [
+    "CLAUDE-HANDOFF.md",
+    "src/app.js",
+    "index.html",
+    "styles.css",
+    "data/seed-data.js only when required"
+  ],
+  "files": {
+    "CLAUDE-HANDOFF.md": {
+      "bytes": 4692,
+      "sha256": "b1dc60085ee99464d61c1d7c49a0e96d0128384919b85a521e63ba3fae852284"
+    },
+    "_headers": {
+      "bytes": 258,
+      "sha256": "bc87b52dbd9eccf1ae01326ac2525a2202f14f59d192597b9ef1e8b37222ea5f"
+    },
+    "_redirects": {
+      "bytes": 19,
+      "sha256": "6036983e5fc00f0169c9e939b1816ed771eee00e27f2fcc517b819041460b9ef"
+    },
+    "data/seed-data.js": {
+      "bytes": 442146,
+      "sha256": "0e92ea51e7146f67009da88a342e97046bee864ea82037252e55e68f09c4d836"
+    },
+    "deploy/404.html": {
+      "bytes": 584002,
+      "sha256": "44a519001b5666eea911ab2b4a4cd56c2db06ba13d1b675885fd27c0ce736d97"
+    },
+    "deploy/standalone-index.html": {
+      "bytes": 584002,
+      "sha256": "44a519001b5666eea911ab2b4a4cd56c2db06ba13d1b675885fd27c0ce736d97"
+    },
+    "icon-192.png": {
+      "bytes": 1940,
+      "sha256": "6c6a68a64a8ebb3f8eede2dcc89f1574ed6d05c31211f5ca3220ae2e6938e96d"
+    },
+    "icon-512.png": {
+      "bytes": 5268,
+      "sha256": "cb3bcf97fcac4efa77d7803598e486e1ba59976870d2a9fdb26a46ea0d0c18b6"
+    },
+    "index.html": {
+      "bytes": 1504,
+      "sha256": "d78f4cd5766154b33035b77b45bdaa16bd12775da1f8d187e4ce737c1b06036e"
+    },
+    "manifest.webmanifest": {
+      "bytes": 746,
+      "sha256": "0156770310297f52ede99bb7da240a6518287d53e28b2963827d305027539bd4"
+    },
+    "src/app.js": {
+      "bytes": 120050,
+      "sha256": "64f7a52dc6f7cfe39db0dd09cb8a708b689a2fd6b1b4a048665cc040d9223314"
+    },
+    "src/register-sw.js": {
+      "bytes": 187,
+      "sha256": "150cf3116a169a7ab05be5ccc7b0cd9ef88c16e054bef69688dac5afa1904aff"
+    },
+    "styles.css": {
+      "bytes": 20202,
+      "sha256": "816c38ed15febd7c87555833684e6326bc5e5e6ea136c4e4b0a72fe3636fe034"
+    },
+    "sw.js": {
+      "bytes": 815,
+      "sha256": "f86f68e74c6a479ecd722fa849194442ce5be131b5fd67e1ef89a4210c596054"
+    }
+  }
+}

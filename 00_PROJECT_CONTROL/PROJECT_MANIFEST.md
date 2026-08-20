@@ -12,6 +12,7 @@ This file defines the canonical structure and manifests the contents of the **De
     *   `DECISION_LOG.md`
     *   `CHANGELOG.md`
     *   `AI_WORKING_RULES.md`
+    *   `GERMAN_RESOURCE_INVENTORY.md`
 *   `01_APPLICATION/` - Application source code.
     *   `CURRENT_APP/` - Intended target production application files.
     *   `LEGACY_APP/` - Raw existing/legacy application code.
@@ -24,10 +25,12 @@ This file defines the canonical structure and manifests the contents of the **De
     *   `NETZWERK_A1/` - A1 source files and syllabus rules.
     *   `NETZWERK_A2/` - A2 course structure assets.
     *   `NETZWERK_NEU_A2/` - Netzwerk Neu A2 assets.
+        *   `AUDIO/` - Consolidates audio listening resources for Netzwerk Neu A2.
     *   `VOCABULARY/` - Vocabulary lists, tables, and dictionary definitions.
     *   `GRAMMAR/` - Structured grammar rules and modules.
     *   `LISTENING/` - Listening comprehension audios and text scripts.
     *   `EXERCISES/` - Formatted test exercises and validation schemes.
+    *   `REFERENCE/` - Reference books, dictionaries, and general supporting materials.
 *   `04_PRODUCT_DESIGN/` - Requirements and learning specifications.
     *   `REQUIREMENTS/` - Written requirements, features, and stories.
     *   `FEATURE_MATRIX/` - Feature roadmap matrix and priority.

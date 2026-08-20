@@ -4,6 +4,20 @@ All notable changes to the **DeutschFlow** project will be documented in this fi
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-08-20
+
+### Added
+*   Intake of German-language learning resources from the main knowledge base.
+    *   `03_COURSE_CONTENT/NETZWERK_A1/Netzwerk Neu A1 - Kursbuch.pdf`
+    *   `03_COURSE_CONTENT/NETZWERK_NEU_A2/Netzwerk neu A2 KB.pdf`
+    *   `03_COURSE_CONTENT/REFERENCE/Nicos-Weg-A2-E2-L1-Lehrerhandreichung-und-Uebungen.pdf`
+    *   `03_COURSE_CONTENT/VOCABULARY/Nicos-Weg-A2-E2-L1-Manuskript-und-Wortschatz-Arabisch.pdf`
+    *   189 unique A2 Kursbuch and Übungsbuch audio files consolidated under `03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/`.
+*   [GERMAN_RESOURCE_INVENTORY.md](file:///C:/ENGINEERING%20AI%20KNOWLEDGE%20BASE/COURSES/GERMAN_LANGUAGE/DEUTSCHFLOW/00_PROJECT_CONTROL/GERMAN_RESOURCE_INVENTORY.md) tracking all analyzed files.
+*   Imported active DeutschFlow application baseline (RC4 Final Technical Build) under `01_APPLICATION/CURRENT_APP/`.
+*   Imported legacy application versions (Codex refactored build and v2) under `01_APPLICATION/LEGACY_APP/`.
+*   Consolidated DeutschFlow IndexedDB data backups (JSON and CSV exports) under `02_DATA/LEGACY_DATA/`.
+
 ## [0.1.0] - 2026-08-20
 
 ### Added
