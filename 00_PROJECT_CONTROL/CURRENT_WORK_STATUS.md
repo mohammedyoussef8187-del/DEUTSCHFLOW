@@ -8,15 +8,15 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
 *   **second pass Git commit:** `2ce3631946f6fe962c48488048a7eaf4ac144e68`
 *   **audit Git commit:** `103970456900e24f6a8f6c85346248d34812aaa5`
 *   **design Git commit:** `afb480b6d069dc756d0318552e31aa892ab014a4`
-*   **Last Update Timestamp:** 2026-08-21T00:46:00+03:00
+*   **Last Update Timestamp:** 2026-08-21T00:58:00+03:00
 
 ## Current Context
-*   **Current Phase:** PHASE 1 — BASELINE CHARACTERIZATION & REGRESSION PROTECTION
+*   **Current Phase:** PHASE 3 — REPOSITORY LAYER & STORAGE ABSTRACTION
 *   **Current Delivery Priority:** MOBILE FIRST — iOS/iPadOS + Android
-*   **Phase Status:** COMPLETE — GATE 0 BASELINE PASSED
+*   **Phase Status:** PHASE 2 COMPLETE; PHASE 3 ACTIVE
 *   **Implementation Status:** ACTIVE ON `mobile-foundation`
-*   **Current Task:** Establish and maintain the Vitest characterization harness before structural refactoring.
-*   **Last Completed Task:** Added the Vitest harness, golden vocabulary/card fixture, and characterization coverage for legacy normalization, German answer evaluation, Levenshtein behavior, and SRS scheduling.
+*   **Current Task:** Isolate the unchanged IndexedDB implementation behind the new repository interfaces and add adapter-level integration coverage.
+*   **Last Completed Task:** Extracted shared utilities/text helpers, deterministic answer evaluation, and SRS scheduling from `src/app.js`; introduced injected repositories and routed application-service persistence calls through them.
 
 ## Decision Status
 *   **Decision 1 (Packaging):** RESOLVED (APPROVED WITH CONDITION)
@@ -28,7 +28,7 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
 *   **Technical Decision 1 (Mobile SQLite):** RESOLVED (APPROVED WITH CONDITIONS)
 *   **Technical Decision 2 (Desktop SQLite):** DEFERRED UNTIL DESKTOP PHASE
 *   **Technical Decision 3 (UI Framework):** RESOLVED (APPROVED WITH STAGED MIGRATION)
-*   **Technical Implementation:** ACTIVE — PHASE 1 COMPLETE
+*   **Technical Implementation:** ACTIVE — PHASE 2 COMPLETE / PHASE 3 STARTED
 *   **Architecture Phase:** COMPLETE (DESIGN & PLANNING ONLY)
 
 ## Audit & Design Metrics
@@ -42,7 +42,7 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
     *   `05_TECHNICAL/DOCUMENTATION/MOBILE_PLATFORM_ROLLOUT_PLAN.md`
     *   `05_TECHNICAL/DOCUMENTATION/FIRST_IMPLEMENTATION_TASK.md`
 *   **unresolved questions:** None. Implementation plan complete.
-*   **last agent:** Antigravity
+*   **last agent:** OpenAI Codex
 
 ## Next Approved Action
-*   Continue with the smallest safe Phase 2 extraction after preserving the passing baseline; keep `src/app.js` behaviorally unchanged and run `npm test` after each extraction.
+*   Continue Phase 3 by extracting the current IndexedDB implementation into a platform adapter while preserving database name/version/schema and migration behavior. Add isolated adapter tests before any canonical-model or SQLite work.

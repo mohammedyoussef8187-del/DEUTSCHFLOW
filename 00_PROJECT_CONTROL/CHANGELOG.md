@@ -5,6 +5,15 @@ All notable changes to the **DeutschFlow** project will be documented in this fi
 ## [Unreleased]
 
 ### Added
+*   Completed the protected Phase 2 modularization milestone:
+    *   Extracted shared utilities and text normalization into `src/core/`.
+    *   Extracted deterministic answer evaluation into `src/exercises/answer-evaluator.js` without scoring changes.
+    *   Extracted existing SRS scheduling, mastery, status, and rating behavior into `src/srs/scheduler.js` without algorithm changes.
+    *   Converted the runtime loader to native ES modules and added a non-persistent module-wiring smoke test.
+*   Started Phase 3 repository abstraction:
+    *   Added injected vocabulary, card, attempt, metadata, and lifecycle repositories.
+    *   Routed application-service persistence calls through repositories while retaining the existing IndexedDB database and schema unchanged.
+    *   Expanded the passing regression suite to 21 tests.
 *   Established the Phase 1 regression safety net on branch `mobile-foundation`:
     *   Added Vitest test execution via `npm test`.
     *   Added `tests/fixtures/golden_vocab_dataset.json` with representative vocabulary and new/review/mastered cards.
