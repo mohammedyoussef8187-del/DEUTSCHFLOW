@@ -158,3 +158,21 @@ This log is the immutable record of approved design, product, and technical deci
     5.  **Provenance:** Educational records retain source/provenance references, verification status, content version, and review metadata where applicable.
     6.  **Dedicated Quality Phase:** A later Educational Content Quality phase will cover natural German, CEFR appropriateness, grammar, realistic context, professional English and Arabic, contextual senses, vocabulary/grammar consistency, and source verification.
 *   **Data Condition:** Learner-state records reference stable educational identities. Content revisions update or supersede educational records independently and must not recalculate or discard SRS history.
+
+## [DF-014] Capacitor 8 Target and SQLite Plugin Version Selection
+*   **Status:** RESOLVED (implements DF-010 condition 2)
+*   **Date:** 2026-08-21
+*   **Approving Authority:** User (approved Capacitor 8.x mobile foundation and native SQLite path)
+*   **Context:** DF-010 deferred SQLite plugin version pinning until the implementation workspace could be evaluated for compatibility. The Capacitor target is now established, so the plugin version can be selected against it.
+*   **Verification Basis (checked against current official documentation on 2026-08-21):**
+    *   Capacitor 8 requires **Xcode 26.0+**, **iOS deployment target 15.0**, **Android Studio Otter 2025.2.1+**, **minSdk 24 / compileSdk 36 / targetSdk 36**, Gradle plugin 8.13.0 / wrapper 8.14.3, and **NodeJS 22+**.
+    *   `@capacitor-community/sqlite` **8.1.1** declares peer dependency `@capacitor/core >= 8.0.0`.
+*   **Decision:**
+    1.  **Capacitor Target:** Capacitor **8.5.0** (`@capacitor/core`, `@capacitor/cli`, `@capacitor/ios`, `@capacitor/android`).
+    2.  **SQLite Plugin:** `@capacitor-community/sqlite` **8.1.1**.
+    3.  **Database Location:** `iosDatabaseLocation = "Library/CapacitorDatabase"`, keeping learner data in native storage rather than WebView storage subject to OS purge (DF-010 condition 4).
+    4.  **Encryption Deferred:** `iosIsEncryption` and `androidIsEncryption` remain **false** until the SQLCipher export-compliance review required by DF-010 condition 6 is completed. Enabling encryption later is a configuration and re-key step, not a schema change.
+    5.  **Adapter Boundary Preserved:** The plugin is reached only through `src/platform/sqlite/capacitor-executor.js`, which satisfies the same executor contract as the Node test executor. The learning engine, SRS, evaluator, and UI never call the plugin (DF-010 condition 3).
+    6.  **Bundle Identifier:** `com.deutschflow.app` is a **placeholder** and must be confirmed before any App Store or Play submission.
+*   **Outstanding User-Only Actions:** `npx cap add ios` requires macOS with Xcode 26; `npx cap add android` requires the Android SDK. Apple Developer enrollment, signing, and provisioning remain user-only.
+*   **Implementation Status:** Executor implemented and contract-tested on a workstation. On-device verification is Stop Gate 5 and is NOT yet performed.

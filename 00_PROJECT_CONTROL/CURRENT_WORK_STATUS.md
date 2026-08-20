@@ -11,14 +11,24 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
 *   **phase 4 parity Git commit:** `d622413` (test: verify indexeddb to sqlite migration parity)
 *   **backup gate Git commit:** `486e47b` (feat: add verified backup and restore safety gate)
 *   **real-data dry-run Git commit:** `bb91fd6` (test: add read-only real-data migration dry-run)
-*   **Last Update Timestamp:** 2026-08-21T01:38:00+03:00
+*   **capacitor foundation Git commit:** `63b5226` (feat: add capacitor native sqlite executor)
+*   **Last Update Timestamp:** 2026-08-21T01:55:00+03:00
 
 ## Current Context
 *   **Current Phase:** PHASE 4 — MIGRATION MAPPING + SQLITE PARITY VALIDATION
 *   **Current Delivery Priority:** MOBILE FIRST — iOS/iPadOS + Android
-*   **Phase Status:** PHASE 2 AND PHASE 3 COMPLETE. PHASE 4 COMPLETE for migration mapping, SQLite parity, backup/restore (Gate 2), and the real-data read-only dry-run. Real learner storage NOT switched.
+*   **Phase Status:** PHASE 2 AND PHASE 3 COMPLETE. PHASE 4 COMPLETE (migration mapping, SQLite parity, backup/restore Gate 2, real-data dry-run). PHASE 5 STARTED: Capacitor 8 mobile foundation and native SQLite executor implemented and contract-tested. Real learner storage NOT switched; on-device verification (Gate 5) NOT yet performed.
 *   **Implementation Status:** ACTIVE ON `mobile-foundation`
-*   **Current Task:** Awaiting the Capacitor stage. Per the approved execution order, the `@capacitor-community/sqlite` version must NOT be selected or installed until the supported Capacitor target/version and iOS/Android requirements are established.
+*   **Current Task:** Capacitor target and SQLite plugin version resolved and recorded as DF-014. Native executor implemented behind the existing adapter. Next work is blocked only on user-only device actions (see below) or can proceed with the runtime storage-selection seam.
+
+## Mobile Foundation (DF-014, verified against official docs 2026-08-21)
+*   Capacitor **8.5.0** (core/cli/ios/android); `@capacitor-community/sqlite` **8.1.1** (peer `@capacitor/core >=8.0.0`).
+*   Platform requirements: **Xcode 26.0+**, **iOS 15.0** deployment target, **Android Studio Otter 2025.2.1+**, **minSdk 24 / compileSdk 36 / targetSdk 36**, **NodeJS 22+**.
+*   `capacitor.config.json`: `webDir` = `01_APPLICATION/CURRENT_APP`; `iosDatabaseLocation` = `Library/CapacitorDatabase`.
+*   Encryption OFF on both platforms pending the SQLCipher export-compliance review (DF-010 condition 6).
+*   `appId` `com.deutschflow.app` is a PLACEHOLDER to confirm before any store submission.
+*   Native platform folders NOT added — `cap add ios` needs macOS + Xcode 26, `cap add android` needs the Android SDK.
+*   Known advisory: `uuid@7.0.3` via `@capacitor/cli > xcode`. devDependency build tooling only, never shipped; `npm audit fix --force` would downgrade the Capacitor CLI, so it is deliberately left in place.
 *   **Last Completed Task:** Implemented backup/validate/restore/parity comparison (explicit-call, no launch-time side effect) and a read-only migration dry-run, then ran it against the real 2026-08-20 learner export. The dry-run exposed genuine unmapped fields and one orphan SRS card; both were closed by preserving all remaining fields and adding a `migration_quarantine` table so unresolved records are preserved rather than dropped. Regression suite 45 -> 61, all passing. No learner data modified (source export verified byte-identical by sha256 and mtime).
 
 ## Real-Data Dry-Run Result (2026-08-21, source: `DeutschFlow-backup-2026-08-20.json`, READ-ONLY)
@@ -57,13 +67,13 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
 *   **last agent:** OpenAI Codex
 
 ## Next Approved Action
-*   Steps 1 (backup/restore gate) and 2 (real-data read-only dry-run) are COMPLETE and green. The next stage is the Capacitor / native SQLite step, which must run in this order:
-    1.  Establish the supported Capacitor target/version.
-    2.  Verify iOS/iPadOS and Android requirements against that target.
-    3.  Only then select a compatible `@capacitor-community/sqlite` version.
-    4.  Implement the native SQLite executor behind the existing adapter, satisfying the same executor contract as `tests/support/sqlite-node-executor.js` (`exec`, `run`, `all`, `transaction`, `pragma`).
-*   Do NOT pin or install the SQLite mobile plugin before that compatibility check.
-*   Do NOT switch real learner persistence, delete IndexedDB support, or install Lit until the approved sequence reaches those gates.
+*   Capacitor target, plugin version, and the native executor are DONE (DF-014). Remaining, in order:
+    1.  **Runtime storage selection seam:** choose the persistence adapter at startup (native -> SQLite, web -> existing IndexedDB) behind the repository layer, with IndexedDB retained as the recoverable source. Implementable now without a device.
+    2.  **First-launch migration controller:** READ OLD -> VALIDATE -> TRANSFORM -> WRITE NEW -> VERIFY -> SWITCH, with backup taken first and rollback to IndexedDB on any verification failure. Must not run automatically against real learner data until Gate 5 verification passes.
+    3.  **USER-ONLY:** `npx cap add ios` on macOS with Xcode 26; `npx cap add android` with the Android SDK; Apple Developer enrollment, signing, provisioning.
+    4.  **Gate 5 on-device verification:** offline launch on iPad/iPhone, touch study controls, virtual keyboard behavior, and native SQLite persistence across app restarts.
+*   Do NOT switch real learner persistence or delete IndexedDB support until Gate 5 passes.
+*   Do NOT install Lit until Gate 4 is reached.
 
 ## Open Observation (non-blocking)
 *   The deployed RC build writes backups with `schemaVersion: 6` plus `appVersion` / `build` / `dbVersion` / `engineVersion`, while `src/app.js` `exportBackup` writes `schemaVersion: 5` without them. The backup module accepts both and preserves the extra metadata, so nothing is at risk; the source/deploy divergence is simply recorded here for a later reconciliation task.
