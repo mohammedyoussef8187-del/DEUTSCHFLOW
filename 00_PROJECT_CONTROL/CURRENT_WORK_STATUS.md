@@ -8,15 +8,15 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
 *   **second pass Git commit:** `2ce3631946f6fe962c48488048a7eaf4ac144e68`
 *   **audit Git commit:** `103970456900e24f6a8f6c85346248d34812aaa5`
 *   **design Git commit:** `afb480b6d069dc756d0318552e31aa892ab014a4`
-*   **Last Update Timestamp:** 2026-08-21T00:58:00+03:00
+*   **Last Update Timestamp:** 2026-08-21T01:05:00+03:00
 
 ## Current Context
-*   **Current Phase:** PHASE 3 — REPOSITORY LAYER & STORAGE ABSTRACTION
+*   **Current Phase:** PHASE 4 PREPARATION — DATA PRESERVATION & MIGRATION PARITY
 *   **Current Delivery Priority:** MOBILE FIRST — iOS/iPadOS + Android
-*   **Phase Status:** PHASE 2 COMPLETE; PHASE 3 ACTIVE
+*   **Phase Status:** PHASE 2 AND PHASE 3 COMPLETE; PHASE 4 SAFETY FOUNDATION ACTIVE
 *   **Implementation Status:** ACTIVE ON `mobile-foundation`
-*   **Current Task:** Isolate the unchanged IndexedDB implementation behind the new repository interfaces and add adapter-level integration coverage.
-*   **Last Completed Task:** Extracted shared utilities/text helpers, deterministic answer evaluation, and SRS scheduling from `src/app.js`; introduced injected repositories and routed application-service persistence calls through them.
+*   **Current Task:** Build isolated source/target migration parity validation before introducing the native SQLite adapter or switching storage.
+*   **Last Completed Task:** Extracted the unchanged `deutschflow_v2` implementation into an injected IndexedDB platform adapter and verified schema, CRUD, indexed queries, backup restore, exact SRS fields, and unchanged legacy wording in isolated tests.
 
 ## Decision Status
 *   **Decision 1 (Packaging):** RESOLVED (APPROVED WITH CONDITION)
@@ -28,7 +28,7 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
 *   **Technical Decision 1 (Mobile SQLite):** RESOLVED (APPROVED WITH CONDITIONS)
 *   **Technical Decision 2 (Desktop SQLite):** DEFERRED UNTIL DESKTOP PHASE
 *   **Technical Decision 3 (UI Framework):** RESOLVED (APPROVED WITH STAGED MIGRATION)
-*   **Technical Implementation:** ACTIVE — PHASE 2 COMPLETE / PHASE 3 STARTED
+*   **Technical Implementation:** ACTIVE — PHASE 3 COMPLETE / PHASE 4 SAFETY PREPARATION STARTED
 *   **Architecture Phase:** COMPLETE (DESIGN & PLANNING ONLY)
 
 ## Audit & Design Metrics
@@ -45,4 +45,4 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
 *   **last agent:** OpenAI Codex
 
 ## Next Approved Action
-*   Continue Phase 3 by extracting the current IndexedDB implementation into a platform adapter while preserving database name/version/schema and migration behavior. Add isolated adapter tests before any canonical-model or SQLite work.
+*   Implement isolated migration mapping and parity checks with stable identity/provenance, exact SRS preservation, and content-fidelity assertions. Do not switch storage or modify real learner data until backup and parity gates pass.

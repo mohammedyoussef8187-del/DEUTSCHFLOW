@@ -5,6 +5,11 @@ All notable changes to the **DeutschFlow** project will be documented in this fi
 ## [Unreleased]
 
 ### Added
+*   Completed the Phase 3 persistence abstraction milestone:
+    *   Extracted the existing `deutschflow_v2` implementation into `src/platform/indexeddb/adapter.js` without changing database name, version, stores, indexes, migration behavior, or persistence format.
+    *   Added in-memory IndexedDB integration tests covering schema creation, CRUD, indexed attempt queries, restore fidelity, exact SRS preservation, and unchanged legacy wording.
+    *   Recorded the approved separation between learner-state preservation and educational-content authority/versioning.
+    *   Expanded the passing regression suite to 24 tests.
 *   Completed the protected Phase 2 modularization milestone:
     *   Extracted shared utilities and text normalization into `src/core/`.
     *   Extracted deterministic answer evaluation into `src/exercises/answer-evaluator.js` without scoring changes.
