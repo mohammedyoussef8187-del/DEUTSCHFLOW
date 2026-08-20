@@ -5,6 +5,15 @@ All notable changes to the **DeutschFlow** project will be documented in this fi
 ## [Unreleased]
 
 ### Added
+*   Implemented the Phase 4 migration-mapping and SQLite-parity milestone (isolated; real learner storage not switched):
+    *   Added a pure current->canonical migration transform (`src/migration/canonical-migration.js`) with deterministic, platform-neutral identifiers (`src/migration/uuid.js`). SRS state is copied verbatim (due dates, interval, ease, reps, lapses, streak, mastery, state, and correct/wrong/stability/difficulty/lastResult/suspended); legacy wording is preserved unchanged and marked with legacy provenance.
+    *   Malformed/incomplete legacy records are quarantined with reasons and a preserved copy; out-of-bounds ease is reported as a warning rather than silently clamped; no missing educational values are invented.
+    *   Added the Version 1 canonical SQLite schema (`src/platform/sqlite/schema.js`) and a platform-neutral persistence adapter (`src/platform/sqlite/adapter.js`) driven by an injected async SQL executor, reached only through a canonical repository facade (`src/data/canonical-repositories.js`). No SQLite driver is bound in the adapter; the SRS engine, evaluator, and UI never issue SQL directly.
+    *   `importCanonical` writes the whole dataset all-or-nothing; `readCanonical` round-trips it; `verifyIntegrity` checks orphan cards/events, ease bounds, and row counts.
+    *   Added isolated fixtures (`tests/fixtures/migration_snapshot.json`, clean + malformed) and a `node:sqlite` test executor exercising in-memory and temporary-file databases.
+    *   Added end-to-end Stop Gate 3 parity tests: READ OLD (IndexedDB) -> TRANSFORM -> WRITE NEW (SQLite) -> VERIFY, proving field-for-field canonical round-trip, identical SRS state, matching counts/integrity, and that the source IndexedDB remains intact and recoverable.
+    *   Recorded Phase 4 implementation refinements in `CURRENT_TO_TARGET_DATA_MAPPING.md`.
+    *   Expanded the passing regression suite from 24 to 45 tests.
 *   Completed the Phase 3 persistence abstraction milestone:
     *   Extracted the existing `deutschflow_v2` implementation into `src/platform/indexeddb/adapter.js` without changing database name, version, stores, indexes, migration behavior, or persistence format.
     *   Added in-memory IndexedDB integration tests covering schema creation, CRUD, indexed attempt queries, restore fidelity, exact SRS preservation, and unchanged legacy wording.

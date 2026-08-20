@@ -64,3 +64,29 @@ Current store elements are distributed across normalization tables to support mu
 | `userAnswer` | `review_events` | `userAnswer` | **Directly migratable** | Raw user typing. |
 | `elapsedMs` | `review_events` | `elapsedMs` | **Directly migratable** | Input latency. |
 | `createdAt` | `review_events` | `createdAt` | **Directly migratable** | Event timestamp. |
+
+---
+
+## 2. Implementation Refinements (Phase 4)
+
+These refinements were applied when the mapping was realized in code
+(`src/migration/canonical-migration.js`, `src/platform/sqlite/schema.js`). They stay
+within the approved architecture and exist to preserve learner state exactly and losslessly:
+
+*   **`words.ignored` -> `vocabulary_items.ignored` (own column), not `deleted`.** Keeping the
+    learner's excluded/quarantine state as its own boolean column keeps the row visible to
+    integrity checks and keeps exclusion reversible. `deleted` stays `0` for ignored items.
+*   **Extended SRS columns on `review_cards`.** In addition to the design-reference fields,
+    the runtime's full card state is carried through unchanged: `correct`, `wrong`,
+    `stability`, `difficulty`, `last_result`, `suspended`. This makes migration a lossless
+    round-trip rather than a lossy projection.
+*   **`pronunciation` kept as its own `vocabulary_meanings.pronunciation` column** instead of
+    being folded into `explanation`, so phonetic text is preserved without overloading a notes
+    field.
+*   **`acceptedArabicAnswers` -> `accepted_answers` rows with `language = "ar"`** (alongside DE
+    rows), preserving the Arabic accepted-answer set the current model stores.
+*   **Skill names preserved verbatim** (`recall`, `recognition`, `article`, `order`). Renaming
+    to the scored-phase vocabulary (e.g. `recall_german`) is deferred so SRS identity and the
+    parity round-trip stay exact during structural migration.
+*   **Stable identifiers** are deterministic name-based UUIDs derived from legacy identity, so
+    re-running migration is idempotent and child rows link to parents without a shared counter.
