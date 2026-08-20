@@ -5,6 +5,15 @@ All notable changes to the **DeutschFlow** project will be documented in this fi
 ## [Unreleased]
 
 ### Added
+*   Passed Gate 4 (Lit proof of architecture) with a real component and began the iPad-first UI foundation (no learner data modified):
+    *   Added Lit 3.3.3, vendored as a single ESM bundle (`npm run build:vendor`) so the app stays a no-bundler static site that Capacitor serves directly.
+    *   Added `<df-review-summary>`, which replaced the dashboard's hand-built stat grid with a real read-only view of learner state (due, new, weak, mastered, vocabulary and learning totals). Every figure comes from the existing SRS `wordStatus` engine; nothing is invented.
+    *   Added the `review-summary-service` application service, which derives the summary through repositories and the domain engine and is strictly read-only.
+    *   Boundaries enforced by test: the component imports Lit and nothing else, renders no interactive controls, and works on a frozen summary, so it cannot reach storage or mutate learner/SRS state.
+    *   Shadow-DOM styles inherit the app's existing CSS custom properties, so the global stylesheet, theming, and RTL keep working; `app.js` changed by two imports and one hydrate call in the existing `afterRender` hook.
+    *   Added the iPad-first app shell layer: safe-area insets on all edges, and a vertical navigation side rail from tablet landscape upward while phones and tablet portrait keep the existing bottom bar.
+    *   Verified in a real browser at iPad landscape, iPad portrait, and iPhone sizes, with the existing UI and routing intact and IndexedDB unchanged.
+    *   Expanded the passing regression suite from 98 to 124 tests.
 *   Implemented the first-launch migration controller and persistence bootstrap (gated OFF; no learner data modified):
     *   `src/migration/first-launch-controller.js` enforces the approved sequence BACKUP -> READ OLD -> VALIDATE -> TRANSFORM -> WRITE SQLITE -> VERIFY -> SWITCH, and only that sequence.
     *   Refuses to start without a durable backup sink. The IndexedDB source is read-only for the whole run and remains the recovery source; the target must be empty before writing so a repeated run cannot double-import.

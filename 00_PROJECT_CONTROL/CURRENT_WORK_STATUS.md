@@ -13,14 +13,30 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
 *   **real-data dry-run Git commit:** `bb91fd6` (test: add read-only real-data migration dry-run)
 *   **capacitor foundation Git commit:** `63b5226` (feat: add capacitor native sqlite executor)
 *   **migration controller Git commit:** `0fe22dc` (feat: wire persistence bootstrap with automatic indexeddb fallback)
-*   **Last Update Timestamp:** 2026-08-21T02:04:00+03:00
+*   **Gate 4 Lit Git commit:** `da6993e` (feat: add iPad-first app shell layout foundation)
+*   **Last Update Timestamp:** 2026-08-21T02:23:00+03:00
 
 ## Current Context
 *   **Current Phase:** PHASE 4 — MIGRATION MAPPING + SQLITE PARITY VALIDATION
 *   **Current Delivery Priority:** MOBILE FIRST — iOS/iPadOS + Android
 *   **Phase Status:** PHASE 2 AND PHASE 3 COMPLETE. PHASE 4 COMPLETE (migration mapping, SQLite parity, backup/restore Gate 2, real-data dry-run). PHASE 5 STARTED: Capacitor 8 mobile foundation and native SQLite executor implemented and contract-tested. Real learner storage NOT switched; on-device verification (Gate 5) NOT yet performed.
 *   **Implementation Status:** ACTIVE ON `mobile-foundation`
-*   **Current Task:** First-launch migration controller and persistence bootstrap are implemented and fully tested, including a rehearsal at real learner-data scale. Native storage remains GATED OFF. The remaining work before a live switch is on-device verification, which requires user-only device actions.
+*   **Current Task:** Gate 4 (Lit proof of architecture) is PASSED with a real, read-only dashboard component, and the iPad-first app shell foundation is in place. Native storage remains GATED OFF; on-device verification still requires user-only device actions.
+
+## Gate 4 — Lit Proof of Architecture (PASSED)
+*   Lit **3.3.3**, vendored as a single ESM bundle at `01_APPLICATION/CURRENT_APP/vendor/lit.js` (`npm run build:vendor`), so the app remains a no-bundler static site that Capacitor can serve directly.
+*   First component `<df-review-summary>` is real and useful: it replaced the dashboard's hand-built stat grid and shows genuine learner state (due = due + overdue, new, weak, mastered, plus vocabulary and learning totals). No invented statistics.
+*   New application service `src/services/review-summary-service.js` derives the summary via the SRS `wordStatus` engine, reading through repositories only. Strictly read-only.
+*   Boundary enforced and tested: the component imports Lit and nothing else — no IndexedDB, SQLite, Capacitor, repositories, or SRS internals — renders no interactive controls, and works against a frozen summary object, so it cannot mutate learner/SRS state.
+*   Coexistence: styles are scoped in shadow DOM and inherit the existing CSS custom properties, so the global stylesheet, theming, and RTL are untouched. `app.js` gained two imports plus one hydrate call in the existing `afterRender` hook.
+*   **Browser-verified** against the seeded app: element upgraded, 2820 real words rendered, reactive re-render without reload, existing topbar/nav/routing/training cards intact, and IndexedDB unchanged (2820 words / 0 cards / 0 attempts before and after).
+
+## iPad-First App Shell Foundation
+*   Additive CSS layer only; existing rules and phone layouts unchanged.
+*   iOS safe-area insets now respected on top and both inline edges (bottom was already handled); `viewport-fit=cover` already present.
+*   From tablet landscape (>=900px) the bottom pill becomes a vertical side rail with 64px touch targets; phones and tablet portrait keep the existing bottom bar.
+*   Logical properties throughout, so RTL places the rail on the correct edge.
+*   Verified at iPad landscape 1180x820 (side rail, content clears it by 28px), iPad portrait 820x1180 (bottom bar), iPhone 375x812 (bottom bar, 2-column summary, no horizontal overflow).
 
 ## First-Launch Migration Controller (implemented, gated OFF)
 *   Sequence enforced: **BACKUP -> READ OLD -> VALIDATE -> TRANSFORM -> WRITE SQLITE -> VERIFY -> SWITCH**.
@@ -83,8 +99,9 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
     3.  **Device-side migration rehearsal:** run the controller on-device with `nativeStorageEnabled` still OFF for the app, verifying the backup sink writes to native storage and the verification stage passes with real data on the device.
     4.  **Live switch (requires approval):** only after 2 and 3 pass, enable `nativeStorageEnabled` and keep IndexedDB as the recovery source until parity is confirmed in production.
 *   Before iOS signing/release (NOT blockers for the stages above): confirm the real bundle identifier (currently placeholder `com.deutschflow.app`) and complete the SQLCipher export-compliance review if encryption is to be enabled.
+*   Next UI increments (no device needed), in order: migrate the **Stats page summary tiles** to reuse `<df-review-summary>`, then extract a shared `<df-stat-tile>`/shell primitive as a second component. The **Study/SRS interaction screen stays on vanilla UI** until it has dedicated interaction tests.
 *   Do NOT switch real learner persistence or delete IndexedDB support until Gate 5 passes.
-*   Do NOT install Lit until Gate 4 is reached. Do NOT start educational-content rewriting.
+*   Do NOT start educational-content rewriting. Do NOT big-bang rewrite `app.js`.
 
 ## Open Observation (non-blocking)
 *   The deployed RC build writes backups with `schemaVersion: 6` plus `appVersion` / `build` / `dbVersion` / `engineVersion`, while `src/app.js` `exportBackup` writes `schemaVersion: 5` without them. The backup module accepts both and preserves the extra metadata, so nothing is at risk; the source/deploy divergence is simply recorded here for a later reconciliation task.
