@@ -27,6 +27,7 @@ All notable changes to the **DeutschFlow** project will be documented in this fi
 *   Recorded user approval with deterministic scoring as authoritative and AI as advisory condition for Product Decision 4 (AI-Assisted Answer Evaluation Policy).
 *   Recorded user approval with self-evaluation recording/playback condition for Product Decision 5 (Speaking / Pronunciation Feature Scope).
 *   Recorded user approval with native local review notifications condition for Product Decision 6 (Notification and Review Reminder Policy).
+*   Recorded user approval with conditions for Technical Decision 1 (Mobile SQLite Plugin Selection).
 
 ## [0.3.0] - 2026-08-20
 

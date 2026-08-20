@@ -5,13 +5,14 @@ This document lists key technical choices requiring developer/user approval befo
 ---
 
 ## Decision 1: Mobile SQLite Plugin Selection
+*   **Status:** APPROVED WITH CONDITIONS
+*   **Condition:** Approved the Capacitor Community SQLite plugin (`@capacitor-community/sqlite`) for native SQLite persistence on iOS/Android. The exact plugin package version remains deferred until implementation compatibility is verified against system SDKs. Strict repository abstraction is mandatory (the learning/application core must never call the plugin directly). Native mobile builds must not rely on browser IndexedDB as the sole persistence mechanism. All existing user progress and SRS state must be preserved during migrations. SQLCipher export compliance and regulatory checks must be completed before app store distribution. Web client uses IndexedDB fallback.
 *   **Context:** Native iOS and Android Capacitor wrappers require a plugin to communicate with native SQLite storage.
 *   **Options:**
-    1.  **`@capacitor-community/sqlite`:** Official community-supported SQLite integration plugin.
+    1.  **`@capacitor-community/sqlite`:** Capacitor Community SQLite plugin.
     2.  **`cordova-sqlite-storage`:** Legacy Cordova plugin wrapped for Capacitor.
 *   **Impact:** Option 1 has active support, handles database encryption optionally, and supports multi-connection transaction queues directly.
 *   **Recommendation:** **Option 1 (`@capacitor-community/sqlite`)**. It is the modern standard for Capacitor applications.
-*   **Status:** **OPEN**
 
 ---
 

@@ -101,3 +101,17 @@ This log is the immutable record of approved design, product, and technical deci
     5.  **Desktop Evaluation:** Windows/macOS/Linux systems will be evaluated separately during the technical architecture phase to design app-running alerts or local tray alarms, avoiding background daemon resource locks.
     6.  **Web Push Deferred:** Web-browser push notifications are deferred. Web versions will use local in-app warnings.
 *   **Storage & Schema Condition:** None directly impacting core data, but platform wrappers must expose notification status queries through clean, abstract interfaces.
+
+## [DF-010] Technical Decision 1 — Mobile SQLite Plugin Selection
+*   **Status:** APPROVED WITH CONDITIONS
+*   **Date:** 2026-08-20
+*   **Approving Authority:** User
+*   **Context:** Selection of native database storage bridge library/plugin for packaged Capacitor iOS and Android targets.
+*   **Decision:** Approved the **Capacitor Community SQLite plugin** (`@capacitor-community/sqlite`) for native SQLite persistence:
+    1.  **Wrapper Family:** Capacitor Community SQLite plugin is approved as the technology driver for mobile storage.
+    2.  **Version Selection:** Package version pinning remains deferred until implementation workspace configurations are evaluated for compatibility.
+    3.  **Repository Isolation:** Mandatory Repository Layer / Persistence Adapter boundary. Business logic and learning engine must never query the plugin API directly.
+    4.  **IndexedDB Prohibited on Native:** Standard IndexedDB browser storage is prohibited as the sole persistence layer for native packaged builds to prevent automatic OS data purges.
+    5.  **Progress Preservation:** Migrations to the new SQLite database must fully preserve existing card schedules, streaks, and user settings.
+    6.  **SQLCipher Compliance:** Export compliance and regulatory checks for SQLCipher must be completed before app store releases.
+*   **Storage & Schema Condition:** Data queries must be standard SQL compliant, enabling transition or schema modifications without touching the core learning engine. Implementation is NOT approved for this phase.
