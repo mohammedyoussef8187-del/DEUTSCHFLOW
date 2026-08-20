@@ -4,6 +4,22 @@ All notable changes to the **DeutschFlow** project will be documented in this fi
 
 ## [Unreleased]
 
+### Added
+*   Complete technical architecture and physical database schema design documentation:
+    *   `05_TECHNICAL/ARCHITECTURE/TARGET_ARCHITECTURE.md`
+    *   `05_TECHNICAL/ARCHITECTURE/MODULE_BOUNDARIES.md`
+    *   `05_TECHNICAL/ARCHITECTURE/PLATFORM_ARCHITECTURE.md`
+    *   `05_TECHNICAL/ARCHITECTURE/TECHNOLOGY_DECISION_MATRIX.md`
+    *   `05_TECHNICAL/DATABASE/TARGET_CANONICAL_DATA_MODEL.md`
+    *   `05_TECHNICAL/DATABASE/TARGET_DATABASE_SCHEMA.md`
+    *   `05_TECHNICAL/DATABASE/CURRENT_TO_TARGET_DATA_MAPPING.md`
+    *   `05_TECHNICAL/DATABASE/DATA_MIGRATION_STRATEGY.md`
+    *   `05_TECHNICAL/DATABASE/SCHEMA_VERSIONING_STRATEGY.md`
+    *   `05_TECHNICAL/TESTING/TARGET_TESTING_ARCHITECTURE.md`
+    *   `06_AUDIT/AUDIT_REPORTS/ARCHITECTURE_RISK_REGISTER.md`
+    *   `05_TECHNICAL/ARCHITECTURE/ARCHITECTURE_REVIEW_SUMMARY.md`
+    *   `05_TECHNICAL/ARCHITECTURE/OPEN_TECHNICAL_DECISIONS.md`
+
 ### Changed
 *   Recorded user approval with persistence condition for Product Decision 1 (Multi-Platform Packaging Architecture).
 *   Recorded user approval with staged implementation condition for Product Decision 2 (Cross-Device Synchronization Strategy).
