@@ -213,3 +213,10 @@ body,button,select,textarea,.question-ar,.question-label,.intro-meaning,.feedbac
 .token-empty{color:var(--muted)}
 .result-count{color:var(--muted);font-size:13px;margin-block-end:9px}
 .skill-detail{color:var(--muted)}
+
+/* Touch targets: reach the 44pt minimum without changing the visual design.
+   The switch keeps its 48x28 look and gains an invisible 44pt-tall hit area
+   (::after is already the knob, so the expander uses ::before). Filter chips grow
+   to 44pt and centre their label. */
+.toggle::before{content:"";position:absolute;inset-inline:0;inset-block-start:50%;block-size:44px;transform:translateY(-50%)}
+.chip{min-block-size:44px;display:inline-flex;align-items:center}

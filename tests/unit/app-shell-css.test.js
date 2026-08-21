@@ -98,3 +98,22 @@ describe("iPad workspace density", () => {
     expect(CSS).toContain(".modal{max-height:88vh;max-height:88dvh}");
   });
 });
+
+describe("touch target hit areas", () => {
+  it("expands the switch hit area without changing its 48x28 look", () => {
+    // ::after is already the knob, so the expander must use ::before.
+    expect(CSS).toContain(".toggle::before{content:\"\";position:absolute");
+    expect(CSS).toContain("block-size:44px");
+    expect(CSS).toContain(".toggle{width:48px;height:28px");
+  });
+
+  it("brings filter chips up to the 44pt minimum with a centred label", () => {
+    expect(CSS).toContain(".chip{min-block-size:44px;display:inline-flex;align-items:center}");
+  });
+
+  it("uses logical properties for the hit area so RTL is unaffected", () => {
+    const block = CSS.slice(CSS.indexOf(".toggle::before"));
+    expect(block).toContain("inset-inline:0");
+    expect(block).not.toMatch(/\bleft:\s*0/);
+  });
+});
