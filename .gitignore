@@ -10,3 +10,7 @@ android/
 # Build output
 build/
 DerivedData/
+
+# Intake working database. The extraction artifacts beside it ARE committed, because
+# they are the audit trail; the database is rebuildable from them at any time.
+tools/intake/artifacts/*.db

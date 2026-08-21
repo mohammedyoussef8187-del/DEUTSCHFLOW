@@ -291,7 +291,10 @@ export function createLearnController(runtime, options = {}) {
               data-uuid="${esc(item.uuid)}" style="min-height:44px">${esc(item.slug)}</button>`).join("")}</div>`
         : "";
 
-      const prompt = exercise.prompt?.de || exercise.prompt?.en || exercise.slug;
+      /* German first because it is the target language, then the support languages.
+         A vocabulary-recall task prompts in Arabic only, and must still be readable. */
+      const prompt = exercise.prompt?.de || exercise.prompt?.en || exercise.prompt?.ar || exercise.slug;
+      const promptLanguage = exercise.prompt?.de ? "de" : exercise.prompt?.en ? "en" : exercise.prompt?.ar ? "ar" : null;
       const instruction = exercise.instruction?.ar || exercise.instruction?.en || "";
       // The exercise TYPE decides the input, not whether options happen to exist:
       // a typed answer usually has an expected option too, and that is not a choice list.
@@ -316,7 +319,7 @@ export function createLearnController(runtime, options = {}) {
       return `${head("التمارين", "تصحيح حتمي عبر المقيّم القائم.")}${picker}
         <section class="card">
           ${instruction ? `<p style="margin:0 0 8px;color:var(--muted);font-size:13px">${esc(instruction)}</p>` : ""}
-          <h2 style="margin:0 0 12px" lang="de" dir="ltr">${esc(prompt)}</h2>
+          <h2 style="margin:0 0 12px" lang="${promptLanguage ?? "de"}" dir="${promptLanguage === "ar" ? "rtl" : "ltr"}">${esc(prompt)}</h2>
           ${exercise.gradeable ? "" : `<p class="pill" data-ungradeable="true"
              style="display:inline-block;margin-block-end:10px">تقييم ذاتي — لا يُحتسب</p>`}
           ${body}

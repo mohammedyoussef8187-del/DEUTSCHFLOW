@@ -19,7 +19,7 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
 *   **UI migration complete Git commit:** `60f2526` (feat: migrate the multiple-choice answers to Lit)
 *   **option (c) work Git commit:** `e872810` (fix: make the PWA actually work offline)
 *   **Gate 5 simulator PASSED commit:** `16807f9` (validated in Codemagic)
-*   **Last Update Timestamp:** 2026-08-21T21:50:00+03:00
+*   **Last Update Timestamp:** 2026-08-21T22:05:00+03:00
 
 ## Current Context
 *   **Current Phase:** PHASE 4 — MIGRATION MAPPING + SQLITE PARITY VALIDATION
@@ -83,6 +83,21 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
 
 ### Highest-value next step
 **Gap 1 — the incremental write path.** It unblocks gaps 2, 3 and 5, needs no hardware and no product decision, and is verifiable with the existing test executor. Wiring anything before it exists would produce read-only screens that cannot record what the learner does.
+## Canonical Content Intake Pipeline (IMPLEMENTED — one verified lesson)
+*   **Stages:** EXTRACT → NORMALIZE → PARSE → VALIDATE → MAP → PREVIEW/DIFF → IMPORT → VERIFY, in `tools/intake/`. Nothing writes straight from raw extraction: the plan is always computed and printable first.
+*   **Sources imported** (both already in this repository, both Deutsche Welle *Nicos Weg A2*, Episode 2 «Familiengeschichten»):
+    *   `03_COURSE_CONTENT/VOCABULARY/Nicos-Weg-A2-E2-L1-Manuskript-und-Wortschatz-Arabisch.pdf` — **pages 1–2**
+    *   `03_COURSE_CONTENT/REFERENCE/Nicos-Weg-A2-E2-L1-Lehrerhandreichung-und-Uebungen.pdf` — **pages 2–4**
+*   **Extraction** uses the local `pdftotext -enc UTF-8 -layout`, splits on form feeds, and commits `raw.txt` + `pages.json` (with a byte digest) as the audit trail. Every later stage is a pure function of those files, so tests are hermetic and a parser change can be diffed against text that never moved.
+*   **Normalization** strips bidi controls and applies NFKC **to Arabic runs only** — applied to the whole string it would rewrite German typography, which would be a silent edit to source text. Umlauts and ß are asserted byte-identical. A visual-order reverser exists and is **off** for this publisher, which verifiably emits logical order.
+*   **Nothing is invented.** No English row is created at all (the source prints none). No answer key exists in the booklet, so its three Übungen import **ungradeable** with the reason recorded. No timecodes are printed, so segments carry none. No audio file for this episode is in the repo, so **no asset is registered** and the activity is honestly unplayable while the transcript still teaches.
+*   **One derivation, labelled as such:** 11 vocabulary-recall exercises whose prompt is the Arabic gloss and whose expected answer is the German headword — both verbatim from the same page. Marked `sourceType: "derived-from-vocabulary"` so a reviewer can tell them from publisher-written tasks.
+*   **Provenance** on every row: document title, publisher, the publisher's own reference URL, and the **printed page number** (`… — dw.com/nico/arabic — Seite 2`), plus `contentStatus: "imported"` — deliberately not `verified`.
+*   **Identity is derived**, never allocated: a re-run with a different clock yields identical uuids. Second import = **0 create, 0 update, 189 unchanged**, row counts unchanged.
+*   **Source-change safety:** a differing row that is still `imported` updates; a differing row a human marked `verified` becomes a **CONFLICT** that stops the import and prints both texts. `--accept-changes` is required to proceed.
+*   **Canonical entities created:** 1 course, 1 CEFR level, 1 unit, 1 lesson, 3 sections, 26 lesson items, 3 curriculum texts, 11 vocabulary items + 11 Arabic meanings + 11 accepted answers, 10 sentences, 1 listening item + 2 speakers + 10 segments + 10 segment texts, 14 exercises + 31 options + 11 targets. **189 rows.**
+*   **End-to-end through the real Learn UI:** course → lesson (3 sections, 26 items) → vocabulary → sentences → listening (10 segments, 2 speakers, no audio) → exercise graded by the existing evaluator → error event recorded → lesson completion → resume `course-complete`. English shows as missing throughout.
+*   **Suite 844 → 919.**
 ## Features A–I Reachable in the Running App (IMPLEMENTED, commit `124de14`)
 *   A sixth nav destination **«المنهج»** hosts a hub plus eight routes: courses/lessons, grammar, sentences, exercises, listening, pronunciation, error learning, reminders. Feature A's multilingual content appears through these screens rather than as a separate area.
 *   **The canonical runtime boots after study and independently of it**, so a content-store failure cannot stop vocabulary revision. `learnerStorageSwitch` stays **false**; the legacy IndexedDB study flow is unchanged.
