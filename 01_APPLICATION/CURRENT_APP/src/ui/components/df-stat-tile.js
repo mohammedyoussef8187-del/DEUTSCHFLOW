@@ -11,7 +11,7 @@
  * post-render hydration step. That is what makes the migration incremental.
  */
 
-import { LitElement, html, css } from "../../../vendor/lit.js";
+import { LitElement, html, css, nothing } from "../../../vendor/lit.js";
 
 export class DfStatTile extends LitElement {
   static properties = {
@@ -58,6 +58,18 @@ export class DfStatTile extends LitElement {
     :host([tone="weak"])     .icon { background: rgb(220 38 38 / 14%);  color: #b91c1c; }
     :host([tone="mastered"]) .icon { background: rgb(22 163 74 / 14%);  color: #15803d; }
 
+    /* Icon-less variant: a compact stacked metric, used by the session summary and the
+       data-audit row. Text alignment is inherited from the host so it keeps matching
+       whichever container it sits in. */
+    .tile.plain {
+      display: block;
+      padding: 15px;
+      border-radius: 15px;
+      min-height: 0;
+    }
+    .tile.plain .value strong { display: block; font-size: 24px; }
+    .tile.plain .value span { font-size: 12px; white-space: normal; }
+
     .value {
       display: flex;
       flex-direction: column;
@@ -93,9 +105,11 @@ export class DfStatTile extends LitElement {
   }
 
   render() {
+    // No icon means the compact stacked variant; existing icon tiles are unaffected.
+    const plain = !this.icon;
     return html`
-      <div class="tile" part="tile">
-        <span class="icon" aria-hidden="true">${this.icon}</span>
+      <div class="tile ${plain ? "plain" : ""}" part="tile">
+        ${plain ? nothing : html`<span class="icon" aria-hidden="true">${this.icon}</span>`}
         <span class="value">
           <strong>${this.value}</strong>
           <span>${this.label}</span>
