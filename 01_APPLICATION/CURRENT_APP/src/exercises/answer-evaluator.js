@@ -149,8 +149,20 @@ export function evaluateArabicAdvisory(userRaw, word, expectedOverride = null, s
   };
 }
 
-/** Skills whose correctness the learner reports, because the answer language cannot score. */
-export const SELF_ASSESSED_SKILLS = Object.freeze(["recognition"]);
+/*
+ * Skills whose correctness the LEARNER reports, because the thing being judged cannot
+ * be judged reliably by the app.
+ *
+ * recognition: the answer is Arabic free text, and orthography and synonym breadth make
+ *   "wrong" and "worded differently" indistinguishable.
+ * pronunciation: judging speech needs acoustic recognition, which is exactly as
+ *   unreliable, and a wrong verdict there would lapse a card for an accent. A recognizer
+ *   may still advise (see pronunciation_attempts.advisory_score) - it may never grade.
+ *
+ * Discriminating sounds is a different act from producing them: a minimal-pair question
+ * is an ordinary German multiple-choice exercise and scores normally.
+ */
+export const SELF_ASSESSED_SKILLS = Object.freeze(["recognition", "pronunciation"]);
 
 export function isSelfAssessedSkill(skill) {
   return SELF_ASSESSED_SKILLS.includes(skill);

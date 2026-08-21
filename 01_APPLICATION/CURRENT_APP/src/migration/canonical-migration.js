@@ -165,6 +165,19 @@ export function migrateToCanonical(snapshot = {}, options = {}) {
     listeningSegments: [],
     listeningSegmentTexts: [],
     listeningLinks: [],
+    /*
+     * Pronunciation is authored (IPA, syllables, stress, minimal pairs) and practised
+     * out loud. The legacy model recorded neither, and no IPA can be derived from a
+     * spelling without guessing, so nothing is back-filled. pronunciationAttempts is
+     * a learner's own spoken history, which simply does not exist yet.
+     */
+    pronunciationFeatures: [],
+    pronunciationTexts: [],
+    pronunciationItems: [],
+    pronunciationVariants: [],
+    pronunciationPairs: [],
+    pronunciationLinks: [],
+    pronunciationAttempts: [],
     reviewCards: [],
     reviewEvents: [],
     quarantine: []

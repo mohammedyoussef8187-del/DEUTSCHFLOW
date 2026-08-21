@@ -19,7 +19,7 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
 *   **UI migration complete Git commit:** `60f2526` (feat: migrate the multiple-choice answers to Lit)
 *   **option (c) work Git commit:** `e872810` (fix: make the PWA actually work offline)
 *   **Gate 5 simulator PASSED commit:** `16807f9` (validated in Codemagic)
-*   **Last Update Timestamp:** 2026-08-21T17:05:00+03:00
+*   **Last Update Timestamp:** 2026-08-21T17:25:00+03:00
 
 ## Current Context
 *   **Current Phase:** PHASE 4 — MIGRATION MAPPING + SQLITE PARITY VALIDATION
@@ -58,6 +58,19 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
 *   **No history touched:** no attempt, card, due date, ease, lapse, mastery or streak modified or recomputed. A test migrates a recognition card built up under the old Arabic-scored rules and asserts all 14 SRS fields survive field-for-field, including through SQLite.
 *   **Verification limit:** the in-app recognition flow was not reachable in a browser from a fresh seeded profile, because recognition cards unlock with future due dates. Covered by tests of the runtime wiring, the advisory evaluator, and the feedback component instead of a live session.
 
+## Feature H — Pronunciation (IMPLEMENTED)
+*   **Canonical schema v9**, 55 tables: `pronunciation_features`, `pronunciation_texts` (owner_type/owner_uuid, language as a ROW), `pronunciation_items`, `pronunciation_variants` (IPA, syllables, stress index, regional variety, is_primary), `pronunciation_pairs` (minimal pairs), `pronunciation_links`, `pronunciation_attempts`.
+*   **The governing rule: producing speech is SELF-ASSESSED; discriminating sounds is SCOREABLE.** Judging how someone SAID a word needs acoustic recognition, and a wrong verdict there would lapse a card for an accent. Deciding which of two words you HEARD is an ordinary German multiple-choice question and scores through the existing evaluator.
+*   **`pronunciation_attempts` has no column for a machine verdict of correctness** — no `correct`, no `scored`, no `quality`. There is `self_rating` (the learner's) and `advisory_score` + `advisory_source` (a recognizer's or model's, always attributed). A field that does not exist cannot later be quietly read as authority. A test asserts the absent columns directly against `TABLE_SPECS`.
+*   **`assessSpokenAttempt()` returns `isCorrect: null`, never `false`**, mirroring `evaluateArabicAdvisory`, with `quality: 0` so it contributes nothing to an automatic rating. An advisory score with no named source is recorded but not attributed; a source with no score is dropped.
+*   **`pronunciation` was added to the evaluator's single `SELF_ASSESSED_SKILLS` list**, so there is still one source of truth for "the learner reports this". The legacy scheduler still creates only `recall` and `recognition` cards — a test pins that, so no SRS behaviour changed.
+*   **Scoring has exactly one route.** `expectedAnswersForPronunciation()` returns `[]` for any production item and otherwise delegates to the exercise layer's own filter, so neither Arabic nor a recognizer's opinion can become correctness by coming in through pronunciation. `gradeabilityOf()` names the reason instead of returning a bare empty list.
+*   **Error learning integrates by consequence, not by special case.** A spoken attempt is self-assessed, so the error service classifies it **advisory** on its own and no deterministic pattern can form out of an opinion about an accent. A minimal-pair answer classifies deterministically like any German answer.
+*   **Model audio reuses `audio_assets` and the Feature G offline rules unchanged** — no new mechanism. An item with no local recording is still practisable from its authored IPA and syllables: losing the file does not lose the teaching.
+*   **Deterministic ordering:** variants sort primary → authored ordering → variety → uuid; a total order, identical on every run and device.
+*   **Migration invents no pronunciation.** All seven tables migrate empty. A legacy `pronunciation` hint is **not** promoted to authored IPA, because it is not IPA. SRS fields, course progress, error history and quarantine behaviour are untouched.
+*   **Minimum UI:** `<df-pronunciation-card>` shows IPA, stressed syllable, accepted regional realizations, minimal pairs and the model recording, and for a spoken item offers **only the learner's own rating** alongside the statement that the app does not judge pronunciation automatically. An advisory score is shown labelled with its source and never replaces the learner's rating.
+*   **Suite 578 → 647.**
 ## Feature G — Listening (IMPLEMENTED)
 *   **Canonical schema v8**, 48 tables. The audio FILE and the listening ACTIVITY are separate entities: `audio_assets` (availability, local_path, source_path, remote_url, mime, bytes, duration, checksum, provenance) and `listening_items` (slug, audio, activity type, level, ordering, lifecycle), plus `listening_texts`, `listening_speakers`, `listening_segments`, `listening_segment_texts`, `listening_links`.
 *   **Offline-first is in the schema, not in convention.** `availability` records where the file actually IS — `bundled`, `downloaded`, `source-only`, `remote` — separately from `remote_url`, which is optional source metadata. `playableOffline` is true only for a file on the device, and an activity whose audio is remote is reported `studyable: false` with a named reason rather than quietly requiring a network. The transcript and translations still render when the file is missing: losing the file must not lose the teaching.

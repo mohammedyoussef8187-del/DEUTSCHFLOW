@@ -88,13 +88,32 @@
  * (content_type, content_uuid), so a listening activity joins a lesson as
  * content_type = 'listening'.
  *
+ * Version 9 adds pronunciation, and one omission in it is deliberate:
+ * pronunciation_attempts has NO COLUMN FOR A MACHINE VERDICT OF CORRECTNESS.
+ *
+ * There is `self_rating`, which the learner gives, and `advisory_score`, which a
+ * recognizer or model may suggest and which is labelled with its source. There is no
+ * `correct`, no `scored`, and no `quality`, because judging speech automatically is
+ * exactly the kind of unreliable verdict Arabic scoring was removed for. A field that
+ * does not exist cannot later be quietly read as authority.
+ *
+ * What IS deterministic about pronunciation is authored, not heard: the phoneme
+ * inventory, IPA, syllabification, stress, regional variety and minimal pairs. And a
+ * minimal-pair DISCRIMINATION question - hear it, choose which word - is an ordinary
+ * multiple-choice exercise in German, so it scores through the existing evaluator via
+ * pronunciation_links. Producing speech is self-assessed; discriminating sounds is
+ * scoreable. The schema keeps those two apart.
+ *
+ * Model audio reuses audio_assets from version 8 unchanged, so the offline-first
+ * rules already established apply to pronunciation with no new mechanism.
+ *
  * Version 1 was never activated for learners (nativeStorageEnabled stayed false through
  * Gate 5), so no deployed v1 database exists and v2 is the first version any learner
  * database will see. A forward migration step becomes necessary only once a learner
  * database has actually been written.
  */
 
-export const SCHEMA_VERSION = 8;
+export const SCHEMA_VERSION = 9;
 
 export const SCHEMA_STATEMENTS = [
   `CREATE TABLE IF NOT EXISTS learner_profiles (
@@ -997,6 +1016,181 @@ export const SCHEMA_STATEMENTS = [
 
   `CREATE INDEX IF NOT EXISTS idx_listening_links_target ON listening_links (target_type, target_uuid)`,
 
+  /* ------------------------------------------------- pronunciation --------
+   * The authored inventory: phonemes, contrasts, stress and intonation patterns,
+   * and grapheme-to-sound correspondences. Shareable content, no profile attached.
+   */
+
+  `CREATE TABLE IF NOT EXISTS pronunciation_features (
+    uuid TEXT PRIMARY KEY,
+    slug TEXT NOT NULL UNIQUE,
+    feature_kind TEXT NOT NULL DEFAULT 'phoneme',
+    ipa TEXT NOT NULL DEFAULT '',
+    level TEXT NOT NULL DEFAULT '',
+    ordering INTEGER NOT NULL DEFAULT 0,
+    content_status TEXT NOT NULL DEFAULT 'draft',
+    content_version INTEGER NOT NULL DEFAULT 1,
+    source_reference TEXT,
+    source_type TEXT,
+    verified_at INTEGER,
+    verified_by TEXT,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    revision INTEGER NOT NULL DEFAULT 1,
+    deleted INTEGER NOT NULL DEFAULT 0
+  )`,
+
+  /* Names, explanations and advice for a feature or an item, one row per
+   * (owner, language, kind), following curriculum_texts. Language is a ROW. */
+  `CREATE TABLE IF NOT EXISTS pronunciation_texts (
+    uuid TEXT PRIMARY KEY,
+    owner_type TEXT NOT NULL,
+    owner_uuid TEXT NOT NULL,
+    language TEXT NOT NULL,
+    kind TEXT NOT NULL,
+    text TEXT NOT NULL,
+    content_status TEXT NOT NULL DEFAULT 'draft',
+    content_version INTEGER NOT NULL DEFAULT 1,
+    source_reference TEXT,
+    source_type TEXT,
+    verified_at INTEGER,
+    verified_by TEXT,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    revision INTEGER NOT NULL DEFAULT 1,
+    deleted INTEGER NOT NULL DEFAULT 0,
+    UNIQUE(owner_type, owner_uuid, language, kind)
+  )`,
+
+  `CREATE INDEX IF NOT EXISTS idx_pronunciation_texts_owner ON pronunciation_texts (owner_type, owner_uuid)`,
+
+  /* A practice item. `practice_mode` says what the learner does; only discrimination
+   * modes can be scored, and even then through a linked exercise, never here. */
+  `CREATE TABLE IF NOT EXISTS pronunciation_items (
+    uuid TEXT PRIMARY KEY,
+    slug TEXT NOT NULL UNIQUE,
+    feature_uuid TEXT,
+    practice_mode TEXT NOT NULL DEFAULT 'listen_repeat',
+    target_type TEXT NOT NULL DEFAULT '',
+    target_uuid TEXT NOT NULL DEFAULT '',
+    model_audio_uuid TEXT,
+    level TEXT NOT NULL DEFAULT '',
+    ordering INTEGER NOT NULL DEFAULT 0,
+    content_status TEXT NOT NULL DEFAULT 'draft',
+    content_version INTEGER NOT NULL DEFAULT 1,
+    source_reference TEXT,
+    source_type TEXT,
+    verified_at INTEGER,
+    verified_by TEXT,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    revision INTEGER NOT NULL DEFAULT 1,
+    deleted INTEGER NOT NULL DEFAULT 0,
+    FOREIGN KEY (feature_uuid) REFERENCES pronunciation_features(uuid) ON DELETE SET NULL,
+    FOREIGN KEY (model_audio_uuid) REFERENCES audio_assets(uuid) ON DELETE SET NULL
+  )`,
+
+  `CREATE INDEX IF NOT EXISTS idx_pronunciation_items_target ON pronunciation_items (target_type, target_uuid)`,
+
+  /* How the item is actually said. Several rows mean several accepted realizations
+   * (de-DE, de-AT, de-CH); `is_primary` marks the one taught first. All authored. */
+  `CREATE TABLE IF NOT EXISTS pronunciation_variants (
+    uuid TEXT PRIMARY KEY,
+    item_uuid TEXT NOT NULL,
+    ipa TEXT NOT NULL DEFAULT '',
+    syllables TEXT NOT NULL DEFAULT '',
+    stress_index INTEGER NOT NULL DEFAULT 0,
+    variety TEXT NOT NULL DEFAULT 'de-DE',
+    is_primary INTEGER NOT NULL DEFAULT 0,
+    audio_uuid TEXT,
+    ordering INTEGER NOT NULL DEFAULT 0,
+    content_status TEXT NOT NULL DEFAULT 'draft',
+    content_version INTEGER NOT NULL DEFAULT 1,
+    source_reference TEXT,
+    source_type TEXT,
+    verified_at INTEGER,
+    verified_by TEXT,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    revision INTEGER NOT NULL DEFAULT 1,
+    deleted INTEGER NOT NULL DEFAULT 0,
+    UNIQUE(item_uuid, variety, ordering),
+    FOREIGN KEY (item_uuid) REFERENCES pronunciation_items(uuid) ON DELETE CASCADE,
+    FOREIGN KEY (audio_uuid) REFERENCES audio_assets(uuid) ON DELETE SET NULL
+  )`,
+
+  /* Minimal pairs: the deterministic half of pronunciation. Two German words that
+   * differ in one feature, which makes a discrimination question objectively
+   * answerable and therefore scoreable through an ordinary exercise. */
+  `CREATE TABLE IF NOT EXISTS pronunciation_pairs (
+    uuid TEXT PRIMARY KEY,
+    feature_uuid TEXT NOT NULL,
+    a_text TEXT NOT NULL,
+    a_vocab_uuid TEXT,
+    a_audio_uuid TEXT,
+    b_text TEXT NOT NULL,
+    b_vocab_uuid TEXT,
+    b_audio_uuid TEXT,
+    ordering INTEGER NOT NULL DEFAULT 0,
+    content_status TEXT NOT NULL DEFAULT 'draft',
+    content_version INTEGER NOT NULL DEFAULT 1,
+    source_reference TEXT,
+    source_type TEXT,
+    verified_at INTEGER,
+    verified_by TEXT,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    revision INTEGER NOT NULL DEFAULT 1,
+    deleted INTEGER NOT NULL DEFAULT 0,
+    UNIQUE(feature_uuid, a_text, b_text),
+    FOREIGN KEY (feature_uuid) REFERENCES pronunciation_features(uuid) ON DELETE CASCADE
+  )`,
+
+  /* What an item teaches or is practised by, typed like listening_links. An exercise
+   * link is the ONLY route by which pronunciation practice can be scored. */
+  `CREATE TABLE IF NOT EXISTS pronunciation_links (
+    uuid TEXT PRIMARY KEY,
+    item_uuid TEXT NOT NULL,
+    target_type TEXT NOT NULL,
+    target_uuid TEXT NOT NULL,
+    ordering INTEGER NOT NULL DEFAULT 0,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    revision INTEGER NOT NULL DEFAULT 1,
+    deleted INTEGER NOT NULL DEFAULT 0,
+    UNIQUE(item_uuid, target_type, target_uuid),
+    FOREIGN KEY (item_uuid) REFERENCES pronunciation_items(uuid) ON DELETE CASCADE
+  )`,
+
+  /*
+   * A learner's attempt at SAYING something.
+   *
+   * Note what is absent: there is no `correct`, no `scored` and no `quality`. The
+   * learner's own `self_rating` is the only judgement stored, and `advisory_score`
+   * exists solely to record what a recognizer or model suggested, always alongside
+   * `advisory_source` naming who suggested it. Nothing reads advisory_score as truth.
+   */
+  `CREATE TABLE IF NOT EXISTS pronunciation_attempts (
+    uuid TEXT PRIMARY KEY,
+    profile_uuid TEXT NOT NULL,
+    item_uuid TEXT NOT NULL,
+    occurred_at INTEGER NOT NULL,
+    session_uuid TEXT,
+    self_rating INTEGER NOT NULL DEFAULT 0,
+    advisory_score REAL,
+    advisory_source TEXT,
+    recording_audio_uuid TEXT,
+    note TEXT NOT NULL DEFAULT '',
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    revision INTEGER NOT NULL DEFAULT 1,
+    deleted INTEGER NOT NULL DEFAULT 0,
+    FOREIGN KEY (item_uuid) REFERENCES pronunciation_items(uuid) ON DELETE CASCADE,
+    FOREIGN KEY (recording_audio_uuid) REFERENCES audio_assets(uuid) ON DELETE SET NULL
+  )`,
+
+  `CREATE INDEX IF NOT EXISTS idx_pronunciation_attempts_profile ON pronunciation_attempts (profile_uuid, occurred_at)`,
+
   `CREATE TABLE IF NOT EXISTS review_cards (
     uuid TEXT PRIMARY KEY,
     legacy_key TEXT,
@@ -1609,6 +1803,99 @@ export const TABLE_SPECS = [
     columns: [
       ["uuid", "uuid"], ["item_uuid", "itemUuid"],
       ["target_type", "targetType"], ["target_uuid", "targetUuid"], ["ordering", "ordering"],
+      ["created_at", "createdAt"], ["updated_at", "updatedAt"],
+      ["revision", "revision"], ["deleted", "deleted"]
+    ]
+  },
+  {
+    entity: "pronunciationFeatures",
+    table: "pronunciation_features",
+    columns: [
+      ["uuid", "uuid"], ["slug", "slug"], ["feature_kind", "featureKind"],
+      ["ipa", "ipa"], ["level", "level"], ["ordering", "ordering"],
+      ["content_status", "contentStatus"], ["content_version", "contentVersion"],
+      ["source_reference", "sourceReference"], ["source_type", "sourceType"],
+      ["verified_at", "verifiedAt"], ["verified_by", "verifiedBy"],
+      ["created_at", "createdAt"], ["updated_at", "updatedAt"],
+      ["revision", "revision"], ["deleted", "deleted"]
+    ]
+  },
+  {
+    entity: "pronunciationTexts",
+    table: "pronunciation_texts",
+    columns: [
+      ["uuid", "uuid"], ["owner_type", "ownerType"], ["owner_uuid", "ownerUuid"],
+      ["language", "language"], ["kind", "kind"], ["text", "text"],
+      ["content_status", "contentStatus"], ["content_version", "contentVersion"],
+      ["source_reference", "sourceReference"], ["source_type", "sourceType"],
+      ["verified_at", "verifiedAt"], ["verified_by", "verifiedBy"],
+      ["created_at", "createdAt"], ["updated_at", "updatedAt"],
+      ["revision", "revision"], ["deleted", "deleted"]
+    ]
+  },
+  {
+    entity: "pronunciationItems",
+    table: "pronunciation_items",
+    columns: [
+      ["uuid", "uuid"], ["slug", "slug"], ["feature_uuid", "featureUuid"],
+      ["practice_mode", "practiceMode"],
+      ["target_type", "targetType"], ["target_uuid", "targetUuid"],
+      ["model_audio_uuid", "modelAudioUuid"], ["level", "level"], ["ordering", "ordering"],
+      ["content_status", "contentStatus"], ["content_version", "contentVersion"],
+      ["source_reference", "sourceReference"], ["source_type", "sourceType"],
+      ["verified_at", "verifiedAt"], ["verified_by", "verifiedBy"],
+      ["created_at", "createdAt"], ["updated_at", "updatedAt"],
+      ["revision", "revision"], ["deleted", "deleted"]
+    ]
+  },
+  {
+    entity: "pronunciationVariants",
+    table: "pronunciation_variants",
+    columns: [
+      ["uuid", "uuid"], ["item_uuid", "itemUuid"], ["ipa", "ipa"],
+      ["syllables", "syllables"], ["stress_index", "stressIndex"], ["variety", "variety"],
+      ["is_primary", "isPrimary"], ["audio_uuid", "audioUuid"], ["ordering", "ordering"],
+      ["content_status", "contentStatus"], ["content_version", "contentVersion"],
+      ["source_reference", "sourceReference"], ["source_type", "sourceType"],
+      ["verified_at", "verifiedAt"], ["verified_by", "verifiedBy"],
+      ["created_at", "createdAt"], ["updated_at", "updatedAt"],
+      ["revision", "revision"], ["deleted", "deleted"]
+    ]
+  },
+  {
+    entity: "pronunciationPairs",
+    table: "pronunciation_pairs",
+    columns: [
+      ["uuid", "uuid"], ["feature_uuid", "featureUuid"],
+      ["a_text", "aText"], ["a_vocab_uuid", "aVocabUuid"], ["a_audio_uuid", "aAudioUuid"],
+      ["b_text", "bText"], ["b_vocab_uuid", "bVocabUuid"], ["b_audio_uuid", "bAudioUuid"],
+      ["ordering", "ordering"],
+      ["content_status", "contentStatus"], ["content_version", "contentVersion"],
+      ["source_reference", "sourceReference"], ["source_type", "sourceType"],
+      ["verified_at", "verifiedAt"], ["verified_by", "verifiedBy"],
+      ["created_at", "createdAt"], ["updated_at", "updatedAt"],
+      ["revision", "revision"], ["deleted", "deleted"]
+    ]
+  },
+  {
+    entity: "pronunciationLinks",
+    table: "pronunciation_links",
+    columns: [
+      ["uuid", "uuid"], ["item_uuid", "itemUuid"],
+      ["target_type", "targetType"], ["target_uuid", "targetUuid"], ["ordering", "ordering"],
+      ["created_at", "createdAt"], ["updated_at", "updatedAt"],
+      ["revision", "revision"], ["deleted", "deleted"]
+    ]
+  },
+  {
+    entity: "pronunciationAttempts",
+    table: "pronunciation_attempts",
+    columns: [
+      ["uuid", "uuid"], ["profile_uuid", "profileUuid"], ["item_uuid", "itemUuid"],
+      ["occurred_at", "occurredAt"], ["session_uuid", "sessionUuid"],
+      ["self_rating", "selfRating"], ["advisory_score", "advisoryScore"],
+      ["advisory_source", "advisorySource"], ["recording_audio_uuid", "recordingAudioUuid"],
+      ["note", "note"],
       ["created_at", "createdAt"], ["updated_at", "updatedAt"],
       ["revision", "revision"], ["deleted", "deleted"]
     ]

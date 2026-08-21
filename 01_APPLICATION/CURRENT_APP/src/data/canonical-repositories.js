@@ -66,6 +66,13 @@ export function createCanonicalRepositories(adapter) {
     listeningSegments: readOnly("listeningSegments"),
     listeningSegmentTexts: readOnly("listeningSegmentTexts"),
     listeningLinks: readOnly("listeningLinks"),
+    pronunciationFeatures: readOnly("pronunciationFeatures"),
+    pronunciationTexts: readOnly("pronunciationTexts"),
+    pronunciationItems: readOnly("pronunciationItems"),
+    pronunciationVariants: readOnly("pronunciationVariants"),
+    pronunciationPairs: readOnly("pronunciationPairs"),
+    pronunciationLinks: readOnly("pronunciationLinks"),
+    pronunciationAttempts: readOnly("pronunciationAttempts"),
     cards: readOnly("reviewCards"),
     events: readOnly("reviewEvents")
   });
