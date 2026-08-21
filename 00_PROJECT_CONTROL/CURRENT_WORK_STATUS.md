@@ -19,7 +19,7 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
 *   **UI migration complete Git commit:** `60f2526` (feat: migrate the multiple-choice answers to Lit)
 *   **option (c) work Git commit:** `e872810` (fix: make the PWA actually work offline)
 *   **Gate 5 simulator PASSED commit:** `16807f9` (validated in Codemagic)
-*   **Last Update Timestamp:** 2026-08-21T21:25:00+03:00
+*   **Last Update Timestamp:** 2026-08-21T21:50:00+03:00
 
 ## Current Context
 *   **Current Phase:** PHASE 4 — MIGRATION MAPPING + SQLITE PARITY VALIDATION
@@ -83,6 +83,22 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
 
 ### Highest-value next step
 **Gap 1 — the incremental write path.** It unblocks gaps 2, 3 and 5, needs no hardware and no product decision, and is verifiable with the existing test executor. Wiring anything before it exists would produce read-only screens that cannot record what the learner does.
+## Features A–I Reachable in the Running App (IMPLEMENTED, commit `124de14`)
+*   A sixth nav destination **«المنهج»** hosts a hub plus eight routes: courses/lessons, grammar, sentences, exercises, listening, pronunciation, error learning, reminders. Feature A's multilingual content appears through these screens rather than as a separate area.
+*   **The canonical runtime boots after study and independently of it**, so a content-store failure cannot stop vocabulary revision. `learnerStorageSwitch` stays **false**; the legacy IndexedDB study flow is unchanged.
+*   **Real interactions, not stubs:** open a lesson from the outline and mark it complete (writes lesson + section + course progress in one transaction, resume point moves); answer an exercise (graded by the **existing** deterministic evaluator over the exercise layer's own filtered answers); a wrong answer records an error event; a spoken attempt records the learner's own rating; reminder settings persist and reload.
+*   **Arabic still cannot score through the UI.** An Arabic-answer exercise arrives ungradeable, is labelled self-checked, returns `correct: null`, and produces no scored mistake.
+*   **Empty content is shown honestly.** Each route names what is missing; the browser build states the content store lives in the iPad/iPhone app. No demo data anywhere.
+*   **The built-in error taxonomy** (Feature F's own categories) is upserted on first use, because `error_event_categories` has a foreign key onto it. That is the app's taxonomy, not authored course content.
+*   Bottom nav moved from a hard-coded 5-column grid to auto columns; the ≥900px side rail flows back into rows explicitly.
+*   **Browser smoke test** at 1024×768, 768×1024 and 390×844: all eight routes reachable by clicking, no horizontal overflow, no touch target under 44px, RTL preserved with German isolated LTR, and a study session built (12 cards), entered, exited and survived a tour of the Learn area with the card array byte-identical. Screenshots were unavailable in this environment (browser pane not composited); layout was verified numerically instead.
+*   **Suite 815 → 844.**
+
+## Content Intake Pipeline (STARTED)
+*   **Verified sources present in the repository:** `03_COURSE_CONTENT/NETZWERK_A1/` (Kursbuch PDF), `NETZWERK_NEU_A2/` (3 PDFs + 189 MP3s), `REFERENCE/Nicos-Weg-A2-E2-L1-Lehrerhandreichung-und-Uebungen.pdf`, `VOCABULARY/Nicos-Weg-A2-E2-L1-Manuskript-und-Wortschatz-Arabisch.pdf`, plus `data/seed-data.js` (2,820 verified German↔Arabic items).
+*   **Extraction proven:** `pdftotext -enc UTF-8 -layout` recovers German umlauts AND the Arabic glosses from the Nicos Weg source (`erwachsen – بالغ؛ راشد`). Arabic arrives in presentation forms and needs normalising to logical order — real data, no fabrication required.
+*   **Best first sample:** Nicos Weg A2, Episode 2 «Familiengeschichten», Lektion 1 — it carries a course, a lesson, a speaker-labelled transcript (listening), German↔Arabic vocabulary with verb principal parts, page-numbered provenance (`dw.com/nico/arabic`, `Seite 1 / 2`), and a companion exercises booklet. Enough to prove course → lesson → content → exercise end to end **without inventing anything**.
+*   **Not yet built:** the pipeline itself, the source registry, and the provenance-preserving importer.
 ## Canonical Incremental Write Path (IMPLEMENTED, commit `473bd98`)
 *   The adapter gained `insert`, `insertAll`, `update`, `upsert`, `softDelete`, `restore`, `hardDelete`, `getByUuid`, `exists`, `find`, `findOne`, `countWhere`, `transaction`. Every one is **entity-scoped**: the entity resolves to a `TABLE_SPEC` and only columns that spec declares are written or filtered on. Unknown field → rejected. Unknown order field → rejected. Every value is **bound**.
 *   **`write-policy.js` decides what each entity may do**, so the shape of a repository IS the invariant: append-only history has `insert` and no `update`; anything a learner earned is soft-deleted, never removed; **`review_cards` is refused by the generic surface entirely** and moves only through `srs.applyScheduledCard`.
