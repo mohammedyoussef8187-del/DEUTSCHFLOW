@@ -19,6 +19,19 @@ export const STATUS_KEYS = Object.freeze([
   "new", "learning", "due", "overdue", "weak", "mastered", "ignored"
 ]);
 
+const NO_CARDS = Object.freeze([]);
+
+/** Index cards by their word so per-word lookups do not rescan the whole list. */
+export function groupCardsByWord(cards = []) {
+  const byWord = new Map();
+  for (const card of cards) {
+    const list = byWord.get(card.wordId);
+    if (list) list.push(card);
+    else byWord.set(card.wordId, [card]);
+  }
+  return byWord;
+}
+
 /**
  * Derive the review summary from an in-memory learner snapshot.
  * Pure: no I/O, no mutation of the inputs.
@@ -30,9 +43,15 @@ export function summarizeLearnerState(snapshot = {}, now = Date.now()) {
   const words = Array.isArray(snapshot.words) ? snapshot.words : [];
   const cards = Array.isArray(snapshot.cards) ? snapshot.cards : [];
 
+  /*
+   * wordStatus filters the card list by wordId internally, so scanning the whole list
+   * for every word is O(words x cards). Grouping once first makes it O(words + cards)
+   * and yields identical results, which matters as a learner's card count grows.
+   */
+  const cardsByWord = groupCardsByWord(cards);
   const counts = Object.fromEntries(STATUS_KEYS.map(key => [key, 0]));
   for (const word of words) {
-    const status = wordStatus(word, cards, now);
+    const status = wordStatus(word, cardsByWord.get(word.id) ?? NO_CARDS, now);
     if (status in counts) counts[status]++;
   }
 

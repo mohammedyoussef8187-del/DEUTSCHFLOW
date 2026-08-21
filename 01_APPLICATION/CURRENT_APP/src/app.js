@@ -4,7 +4,7 @@ import { levenshtein, validateGermanAnswer, validateArticleAnswer, validateArabi
 import { createCard, scheduleCard, cardMastery, automaticRating, skillLabel, skillWeight, wordMastery, wordStatus, cardStatus, preferredSkills, nextSkillUnlocks } from "./srs/scheduler.js";
 import { createRepositories } from "./data/repositories.js";
 import { createIndexedDbAdapter } from "./platform/indexeddb/adapter.js";
-import { summarizeLearnerState } from "./services/review-summary-service.js";
+import { summarizeLearnerState, groupCardsByWord } from "./services/review-summary-service.js";
 import "./ui/components/df-review-summary.js";
 import "./ui/components/df-stat-tile.js";
 import "./ui/components/df-study-progress.js";
@@ -678,17 +678,23 @@ async function submitAnswer(state,payload){
   }
   function trainingCard(icon,title,desc,mode){return `<button class="card interactive training-card" data-action="start-session" data-mode="${mode}"><span class="training-icon">${icon}</span><span><h3>${title}</h3><p>${desc}</p></span></button>`;}
 
+  /* فهرس البطاقات حسب الكلمة يُبنى مرة واحدة لكل عملية عرض: يحوّل الكلفة من
+     (عدد الكلمات × عدد البطاقات) إلى (عدد الكلمات + عدد البطاقات) بنفس النتائج.
+     لا يُخزَّن بين عمليات الرسم لأن state.cards تُعدَّل في مكانها بعد كل مراجعة. */
+  const NO_CARDS=[];
+  function cardsOf(index,wordId){return index.get(wordId)||NO_CARDS;}
   function getFilteredWords(state){
+    const index=groupCardsByWord(state.cards||[]);
     const v=state.wordView,q=DF.normalizeGerman(v.query||""),qa=DF.normalizeArabic(v.query||"");let list=state.words.slice();
     if(q||qa)list=list.filter(w=>w.normalizedGerman.includes(q)||w.normalizedArabic.includes(qa)||(w.pronunciation||"").includes(v.query));
-    list=list.filter(w=>{const s=DF.wordStatus(w,state.cards);if(v.filter==="all")return true;if(v.filter==="favorite")return w.favorite;if(v.filter==="quality")return w.qualityStatus==="review";if(v.filter==="noun")return w.itemType==="noun";if(v.filter==="due")return s==="due"||s==="overdue";return s===v.filter;});
+    list=list.filter(w=>{const s=DF.wordStatus(w,cardsOf(index,w.id));if(v.filter==="all")return true;if(v.filter==="favorite")return w.favorite;if(v.filter==="quality")return w.qualityStatus==="review";if(v.filter==="noun")return w.itemType==="noun";if(v.filter==="due")return s==="due"||s==="overdue";return s===v.filter;});
     if(v.sort==="alpha")list.sort((a,b)=>a.normalizedGerman.localeCompare(b.normalizedGerman,"de"));
-    if(v.sort==="mastery")list.sort((a,b)=>DF.wordMastery(a,state.cards)-DF.wordMastery(b,state.cards));
+    if(v.sort==="mastery")list.sort((a,b)=>DF.wordMastery(a,cardsOf(index,a.id))-DF.wordMastery(b,cardsOf(index,b.id)));
     if(v.sort==="errors")list.sort((a,b)=>wordErrors(state,b.id)-wordErrors(state,a.id));
     if(v.sort==="recent")list.sort((a,b)=>b.updatedAt-a.updatedAt);
     return list;
   }
-  function wordErrors(state,id){return state.cards.filter(c=>c.wordId===id).reduce((s,c)=>s+(c.wrong||0),0);}
+  function wordErrors(state,id){return (state.cards||[]).reduce((s,c)=>c.wordId===id?s+(c.wrong||0):s,0);}
   function renderWords(state){
     const list=getFilteredWords(state),shown=list.slice(0,state.wordView.limit);
     const filters=[["all","الكل"],["new","جديدة"],["due","مستحقة"],["weak","ضعيفة"],["mastered","متقنة"],["favorite","المفضلة"],["noun","الأسماء"],["quality","تحتاج مراجعة"],["ignored","مستبعدة"]];
@@ -696,11 +702,11 @@ async function submitAnswer(state,payload){
       <div class="toolbar"><input id="word-search" class="search-input" type="search" inputmode="search" enterkeyhint="search" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="بحث في الكلمات" placeholder="بحث بالألمانية أو العربية أو النطق…" value="${DF.esc(state.wordView.query)}"><button class="ghost-btn" data-action="import-open">استيراد</button><select id="word-sort" class="field-select sort-select" aria-label="ترتيب الكلمات"><option value="alpha" ${state.wordView.sort==='alpha'?'selected':''}>أبجدي</option><option value="mastery" ${state.wordView.sort==='mastery'?'selected':''}>الأقل إتقاناً</option><option value="errors" ${state.wordView.sort==='errors'?'selected':''}>الأكثر خطأً</option><option value="recent" ${state.wordView.sort==='recent'?'selected':''}>الأحدث تعديلاً</option></select></div>
       <div class="chips">${filters.map(([f,l])=>`<button class="chip ${state.wordView.filter===f?'active':''}" data-action="word-filter" data-filter="${f}" aria-pressed="${state.wordView.filter===f}">${l}</button>`).join("")}</div>
       <div class="result-count" role="status" aria-live="polite">${list.length.toLocaleString("ar-EG")} نتيجة</div>
-      <section class="card list-card">${shown.length?shown.map(w=>wordRow(state,w)).join(""):'<div class="empty">لا توجد كلمات مطابقة.</div>'}</section>
+      <section class="card list-card">${shown.length?(()=>{const index=groupCardsByWord(state.cards||[]);return shown.map(w=>wordRow(w,cardsOf(index,w.id))).join("");})():'<div class="empty">لا توجد كلمات مطابقة.</div>'}</section>
       ${shown.length<list.length?`<button class="ghost-btn load-more" data-action="load-more">عرض المزيد</button>`:""}`;
   }
-  function wordRow(state,w){
-    const status=DF.wordStatus(w,state.cards),mastery=DF.wordMastery(w,state.cards);
+  function wordRow(w,own){
+    const status=DF.wordStatus(w,own),mastery=DF.wordMastery(w,own);
     const statusClass=status==="overdue"?"weak":status;
     return `<df-word-row wordid="${DF.esc(w.id)}" german="${DF.esc(w.german)}" arabic="${DF.esc(w.arabic)}" pronunciation="${DF.esc(w.pronunciation||"")}" ${w.favorite?"favorite":""} ${w.qualityStatus==="review"?"flagged":""} mastery="${mastery}" statusclass="${statusClass}" statuslabel="${DF.esc(statusLabel(status))}"></df-word-row>`;
   }
