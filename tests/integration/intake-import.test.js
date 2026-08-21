@@ -252,12 +252,12 @@ describe("verification through the services", () => {
     const exercises = await services.exercises.all();
 
     // The booklet's three tasks carry no answer key, so they cannot be graded.
-    const fromBooklet = exercises.filter(exercise => exercise.slug.startsWith("uebung-"));
+    const fromBooklet = exercises.filter(exercise => exercise.slug.includes("-uebung-"));
     expect(fromBooklet).toHaveLength(3);
     expect(fromBooklet.every(exercise => exercise.gradeable === false)).toBe(true);
 
     // The derived recall exercises answer with the German headword, which can score.
-    const derived = exercises.filter(exercise => exercise.slug.startsWith("recall-"));
+    const derived = exercises.filter(exercise => exercise.slug.includes("-recall-"));
     expect(derived).toHaveLength(11);
     expect(derived.every(exercise => exercise.gradeable === true)).toBe(true);
     expect(derived.every(exercise => exercise.answerLanguage === "de")).toBe(true);
@@ -266,7 +266,7 @@ describe("verification through the services", () => {
   it("never makes an Arabic prompt into a scoreable answer", async () => {
     const { repositories } = await importedStore();
     const services = createServices(repositories);
-    const derived = (await services.exercises.all()).find(e => e.slug === "recall-erwachsen");
+    const derived = (await services.exercises.all()).find(e => e.slug === "e2-recall-erwachsen");
     expect(derived.prompt.ar).toBe("بالغ؛ راشد");
     expect(derived.expectedAnswers.every(answer => answer.language === "de")).toBe(true);
   });
@@ -355,7 +355,7 @@ describe("the imported lesson in the real Learn routes", () => {
     await show(controller, "learn-exercises");
 
     const recall = (await controller.runtime.services.exercises.all())
-      .find(exercise => exercise.slug === "recall-erwachsen");
+      .find(exercise => exercise.slug === "e2-recall-erwachsen");
     await controller.handleAction("learn-exercise", { uuid: recall.uuid });
     const app = await show(controller, "learn-exercises");
     // The Arabic gloss is the prompt on screen.
@@ -380,7 +380,7 @@ describe("the imported lesson in the real Learn routes", () => {
     const controller = await controllerOverImportedStore();
     await show(controller, "learn-exercises");
     const uebung = (await controller.runtime.services.exercises.all())
-      .find(exercise => exercise.slug.startsWith("uebung-2"));
+      .find(exercise => exercise.slug.startsWith("e2-uebung-2"));
     await controller.handleAction("learn-exercise", { uuid: uebung.uuid });
     const app = await show(controller, "learn-exercises");
     expect(app.querySelector("[data-ungradeable]")).not.toBeNull();

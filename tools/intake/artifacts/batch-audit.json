@@ -1,0 +1,155 @@
+{
+  "generatedAt": 1787339516883,
+  "applied": true,
+  "discovered": 1,
+  "unrecognisedFiles": [
+    {
+      "path": "03_COURSE_CONTENT/NETZWERK_A1/Netzwerk Neu A1 - Kursbuch.pdf",
+      "reason": "no-template-matches"
+    },
+    {
+      "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/Netzwerk neu A2 KB.pdf",
+      "reason": "no-template-matches"
+    },
+    {
+      "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/Netzwerk neu A2 Kursbuch.pdf",
+      "reason": "no-template-matches"
+    },
+    {
+      "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/Netzwerk neu A2 UB.pdf",
+      "reason": "no-template-matches"
+    }
+  ],
+  "imported": [
+    "nicos-weg-a2-e2-l1"
+  ],
+  "skipped": [],
+  "rows": {
+    "create": 0,
+    "update": 0,
+    "unchanged": 189,
+    "conflicts": 0
+  },
+  "warnings": [
+    {
+      "lessonKey": "nicos-weg-a2-e2-l1",
+      "code": "english-absent-in-source",
+      "kind": "absence",
+      "where": "ab|hauen (page 2)"
+    },
+    {
+      "lessonKey": "nicos-weg-a2-e2-l1",
+      "code": "english-absent-in-source",
+      "kind": "absence",
+      "where": "außerdem (page 2)"
+    },
+    {
+      "lessonKey": "nicos-weg-a2-e2-l1",
+      "code": "english-absent-in-source",
+      "kind": "absence",
+      "where": "bei (page 2)"
+    },
+    {
+      "lessonKey": "nicos-weg-a2-e2-l1",
+      "code": "english-absent-in-source",
+      "kind": "absence",
+      "where": "erwachsen (page 2)"
+    },
+    {
+      "lessonKey": "nicos-weg-a2-e2-l1",
+      "code": "english-absent-in-source",
+      "kind": "absence",
+      "where": "mit (page 2)"
+    },
+    {
+      "lessonKey": "nicos-weg-a2-e2-l1",
+      "code": "english-absent-in-source",
+      "kind": "absence",
+      "where": "etwas schieben (page 2)"
+    },
+    {
+      "lessonKey": "nicos-weg-a2-e2-l1",
+      "code": "english-absent-in-source",
+      "kind": "absence",
+      "where": "der Single, die Singles (page 2)"
+    },
+    {
+      "lessonKey": "nicos-weg-a2-e2-l1",
+      "code": "english-absent-in-source",
+      "kind": "absence",
+      "where": "mit jemandem spielen (page 2)"
+    },
+    {
+      "lessonKey": "nicos-weg-a2-e2-l1",
+      "code": "english-absent-in-source",
+      "kind": "absence",
+      "where": "streng (page 2)"
+    },
+    {
+      "lessonKey": "nicos-weg-a2-e2-l1",
+      "code": "english-absent-in-source",
+      "kind": "absence",
+      "where": "etwas/jemanden vergessen (page 2)"
+    },
+    {
+      "lessonKey": "nicos-weg-a2-e2-l1",
+      "code": "english-absent-in-source",
+      "kind": "absence",
+      "where": "jemandem zu|hören (page 2)"
+    },
+    {
+      "lessonKey": "nicos-weg-a2-e2-l1",
+      "code": "exercise-answers-absent",
+      "kind": "absence",
+      "where": "Übung 1 (page 2)"
+    },
+    {
+      "lessonKey": "nicos-weg-a2-e2-l1",
+      "code": "exercise-options-incomplete",
+      "kind": "absence",
+      "where": "Übung 1 (page 2)"
+    },
+    {
+      "lessonKey": "nicos-weg-a2-e2-l1",
+      "code": "exercise-answers-absent",
+      "kind": "absence",
+      "where": "Übung 2 (page 3)"
+    },
+    {
+      "lessonKey": "nicos-weg-a2-e2-l1",
+      "code": "exercise-answers-absent",
+      "kind": "absence",
+      "where": "Übung 3 (page 4)"
+    }
+  ],
+  "errors": [],
+  "conflicts": [],
+  "written": [
+    {
+      "lessonKey": "nicos-weg-a2-e2-l1",
+      "courses": 1,
+      "vocabulary": 0,
+      "vocabularyReused": 11,
+      "sentences": 10,
+      "listening": 1,
+      "exercises": 14
+    }
+  ],
+  "reuse": [
+    {
+      "lessonKey": "nicos-weg-a2-e2-l1",
+      "vocabularyReused": 11,
+      "vocabularyCreated": 0,
+      "homographs": []
+    }
+  ],
+  "digests": {
+    "nicos-weg-a2-e2-l1": {
+      "manuscript": "5dfbd5938e5fe263",
+      "exercises": "1a6d1e848735a726"
+    }
+  },
+  "decisions": {
+    "import": 1
+  }
+}

@@ -149,7 +149,7 @@ export async function planImport(repositories, mapped) {
  */
 export async function applyImport(repositories, mapped, options = {}) {
   const now = options.now ?? Date.now();
-  const written = { courses: 0, vocabulary: 0, sentences: 0, listening: 0, exercises: 0 };
+  const written = { courses: 0, vocabulary: 0, vocabularyReused: 0, sentences: 0, listening: 0, exercises: 0 };
 
   if (!repositories.write) throw new Error("This store is read-only; nothing was imported");
 
@@ -167,6 +167,16 @@ export async function applyImport(repositories, mapped, options = {}) {
   written.courses = 1;
 
   for (const entry of mapped.vocabulary) {
+    /*
+     * A word already stored under this course-scoped identity is the same word with the
+     * same meaning, so it is NOT rewritten: the row keeps the provenance of the page it
+     * was first read from, and this lesson joins it through lesson_items instead.
+     * Rewriting would silently move the citation to whichever episode imported last.
+     */
+    if (await repositories.vocabulary.exists(entry.item.uuid)) {
+      written.vocabularyReused += 1;
+      continue;
+    }
     await repositories.write.content.saveVocabulary(entry, { now });
     written.vocabulary += 1;
   }

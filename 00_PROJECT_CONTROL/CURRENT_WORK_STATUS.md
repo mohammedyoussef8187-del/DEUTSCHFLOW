@@ -19,7 +19,7 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
 *   **UI migration complete Git commit:** `60f2526` (feat: migrate the multiple-choice answers to Lit)
 *   **option (c) work Git commit:** `e872810` (fix: make the PWA actually work offline)
 *   **Gate 5 simulator PASSED commit:** `16807f9` (validated in Codemagic)
-*   **Last Update Timestamp:** 2026-08-21T22:05:00+03:00
+*   **Last Update Timestamp:** 2026-08-21T22:20:00+03:00
 
 ## Current Context
 *   **Current Phase:** PHASE 4 — MIGRATION MAPPING + SQLITE PARITY VALIDATION
@@ -83,6 +83,16 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
 
 ### Highest-value next step
 **Gap 1 — the incremental write path.** It unblocks gaps 2, 3 and 5, needs no hardware and no product decision, and is verifiable with the existing test executor. Wiring anything before it exists would produce read-only screens that cannot record what the learner does.
+## Controlled Batch Intake — Nicos Weg A2 (COMPLETE for the available corpus)
+*   **Discovery replaces hard-coded paths.** `discover.js` scans `03_COURSE_CONTENT/`, matches filenames against a **publisher template**, and groups a lesson's documents by role. Capabilities (`supports`/`absent`) come from the template, so a newly dropped-in handout never has its contents guessed. **6 PDFs scanned → 1 Nicos Weg candidate; the 4 Netzwerk books are reported `no-template-matches`** and deliberately untouched.
+*   **The corpus is one lesson.** Only `Nicos-Weg-A2-E2-L1-*` exists in the repository — there is no second Nicos Weg lesson to import. The batch machinery is built and proven; the material is not here yet.
+*   **Preview-all-then-apply.** Every candidate is previewed against the pre-batch store before any of them is written.
+*   **The gate: absence imports, ambiguity is quarantined.** `english-absent-in-source`, `exercise-answers-absent`, `exercise-options-incomplete` and friends describe the source honestly and import. `duplicate-headword`, `ambiguous-headword`, `unresolved-speaker` mean we do not know which reading is right, so the lesson is quarantined. **An unclassified warning defaults to ambiguity**, so a new one can never import unexamined.
+*   **Cross-lesson identity fixed before it could bite.** Vocabulary uuids were **lesson-scoped**, so the same word in two episodes would have become two canonical items. Identity is now **course-scoped and keyed by (headword + gloss fingerprint)**: same word and same meaning is one item reused across lessons; the same spelling with a different gloss stays separate and is reported as a **homograph, never merged**. Lesson membership stays per-lesson in `lesson_items`, and a reused row **keeps the provenance of the page it was first read from**.
+*   **Two real bugs found by building this:** (1) the episode-title scan read the page **footer** as a title, because it ran over the page with its chrome still attached; (2) `exercises.slug` is UNIQUE store-wide, so a second lesson's «Übung 1» and its `recall-<word>` exercises **would have silently taken over the first lesson's rows** — slugs are now lesson-tagged.
+*   **Batch audit artifact** (`tools/intake/artifacts/batch-audit.json`): lessons discovered/imported/skipped, rows create/update/unchanged/conflicts, every warning labelled `absence` or `ambiguity`, errors, conflicts, reuse counts (both the pre-batch preview view and what was actually written), source digests, and unrecognised files.
+*   **Result:** 1 discovered, 1 imported, 0 skipped, **189 rows created**, 0 errors, 0 conflicts, 15 warnings all `absence`. Second run: **0 create / 0 update / 189 unchanged**, vocabulary **reused 11 / written 0**.
+*   **Suite 919 → 950.**
 ## Canonical Content Intake Pipeline (IMPLEMENTED — one verified lesson)
 *   **Stages:** EXTRACT → NORMALIZE → PARSE → VALIDATE → MAP → PREVIEW/DIFF → IMPORT → VERIFY, in `tools/intake/`. Nothing writes straight from raw extraction: the plan is always computed and printable first.
 *   **Sources imported** (both already in this repository, both Deutsche Welle *Nicos Weg A2*, Episode 2 «Familiengeschichten»):

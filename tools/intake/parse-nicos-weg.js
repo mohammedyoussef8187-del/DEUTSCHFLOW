@@ -62,7 +62,9 @@ export function parseManuscript(extraction, source) {
   let episodeTitle = null;
   let episodeNumber = null;
   let episodeTitleArabic = null;
-  for (const line of first.text.split("\n")) {
+  /* Over the page WITHOUT its header and footer: the footer also contains a "|" and
+     would otherwise be read as the episode title. */
+  for (const line of stripChrome(first.text)) {
     const match = EPISODE.exec(line.trim());
     if (!match) continue;
     const german = match[1].trim();

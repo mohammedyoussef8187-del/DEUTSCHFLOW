@@ -40,8 +40,14 @@ export function digestOf(buffer) {
   return `${h1.toString(16).padStart(8, "0")}${h2.toString(16).padStart(8, "0")}`;
 }
 
+/**
+ * @param {string} sourceId registry id
+ * @param {object} [options] `source` accepts a DISCOVERED descriptor directly, so a
+ *   newly dropped-in handout can be extracted without first being written into the
+ *   registry by hand. It still had to match a publisher template to become one.
+ */
 export function extractSource(sourceId, options = {}) {
-  const source = sourceById(sourceId);
+  const source = options.source ?? sourceById(sourceId);
   if (!source) throw new Error(`Unknown source: ${sourceId}`);
 
   const root = options.root ?? process.cwd();

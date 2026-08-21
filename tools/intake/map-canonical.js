@@ -6,9 +6,16 @@
  * only path into the store.
  *
  * Identity is derived, never allocated. Every uuid is a deterministic hash of a source
- * key like `nicos-weg:a2:2:vocab:abhauen`, so re-running the same source produces the
- * same identifiers and the import upserts instead of duplicating. Nothing here reads a
- * clock for identity.
+ * key, so re-running the same source produces the same identifiers and the import
+ * upserts instead of duplicating. Nothing here reads a clock for identity.
+ *
+ * VOCABULARY IDENTITY IS COURSE-SCOPED, NOT LESSON-SCOPED, and keyed by the headword
+ * TOGETHER WITH ITS GLOSS. A word that recurs in a later episode with the same meaning
+ * is therefore the same canonical item, reused rather than duplicated, while the same
+ * German surface form printed with a different meaning stays a separate item. Merging on
+ * spelling alone would quietly fuse two words; splitting on lesson alone would give a
+ * learner the same word twice. Lesson membership lives in lesson_items either way, so
+ * reuse never costs the per-lesson context.
  *
  * Provenance travels with every row at the finest level the source offers: the document,
  * the page it was printed on, the publisher's own reference URL, when it was extracted,
@@ -48,6 +55,25 @@ const NS = Object.freeze({
  * as refreshable, which is what keeps a re-import from overwriting reviewed wording.
  */
 export const IMPORTED_STATUS = "imported";
+
+/**
+ * The canonical identity of one vocabulary entry within a course.
+ *
+ * The gloss is folded into the key through a short stable fingerprint, so two entries
+ * only share an identity when the source printed the same meaning for them.
+ */
+export function vocabularyKey(courseSlug, entry) {
+  return `${courseSlug}:vocab:${slugify(entry.headword)}:${glossFingerprint(entry.arabic)}`;
+}
+
+/** A short, stable digest of a gloss. Not a hash of meaning — a hash of the printed text. */
+export function glossFingerprint(gloss) {
+  const text = String(gloss ?? "").normalize("NFC").replace(/\s+/g, " ").trim();
+  if (!text) return "none";
+  let h = 0x811c9dc5;
+  for (let i = 0; i < text.length; i++) h = Math.imul(h ^ text.charCodeAt(i), 0x01000193) >>> 0;
+  return h.toString(16).padStart(8, "0");
+}
 
 const slugify = value => String(value ?? "")
   .toLowerCase()
@@ -100,6 +126,14 @@ export function mapLesson(input) {
   const levelUuid = deterministicUuid(NS.level, `${courseSlug}:${manuscript.course.cefrLevel}`);
   const unitUuid = deterministicUuid(NS.unit, `${courseSlug}:default`);
   const lessonUuid = deterministicUuid(NS.lesson, lessonKey);
+  /*
+   * exercises.slug is UNIQUE across the store, and every lesson prints an "Übung 1" and
+   * shares vocabulary with its neighbours. Without a lesson tag the second lesson's
+   * exercise would collide with the first one's and quietly take it over.
+   */
+  const lessonTag = manuscript.lesson.number != null
+    ? `e${manuscript.lesson.number}`
+    : slugify(manuscript.lesson.title);
 
   /* ------------------------------------------------------------- course */
 
@@ -151,7 +185,9 @@ export function mapLesson(input) {
 
   assertSupports(source, SUPPORTS.VOCABULARY_DE_AR, "vocabulary");
   const vocabulary = manuscript.vocabulary.map(entry => {
-    const key = `${lessonKey}:vocab:${slugify(entry.headword)}`;
+    /* Same word AND same meaning across episodes is one item; same spelling with a
+       different gloss is not. The gloss fingerprint is what tells them apart. */
+    const key = vocabularyKey(courseSlug, entry);
     const vocabUuid = deterministicUuid(NS.vocab, key);
     const meaningUuid = deterministicUuid(NS.meaning, key);
 
@@ -278,7 +314,7 @@ export function mapLesson(input) {
 
     mappedExercises.push({
       exercise: {
-        uuid: exerciseUuid, slug: slugify(`uebung-${exercise.number}-${exercise.title}`),
+        uuid: exerciseUuid, slug: slugify(`${lessonTag}-uebung-${exercise.number}-${exercise.title}`),
         exerciseType: exercise.options.length ? "multiple_choice" : "type_answer",
         level: manuscript.course.cefrLevel, ordering: exercise.ordering,
         answerLanguage: "de", ...provenance(exPage, now)
@@ -315,7 +351,7 @@ export function mapLesson(input) {
 
     mappedExercises.push({
       exercise: {
-        uuid: exerciseUuid, slug: slugify(`recall-${entry.headword}`),
+        uuid: exerciseUuid, slug: slugify(`${lessonTag}-recall-${entry.headword}`),
         exerciseType: "type_answer", level: manuscript.course.cefrLevel,
         ordering: 100 + entry.ordering, answerLanguage: "de",
         ...provenance(exPage, now),
@@ -336,7 +372,7 @@ export function mapLesson(input) {
       targets: [{
         uuid: deterministicUuid(NS.link, `${key}:target`),
         exerciseUuid, targetType: "vocabulary",
-        targetUuid: deterministicUuid(NS.vocab, `${lessonKey}:vocab:${slugify(entry.headword)}`),
+        targetUuid: deterministicUuid(NS.vocab, vocabularyKey(courseSlug, entry)),
         ...linkMeta(now)
       }]
     });
