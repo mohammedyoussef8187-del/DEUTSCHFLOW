@@ -1,0 +1,157 @@
+{
+  "generatedAt": 1787340272546,
+  "applied": true,
+  "filesDiscovered": 193,
+  "documents": [
+    {
+      "path": "03_COURSE_CONTENT/NETZWERK_A1/Netzwerk Neu A1 - Kursbuch.pdf",
+      "edition": "neu",
+      "level": "A1",
+      "component": "kursbuch",
+      "sha256": "05bdd22869920e4118fb267d6ffc07b1599857a4e00d6c81bb1b5907f850e5c5",
+      "textLayer": "sparse",
+      "charsPerPage": 1.8,
+      "suspectRate": 0,
+      "decision": "blocked-malformed-source",
+      "reason": "far too little text for the page count; the pages are images, not text"
+    },
+    {
+      "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/Netzwerk neu A2 KB.pdf",
+      "edition": "neu",
+      "level": "A2",
+      "component": "kursbuch",
+      "sha256": "4f4e95787304f4369df2861359f7039b6c4aa12494e61f0bf4cc36a835fe8b21",
+      "textLayer": "absent",
+      "charsPerPage": 0,
+      "suspectRate": 0,
+      "decision": "blocked-malformed-source",
+      "reason": "the document carries no text layer at all; it is a picture of a book"
+    },
+    {
+      "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/Netzwerk neu A2 Kursbuch.pdf",
+      "edition": "neu",
+      "level": "A2",
+      "component": "kursbuch",
+      "sha256": "f9eb63a6da62d4884e816c6c34564377733bd7eceb32ba84455479d1840810dc",
+      "textLayer": "absent",
+      "charsPerPage": 0,
+      "suspectRate": 0,
+      "decision": "blocked-malformed-source",
+      "reason": "the document carries no text layer at all; it is a picture of a book"
+    },
+    {
+      "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/Netzwerk neu A2 UB.pdf",
+      "edition": "neu",
+      "level": "A2",
+      "component": "uebungsbuch",
+      "sha256": "f03893c91a08477b1141eb9173c3480b5c1cc7659416a20c50476081466b2df1",
+      "textLayer": "sparse",
+      "charsPerPage": 43.7,
+      "suspectRate": 0.0214,
+      "decision": "blocked-malformed-source",
+      "reason": "far too little text for the page count; the pages are images, not text"
+    }
+  ],
+  "coverage": [
+    {
+      "edition": "neu",
+      "level": "A1",
+      "components": [
+        "kursbuch"
+      ],
+      "parseableComponents": [],
+      "audioTracks": 0
+    },
+    {
+      "edition": "neu",
+      "level": "A2",
+      "components": [
+        "kursbuch",
+        "kursbuch",
+        "uebungsbuch"
+      ],
+      "parseableComponents": [],
+      "audioTracks": 189
+    }
+  ],
+  "parserStatus": "not-written-no-readable-source",
+  "lessonsDiscovered": 0,
+  "lessonsImported": 0,
+  "lessonsQuarantined": [
+    {
+      "path": "03_COURSE_CONTENT/NETZWERK_A1/Netzwerk Neu A1 - Kursbuch.pdf",
+      "decision": "blocked-malformed-source",
+      "reason": "far too little text for the page count; the pages are images, not text"
+    },
+    {
+      "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/Netzwerk neu A2 KB.pdf",
+      "decision": "blocked-malformed-source",
+      "reason": "the document carries no text layer at all; it is a picture of a book"
+    },
+    {
+      "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/Netzwerk neu A2 Kursbuch.pdf",
+      "decision": "blocked-malformed-source",
+      "reason": "the document carries no text layer at all; it is a picture of a book"
+    },
+    {
+      "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/Netzwerk neu A2 UB.pdf",
+      "decision": "blocked-malformed-source",
+      "reason": "far too little text for the page count; the pages are images, not text"
+    }
+  ],
+  "rows": {
+    "created": 0,
+    "reused": 189,
+    "updated": 0
+  },
+  "audio": {
+    "discovered": 189,
+    "identified": 189,
+    "unidentified": 0,
+    "deterministicFields": [
+      "level",
+      "book",
+      "disc",
+      "track"
+    ],
+    "mappedToLessons": 0,
+    "unresolvedMappings": 189,
+    "unresolvedReason": "the track-to-lesson index is printed in the Kursbuch, which has no readable text layer; mapping by order or duration would be a guess",
+    "registeredAssets": 189,
+    "created": 0,
+    "reused": 189
+  },
+  "duplicates": [],
+  "findings": [
+    {
+      "path": "03_COURSE_CONTENT/NETZWERK_A1/Netzwerk Neu A1 - Kursbuch.pdf",
+      "kind": "malformed-source",
+      "verdict": "sparse",
+      "reason": "far too little text for the page count; the pages are images, not text"
+    },
+    {
+      "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/Netzwerk neu A2 KB.pdf",
+      "kind": "malformed-source",
+      "verdict": "absent",
+      "reason": "the document carries no text layer at all; it is a picture of a book"
+    },
+    {
+      "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/Netzwerk neu A2 Kursbuch.pdf",
+      "kind": "malformed-source",
+      "verdict": "absent",
+      "reason": "the document carries no text layer at all; it is a picture of a book"
+    },
+    {
+      "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/Netzwerk neu A2 UB.pdf",
+      "kind": "malformed-source",
+      "verdict": "sparse",
+      "reason": "far too little text for the page count; the pages are images, not text"
+    }
+  ],
+  "digests": {
+    "03_COURSE_CONTENT/NETZWERK_A1/Netzwerk Neu A1 - Kursbuch.pdf": "05bdd22869920e4118fb267d6ffc07b1599857a4e00d6c81bb1b5907f850e5c5",
+    "03_COURSE_CONTENT/NETZWERK_NEU_A2/Netzwerk neu A2 KB.pdf": "4f4e95787304f4369df2861359f7039b6c4aa12494e61f0bf4cc36a835fe8b21",
+    "03_COURSE_CONTENT/NETZWERK_NEU_A2/Netzwerk neu A2 Kursbuch.pdf": "f9eb63a6da62d4884e816c6c34564377733bd7eceb32ba84455479d1840810dc",
+    "03_COURSE_CONTENT/NETZWERK_NEU_A2/Netzwerk neu A2 UB.pdf": "f03893c91a08477b1141eb9173c3480b5c1cc7659416a20c50476081466b2df1"
+  }
+}

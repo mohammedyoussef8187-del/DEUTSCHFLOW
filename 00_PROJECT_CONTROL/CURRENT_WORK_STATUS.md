@@ -19,7 +19,7 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
 *   **UI migration complete Git commit:** `60f2526` (feat: migrate the multiple-choice answers to Lit)
 *   **option (c) work Git commit:** `e872810` (fix: make the PWA actually work offline)
 *   **Gate 5 simulator PASSED commit:** `16807f9` (validated in Codemagic)
-*   **Last Update Timestamp:** 2026-08-21T22:20:00+03:00
+*   **Last Update Timestamp:** 2026-08-21T22:35:00+03:00
 
 ## Current Context
 *   **Current Phase:** PHASE 4 — MIGRATION MAPPING + SQLITE PARITY VALIDATION
@@ -83,6 +83,25 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
 
 ### Highest-value next step
 **Gap 1 — the incremental write path.** It unblocks gaps 2, 3 and 5, needs no hardware and no product decision, and is verifiable with the existing test executor. Wiring anything before it exists would produce read-only screens that cannot record what the learner does.
+## Netzwerk Intake — BLOCKED ON SOURCE QUALITY (audio registered)
+*   **Inventory (SHA-256 identified, text layer measured):**
+    | File | Edition/Level | Component | Pages | chars/page | Verdict |
+    |---|---|---|---|---|---|
+    | `Netzwerk Neu A1 - Kursbuch.pdf` | neu A1 | Kursbuch | 177 | **1.8** | `sparse` |
+    | `Netzwerk neu A2 KB.pdf` | neu A2 | Kursbuch | 181 | **0** | `absent` |
+    | `Netzwerk neu A2 Kursbuch.pdf` | neu A2 | Kursbuch | 180 | **0** | `absent` |
+    | `Netzwerk neu A2 UB.pdf` | neu A2 | Übungsbuch | 203 | **43.7** | `sparse` (OCR artefacts, 2.1% suspect rate) |
+*   **0 of 4 documents are parseable.** The Kursbücher are scans with **no text layer at all**; the Übungsbuch has an OCR layer that is visibly corrupted — `Dcngler` for Dengler, `Rcmus` for Remus, `Losungen` for Lösungen, `Klctt`, `Tesrheft`, `A^pleLogo`. Importing that into a German course would store misspelled German as verified vocabulary.
+*   **No Netzwerk parser was written.** There is no readable layout to parse, so a parser would be untested speculation. `parserStatus: not-written-no-readable-source`.
+*   **New: the text-layer gate** (`tools/intake/text-layer.js`) classifies a document `digital` / `sparse` / `ocr-degraded` / `absent` **before** parsing, from chars-per-page plus German-specific OCR fingerprints. Deterministic, tested both ways, and it **never repairs text** — correcting a scanner's guess is guessing what the page said.
+*   **The two A2 Kursbuch files are NOT duplicates.** Sizes differ by 0.5% but SHA-256 differs, so both are kept and reported separately. **0 exact duplicates** across the corpus.
+*   **Audio: 189 files, all 189 distinct by SHA-256**, three complete groups with **no gaps** — KB disc 1 (63), KB disc 2 (59), UeB disc 1 (67, tracks 2–68). All **registered** as `audio_assets` with `checksum: sha256:…`, `availability: source-only`, `durationMs: 0`. Idempotent: second run 0 new / 189 present.
+*   **0 tracks mapped to lessons.** The filename convention deterministically gives level, book, disc and track — and never a lesson. The track-to-lesson index is printed in the Kursbuch, which has no readable text. Mapping by order or duration is exactly the guess the rules forbid.
+*   **No listening activity was created** for any track: nothing in the repository says what these recordings teach.
+*   Existing Nicos Weg content, learner data and SRS rows untouched. **Suite 950 → 979.**
+
+### What would unblock Netzwerk
+A **digital-text** (not scanned) edition of the Kursbuch/Übungsbuch, or the publisher's downloadable **Lösungen/Transkripte** and **audio index** (the Übungsbuch's own imprint points at `klett-sprachen.de/netzwerk-neu`). With either, the parser is a day's work; without one, nothing honest can be imported.
 ## Controlled Batch Intake — Nicos Weg A2 (COMPLETE for the available corpus)
 *   **Discovery replaces hard-coded paths.** `discover.js` scans `03_COURSE_CONTENT/`, matches filenames against a **publisher template**, and groups a lesson's documents by role. Capabilities (`supports`/`absent`) come from the template, so a newly dropped-in handout never has its contents guessed. **6 PDFs scanned → 1 Nicos Weg candidate; the 4 Netzwerk books are reported `no-template-matches`** and deliberately untouched.
 *   **The corpus is one lesson.** Only `Nicos-Weg-A2-E2-L1-*` exists in the repository — there is no second Nicos Weg lesson to import. The batch machinery is built and proven; the material is not here yet.

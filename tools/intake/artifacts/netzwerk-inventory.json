@@ -1,0 +1,2820 @@
+{
+  "generatedAt": 1787340258122,
+  "documents": [
+    {
+      "path": "03_COURSE_CONTENT/NETZWERK_A1/Netzwerk Neu A1 - Kursbuch.pdf",
+      "size": 15984256,
+      "sha256": "05bdd22869920e4118fb267d6ffc07b1599857a4e00d6c81bb1b5907f850e5c5",
+      "edition": "neu",
+      "level": "A1",
+      "component": "kursbuch",
+      "textLayer": {
+        "verdict": "sparse",
+        "parseable": false,
+        "pages": 177,
+        "characters": 319,
+        "charsPerPage": 1.8,
+        "words": 23,
+        "germanMarkers": 20,
+        "suspectHits": 0,
+        "suspectRate": 0,
+        "signals": [],
+        "reason": "far too little text for the page count; the pages are images, not text"
+      },
+      "samples": []
+    },
+    {
+      "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/Netzwerk neu A2 KB.pdf",
+      "size": 59080275,
+      "sha256": "4f4e95787304f4369df2861359f7039b6c4aa12494e61f0bf4cc36a835fe8b21",
+      "edition": "neu",
+      "level": "A2",
+      "component": "kursbuch",
+      "textLayer": {
+        "verdict": "absent",
+        "parseable": false,
+        "pages": 181,
+        "characters": 0,
+        "charsPerPage": 0,
+        "words": 0,
+        "germanMarkers": 0,
+        "suspectHits": 0,
+        "suspectRate": 0,
+        "signals": [],
+        "reason": "the document carries no text layer at all; it is a picture of a book"
+      },
+      "samples": []
+    },
+    {
+      "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/Netzwerk neu A2 Kursbuch.pdf",
+      "size": 58771601,
+      "sha256": "f9eb63a6da62d4884e816c6c34564377733bd7eceb32ba84455479d1840810dc",
+      "edition": "neu",
+      "level": "A2",
+      "component": "kursbuch",
+      "textLayer": {
+        "verdict": "absent",
+        "parseable": false,
+        "pages": 180,
+        "characters": 0,
+        "charsPerPage": 0,
+        "words": 0,
+        "germanMarkers": 0,
+        "suspectHits": 0,
+        "suspectRate": 0,
+        "signals": [],
+        "reason": "the document carries no text layer at all; it is a picture of a book"
+      },
+      "samples": []
+    },
+    {
+      "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/Netzwerk neu A2 UB.pdf",
+      "size": 30418217,
+      "sha256": "f03893c91a08477b1141eb9173c3480b5c1cc7659416a20c50476081466b2df1",
+      "edition": "neu",
+      "level": "A2",
+      "component": "uebungsbuch",
+      "textLayer": {
+        "verdict": "sparse",
+        "parseable": false,
+        "pages": 203,
+        "characters": 8871,
+        "charsPerPage": 43.7,
+        "words": 933,
+        "germanMarkers": 127,
+        "suspectHits": 20,
+        "suspectRate": 0.0214,
+        "signals": [
+          {
+            "code": "impossible-consonant-run",
+            "hits": 11
+          },
+          {
+            "code": "stray-symbol-in-word",
+            "hits": 2
+          },
+          {
+            "code": "lonely-digit-in-word",
+            "hits": 4
+          },
+          {
+            "code": "broken-umlaut-word",
+            "hits": 1
+          },
+          {
+            "code": "mixed-case-inside-word",
+            "hits": 2
+          }
+        ],
+        "reason": "far too little text for the page count; the pages are images, not text"
+      },
+      "samples": [
+        "Deutsch A2Tell1                                                                                                  82",
+        "Zertifikat A2Teil 3                                                              122",
+        "Zertifikat A2Te\\\\ 2                                                              162",
+        "Quellenverzeichnis 174 Kurssprache 176",
+        "Umschlaggestaltung: Anna Wanner"
+      ]
+    }
+  ],
+  "audio": {
+    "files": [
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-001.mp3",
+        "size": 1204411,
+        "sha256": "b49f4c82d706fa6ea1f2f3e96856f30c554875b5d23089c33c8d0eb7ac0a3f7c",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 1
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-002.mp3",
+        "size": 2514526,
+        "sha256": "bfa54ce4fbd32d5669a88b39ed9f07692c139d91542ae78bd1d21379b8fd7ef3",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 2
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-003.mp3",
+        "size": 1561791,
+        "sha256": "69431fa6c3a67458f7ac092b7d9acb6c7a513ad702ebae28625f8bc6968d90ab",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 3
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-004.mp3",
+        "size": 1412326,
+        "sha256": "aa7245fda4b1dc0d72ca1825d7fadd8b1f7d9d0316225defcd23c2980a53bf52",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 4
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-005.mp3",
+        "size": 1363896,
+        "sha256": "4a7f6d731cf23fff7635b9b5585f72aa784249bf4deefd69ecfd6ce69e0e9896",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 5
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-006.mp3",
+        "size": 2743316,
+        "sha256": "f703457a1d9f7084f56a50156d53f3278655ccbf3d10d7742197f318fbcea22d",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 6
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-007.mp3",
+        "size": 3622571,
+        "sha256": "48c09b88119d8979c008ddf009044cf1f875bade79a2c83b964a683902387061",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 7
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-008.mp3",
+        "size": 1730461,
+        "sha256": "a6d6ad634d6c93e9039a86ed2f47e65b043f50ea0b62deb18001b47857e76e67",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 8
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-009.mp3",
+        "size": 1897461,
+        "sha256": "a767f0a37d8d140ea1d7c31d03c6ff8e62535b6c3721955e39498d9379d27130",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 9
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-010.mp3",
+        "size": 1381431,
+        "sha256": "ccc185a238ab7890c87a0b7fa588b91ec80598aafad207e3234c12e424753922",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 10
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-011.mp3",
+        "size": 1295426,
+        "sha256": "8e34c7967e95f104809c801389a536eb2a4ad3ae83cac5a26767bdaf04cb6d80",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 11
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-012.mp3",
+        "size": 1788911,
+        "sha256": "e8937faa84d698e9baf384960b343c7fbf2f4171b7fc61dd0d0c34787d42f691",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 12
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-013.mp3",
+        "size": 1266201,
+        "sha256": "3f43211c68e85c4acc75ddbbfac55e4358319fad93676dc9dbb2fe2748a455e2",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 13
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-014.mp3",
+        "size": 2150466,
+        "sha256": "107d0aa13e6de532153c340b0f6bbb9589a978980e125f22a5a1528d23e888e2",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 14
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-015.mp3",
+        "size": 798601,
+        "sha256": "ed940e599b67ddc3d934af808e29d21feaf03ab6f95879619c4285146e05da7a",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 15
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-016.mp3",
+        "size": 5871226,
+        "sha256": "35088cbede1c5d29aa81dcd0527fd502d434729dce033e6be1c0ee62d9bc7513",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 16
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-017.mp3",
+        "size": 3567461,
+        "sha256": "9c64ff01e0df9dea62e9de421e9102be44b952c674951d2dd6d6ff7e3c55c8e8",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 17
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-018.mp3",
+        "size": 3897286,
+        "sha256": "31f6c00134f5086c49d7549dd63c66d7825a680637cfc1c31c0d5cc7c20c0dfe",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 18
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-019.mp3",
+        "size": 1544256,
+        "sha256": "75b06d2cf4b8cdc7afcee677c2c863645f24c56011aa73852cf9976d6dcdfa7b",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 19
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-020.mp3",
+        "size": 1540081,
+        "sha256": "4c48648b6f2914db4db8e26cab5ec9251767546d73ebc75c319cc01c9e64b9f9",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 20
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-021.mp3",
+        "size": 1548431,
+        "sha256": "aa12b415a163c5e7622623afb257b53f124efe74ec235f8f8a3141bfc28224d9",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 21
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-022.mp3",
+        "size": 958921,
+        "sha256": "90b9eebf0f64551c8589bf992636d258e9d4eb562a4d7bce660d2700f251a0f2",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 22
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-023.mp3",
+        "size": 1262026,
+        "sha256": "348810451f5bd7d0f495ad6995b5e512596e06084d4693ad9b19cde767b2ab97",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 23
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-024.mp3",
+        "size": 2186371,
+        "sha256": "c32ee97a4c7594b1bc4d59d6a7b3ef01fbb2f6c2c864d2e82de4f6afa9ac51b6",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 24
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-025.mp3",
+        "size": 1834836,
+        "sha256": "1c56c6efe4ef88e378172bdb6d1103d90982eeecc8abf4aa40813d1e47510c70",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 25
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-026.mp3",
+        "size": 1445726,
+        "sha256": "be8d53acaffa588af4023b9f055f9ed0bed3af2179867729e9e6da45e0cf5ed8",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 26
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-027.mp3",
+        "size": 2254841,
+        "sha256": "9e65ae54a843bf8d6237e52085f594f498a6a835f9a944b7dc7ce490f0dcb3d9",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 27
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-028.mp3",
+        "size": 2957911,
+        "sha256": "2240b49d54e02c1741aea97853d03f5da3949b97268dd4111d64edbeecb03d49",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 28
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-029.mp3",
+        "size": 2022711,
+        "sha256": "192da2d8676a0ba0cbbee81a69a1aeb8d38440c4de19f849e737fe288f1596b4",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 29
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-030.mp3",
+        "size": 1687041,
+        "sha256": "4155434c02bd535fb9fb3dcb45ba25f9819ed7c0b8a891b0146f4b0587045462",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 30
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-031.mp3",
+        "size": 1472446,
+        "sha256": "887f58f9b8d439dcbde1b0cc4b95b6a6d7f41a3dcfc73c490e4ab6ade98ee327",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 31
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-032.mp3",
+        "size": 3868061,
+        "sha256": "d31da52389bbb0b97cd80c951452e8b0962f86904154306a33d9d25351bf8c52",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 32
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-033.mp3",
+        "size": 1596026,
+        "sha256": "ed6a1408056a71575339f19c0cab978ab04990a1b23d23d96b7771fc000f94e3",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 33
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-034.mp3",
+        "size": 2312456,
+        "sha256": "ec523fa9019cd693797101be96393b90a881ab7003e1e64e585093929b78dd77",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 34
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-035.mp3",
+        "size": 791921,
+        "sha256": "fbdefa96d811482df8321761ada7a162fe7d7d24420009c1646ef0f7c2158e8a",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 35
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-036.mp3",
+        "size": 959756,
+        "sha256": "fab0b0a9c52011483de87cc019b918f4cda63d688250cf1818caa061bf9ba416",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 36
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-037.mp3",
+        "size": 945561,
+        "sha256": "bca457594a5d8d14c34e6d48cd064eea5ec08d08d193fe4cc9a7e182e511282c",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 37
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-038.mp3",
+        "size": 1208586,
+        "sha256": "d9778e59cc4e4215060525cbc8abea6815f59f4379399cd9d5ab80c0e876df6c",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 38
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-039.mp3",
+        "size": 2112891,
+        "sha256": "c87b2f48cdbf0f12b2a00e44a318b71bc71c49e63615ee3de82d53823928a095",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 39
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-040.mp3",
+        "size": 1820641,
+        "sha256": "3e6a7a2fadd754cfde9ed04f49691ef9b78d180ceb30b884f8f3d8923feba3fb",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 40
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-041.mp3",
+        "size": 1263696,
+        "sha256": "c2061670aa602d5c77088984ab022895d33a62915684c13c6c5652a78f840796",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 41
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-042.mp3",
+        "size": 2490311,
+        "sha256": "001c71faaf3a2d3744ae4e62451279a5b3198be67daef096d00b3f5c5f52d317",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 42
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-043.mp3",
+        "size": 5006166,
+        "sha256": "a2dc839ce99aa04e88f1166b811245fc95e47f413ebf75f23f16300f62a0d1fb",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 43
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-044.mp3",
+        "size": 648301,
+        "sha256": "72a0afc7b69355fa8c1cb35680097ff62fe8f203087f4c3d6189a14e96859ac8",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 44
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-045.mp3",
+        "size": 2734966,
+        "sha256": "fb8a6b9696f01b9cbc1dea7e65b546724cafa33314e5538e27e3aeff90546525",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 45
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-046.mp3",
+        "size": 2530391,
+        "sha256": "f813250ea245aff548b4462e98ad63fb381209cbf49a0c0c737ffa8e604e7015",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 46
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-047.mp3",
+        "size": 2461086,
+        "sha256": "7c582e05b40f4a97af5bd113dc6e1e8d472b433fe261fbde24f30baf02095101",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 47
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-048.mp3",
+        "size": 1388946,
+        "sha256": "f6596d0ffe25d09e77c3595e2f7543298f5350403696ea7d11e0fe62abfa1117",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 48
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-049.mp3",
+        "size": 1824816,
+        "sha256": "4cc5fb79e1ab3a4ef10f757ca263c0a96af4eed8d1db0d532c26974e090ef9d7",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 49
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-050.mp3",
+        "size": 4752326,
+        "sha256": "c23516aaf96e02798676330758fbc284169cf4876882e62dee6fe1f25b2e09d3",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 50
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-051.mp3",
+        "size": 3453901,
+        "sha256": "083541ec7e3e767ba3db38ae5272ffb89f3b837f2b3a9a475142fa54030c77ae",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 51
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-052.mp3",
+        "size": 4428346,
+        "sha256": "cc6afce8792ec81ae8cd9bbb6d2d96d7267248627c81ca38fa7a41a2d9adc25f",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 52
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-053.mp3",
+        "size": 2050266,
+        "sha256": "e0e2e82201646ac01c6c6b510350f4cdbc1387300c2c722447e5c49b7d6292f9",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 53
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-054.mp3",
+        "size": 3119066,
+        "sha256": "a9507af4ca25274bb4c0c7d8d3d5af8860d14a322d2378b2039d4ce55c21b9fb",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 54
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-055.mp3",
+        "size": 3852196,
+        "sha256": "c7c7ef70197f102de4d99886e47885583ff4aff84662c55c51c22b152b779088",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 55
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-056.mp3",
+        "size": 1591851,
+        "sha256": "29f633f45d17e386c29b276f907bb25b2c7750eea37c5c2ef1fe254c0e13441c",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 56
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-057.mp3",
+        "size": 1798096,
+        "sha256": "1294d6a3dd9d502386847c5dbb82210cc3309b1ca01e3f9e87a25f6041069202",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 57
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-058.mp3",
+        "size": 2983796,
+        "sha256": "1a10e3fefc7ad98a2b91c9ec1fd07126bfc9840c131d8b06b3c68a723a581ee6",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 58
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-059.mp3",
+        "size": 2730791,
+        "sha256": "ee62628aaa9389ef7bbd366ae8adbcedfa2de83bbaa020ecff3fd41ff5703bed",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 59
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-060.mp3",
+        "size": 660826,
+        "sha256": "b9cae0c0010ec968eb1e9c57431533b992d2af6c580e2569619d6e5801eb7fa7",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 60
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-061.mp3",
+        "size": 6641096,
+        "sha256": "d2c9848e232cc0f76b5d4c8f33c8d6e02e6cbed1b0d85220d67dae2b536d14d8",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 61
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-062.mp3",
+        "size": 4682186,
+        "sha256": "7bffd409b663ad8317985e5131fe22b7c81f78ca119155bd9b0a645a58438a34",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 62
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-063.mp3",
+        "size": 2956241,
+        "sha256": "aff1d3f93180569ae5c2d84ebc121ee77fd0868bc303642f1c8a21f8840e614c",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 1,
+          "track": 63
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_2-001.mp3",
+        "size": 4213751,
+        "sha256": "5f41ebdaf750ff77b7b40b46b8696a52ac0968f1ce183ddd1e3add6e019cd453",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 2,
+          "track": 1
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_2-002.mp3",
+        "size": 1721276,
+        "sha256": "aa33b505de80fa6d5e0574fdc83a6834b416ff2ed9f3c915afee8684adaf1ce8",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 2,
+          "track": 2
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_2-003.mp3",
+        "size": 958921,
+        "sha256": "0277cc0fe0df202d32feb79474de535813ea74d10378ee15577d9252c5bfd24b",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 2,
+          "track": 3
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_2-004.mp3",
+        "size": 3131591,
+        "sha256": "8e6ec2e517003353d17157b40624e55d28c0bf973703a2c993b24a3f8355343b",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 2,
+          "track": 4
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_2-005.mp3",
+        "size": 1672846,
+        "sha256": "87b2823c0ff18e8ee132697bdd56f47a94e8a03c6b41a836e064f3fb39ecebe9",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 2,
+          "track": 5
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_2-006.mp3",
+        "size": 2380091,
+        "sha256": "f9065a29f4673b0d82eb91efd6fabc88ced61cfbe19038066277a914e4b7dc06",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 2,
+          "track": 6
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_2-007.mp3",
+        "size": 2314961,
+        "sha256": "4241684c6e54d05b84f8d83691c8aa7bb5c7ec6a300cfb119b31a5d094dce4e2",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 2,
+          "track": 7
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_2-008.mp3",
+        "size": 1487476,
+        "sha256": "ce8bf932fb92d417d36762781fc7b0d6a11d6bfee75302b8774503f17245ad8a",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 2,
+          "track": 8
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_2-009.mp3",
+        "size": 1799766,
+        "sha256": "af8d4d58e7b32481f0ee21a8e6048c80a7c01e64c1acd34c6eb7c74cabbe124d",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 2,
+          "track": 9
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_2-010.mp3",
+        "size": 1469106,
+        "sha256": "3d818aad9ce8f9b316019c5d39770cb0d07745b3e98ddd3e86f12b91ba2bc422",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 2,
+          "track": 10
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_2-011.mp3",
+        "size": 1679526,
+        "sha256": "e026ab6e47e77e0f04aaecfc493b429809928024c0b6361e4f2d428c1635a1a0",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 2,
+          "track": 11
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_2-012.mp3",
+        "size": 1495826,
+        "sha256": "c22eded5e309ad763decdff3befd5a603782a4aad2bc5673591fd0385ce1a856",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 2,
+          "track": 12
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_2-013.mp3",
+        "size": 923851,
+        "sha256": "b4106f9e61e5a937b88d5b82997f8cada6ca840d59db13dc6bb557b3bf55e25f",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 2,
+          "track": 13
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_2-014.mp3",
+        "size": 2970436,
+        "sha256": "aff7cb6272c4f3a215e356eaef01230bffadf9240b890e714e21a541eb859d36",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 2,
+          "track": 14
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_2-015.mp3",
+        "size": 2541246,
+        "sha256": "16b52e6f14ff0c9b60b51bc79465bf592cb344952e36c8bdc4b48ef44369f9d4",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 2,
+          "track": 15
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_2-016.mp3",
+        "size": 1076656,
+        "sha256": "8c429efbd75712b238509b62cb2ced3d91a521acfa34add876f111c56bceac6a",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 2,
+          "track": 16
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_2-017.mp3",
+        "size": 6017351,
+        "sha256": "7907b2aa20a6ea73dc78fbe865059f0282b16ba026429928d52eb6be396ed454",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 2,
+          "track": 17
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_2-018.mp3",
+        "size": 5165651,
+        "sha256": "1073f18988bf95a736fd89a34fbf61ac5761b613b4060c55e4251da754e0156e",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 2,
+          "track": 18
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_2-019.mp3",
+        "size": 6695371,
+        "sha256": "2b44641507c12f3a3e87cb48105c9264c2f25b6ef585cf9c17cfdcc60ddf934c",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 2,
+          "track": 19
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_2-020.mp3",
+        "size": 1300436,
+        "sha256": "98a2b91c98798793cc22394aa471b4c91d6fb415c5b61297235377b8fd158574",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 2,
+          "track": 20
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_2-021.mp3",
+        "size": 1709586,
+        "sha256": "855ca03d600c89e543ce5349a573ba574facf6d3bc0241172843b8e293423f19",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 2,
+          "track": 21
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_2-022.mp3",
+        "size": 1227791,
+        "sha256": "ae0bb5cc1dd8c673e31cb2cc8bb61486825870176b76f2ca50ecd8808f5050f3",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 2,
+          "track": 22
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_2-023.mp3",
+        "size": 806951,
+        "sha256": "c8f002f21f39201ffdaecfc7e0337228d6eb46a2bfc9524f79f213f6f0113324",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 2,
+          "track": 23
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_2-024.mp3",
+        "size": 1794756,
+        "sha256": "98ef659be43da111a949af9e2c4cf706f1b328d4e216feb42cdeb1b5d99e6fd7",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 2,
+          "track": 24
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_2-025.mp3",
+        "size": 1228626,
+        "sha256": "3cff525b0ff890613a6f4d2aac74874d8c8015d34b8bdb2f60057ee282e4d736",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 2,
+          "track": 25
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_2-026.mp3",
+        "size": 2414326,
+        "sha256": "4a61375aaeeb0425729d8b76de85029782239a56326582cc321ea3b94cc325a9",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 2,
+          "track": 26
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_2-027.mp3",
+        "size": 2295756,
+        "sha256": "ef305829c1fac0143f18b19356dbb58d51dadba83aed5314981873be156cde30",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 2,
+          "track": 27
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_2-028.mp3",
+        "size": 5568956,
+        "sha256": "f101041d0cf47500351e3ed1d84986353c5c3b812d0c8c87153f2a8a1fac4cd1",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 2,
+          "track": 28
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_2-029.mp3",
+        "size": 7233946,
+        "sha256": "7d1727bffd0d1f3de2c5e4e685a4c53a0224173c78429c598db8bcb3b6507f81",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 2,
+          "track": 29
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_2-030.mp3",
+        "size": 1841516,
+        "sha256": "e1429c75e8008d79122a236416016e63a3a561f805038d47a4f044bb1f93fb77",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 2,
+          "track": 30
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_2-031.mp3",
+        "size": 1472446,
+        "sha256": "eec91edd6dfb5eb7dda8d1d72512101ce4de2244eee0e263d2e807e227f67419",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 2,
+          "track": 31
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_2-032.mp3",
+        "size": 1567636,
+        "sha256": "1b6befeaa4249331b86a6cb66b7da0e0afae2c255393fd239bd17d0445b3f0c4",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 2,
+          "track": 32
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_2-033.mp3",
+        "size": 1508351,
+        "sha256": "edfd534656e4342238318103ebf17c9dd364ff46f1d1547bc6fb9fff2682cec4",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 2,
+          "track": 33
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_2-034.mp3",
+        "size": 1425686,
+        "sha256": "1109ca8bce9bbeb5ee09f37cb5f33f51f198f21ad90b21d9a60e00946b916d81",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 2,
+          "track": 34
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_2-035.mp3",
+        "size": 2009351,
+        "sha256": "6fcc4e5701f08081b0e42f2bbdf330852ce013b6f16b7fd266180161cdf4737b",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 2,
+          "track": 35
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_2-036.mp3",
+        "size": 1500836,
+        "sha256": "46a88d47dc0e65051414a3134546f3e82efa2e30995e246a80aab63d06536231",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 2,
+          "track": 36
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_2-037.mp3",
+        "size": 2658146,
+        "sha256": "a966e212ea28cf77fe3df703b5f489a3fd5d20142d3bc02da8ad53157b94fe0e",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 2,
+          "track": 37
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_2-038.mp3",
+        "size": 1085006,
+        "sha256": "182f80780cdd2f54975888433f7c6815b1ceded083f52dd3cd98f3953ee54a22",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 2,
+          "track": 38
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_2-039.mp3",
+        "size": 1386441,
+        "sha256": "cfcab76f99c532d4a87c9912bd86eabfe2793635546ff1e5d9012f60f8ca656c",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 2,
+          "track": 39
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_2-040.mp3",
+        "size": 4560276,
+        "sha256": "72cff4e43f05ce581b2965394656f60d8df1b79d31330e06247a2f0fb10e4063",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 2,
+          "track": 40
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_2-041.mp3",
+        "size": 971446,
+        "sha256": "c305af960b4a75d8206bd1dc72c4aafa27f949ffbadee7f4d51bf82ab31184d5",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 2,
+          "track": 41
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_2-042.mp3",
+        "size": 7499476,
+        "sha256": "d9d40100e16abad37414726a9c582d02ccd019a93250b32d8f4442d95673232f",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 2,
+          "track": 42
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_2-043.mp3",
+        "size": 5640766,
+        "sha256": "3676303c4d4eba1f28709215183b76af094bc5a9e81b52924566aceac51bd709",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 2,
+          "track": 43
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_2-044.mp3",
+        "size": 4880081,
+        "sha256": "cadebdb9541237f844971b87ac95964518ae28a7225f79ff9c2f7bc0b7b63103",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 2,
+          "track": 44
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_2-045.mp3",
+        "size": 1457416,
+        "sha256": "b1586f74f04c98405d1ae1675d89c4bd1992eb684fb32a76cc5d9a0c972127fa",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 2,
+          "track": 45
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_2-046.mp3",
+        "size": 1016536,
+        "sha256": "4b4e0e1c13e70125159d187b4e6d7ca3f4b2bbd8c9167317af188e0fcbc2048f",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 2,
+          "track": 46
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_2-047.mp3",
+        "size": 819476,
+        "sha256": "e14bd28ba3d95bc4d45cb75c97d769caa4ffab93687b0627eda7af2f32ac0688",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 2,
+          "track": 47
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_2-048.mp3",
+        "size": 740986,
+        "sha256": "ad3af4efb6ab971585a2e6e24253fe23163d3051b103f9a3df58bca54410aa03",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 2,
+          "track": 48
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_2-049.mp3",
+        "size": 817806,
+        "sha256": "ceae2e9117c73ab5f753117b64a3572b3ab381ca2186e8ae758034bb7e39879b",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 2,
+          "track": 49
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_2-050.mp3",
+        "size": 1007351,
+        "sha256": "f71bde7c6032b476e358783fc6fd31b5fb99bec05030f00a39824622de5e6145",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 2,
+          "track": 50
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_2-051.mp3",
+        "size": 1004846,
+        "sha256": "854f78d968a3ec48aab6cf4707fb201ee292d8bdee5eeff81f42f62fd1c83f69",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 2,
+          "track": 51
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_2-052.mp3",
+        "size": 5271696,
+        "sha256": "42242ff1969c2753e4412959e7180a5a18bbcc683012b431f822dba38e79d865",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 2,
+          "track": 52
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_2-053.mp3",
+        "size": 1182701,
+        "sha256": "9892d31e0c2e57c63fe4d8c24a94b6f09af8f6f80ace2fd15d7eb028d09ee18f",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 2,
+          "track": 53
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_2-054.mp3",
+        "size": 878761,
+        "sha256": "52dc664a8984a34dff70a174ed961ed83274998c4c8187bca9d39141ad9840d3",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 2,
+          "track": 54
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_2-055.mp3",
+        "size": 4165321,
+        "sha256": "c8c63a7dcada274cce47c0ce2f58e4197c3b0ef54e9fe6106a48a397fbcc42c9",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 2,
+          "track": 55
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_2-056.mp3",
+        "size": 2129591,
+        "sha256": "5783feebf116fc5f43087f125fc85f77063be706b5908a32fcaae2d5dd592192",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 2,
+          "track": 56
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_2-057.mp3",
+        "size": 2299931,
+        "sha256": "979004fccafe2f4fa6a4c1be3a24827b516b2fe72ccc03977e04b514d29e0798",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 2,
+          "track": 57
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_2-058.mp3",
+        "size": 1353041,
+        "sha256": "ec4c1782e77f117a6d29bcefc35d10f60c7fa0b3a5cd32b57eb17981cdf85166",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 2,
+          "track": 58
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_2-059.mp3",
+        "size": 1867401,
+        "sha256": "c006289054a3c4161ce9f8b7e0caa6340e47b3b032577a504feaf738e5dc7fff",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "kursbuch",
+          "disc": 2,
+          "track": 59
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-002.mp3",
+        "size": 1168928,
+        "sha256": "e0d17359f8d9c6e5f887d2fcf3f7bfd8aa6f99151da0ee104107504c3ccc8954",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 2
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-003.mp3",
+        "size": 1432788,
+        "sha256": "d62561b40c3b84baf3667465a5176443276f2b13f35e82a1d0f3d2020397e844",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 3
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-004.mp3",
+        "size": 1250758,
+        "sha256": "089df99f035f1304a04de03d00014f793aaf561d6cb9a95dadbe3423e0a2ef16",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 4
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-005.mp3",
+        "size": 1151393,
+        "sha256": "46810611551c4a1459c96dd3732605720c9efe42ed90c9425ec8971a0752d589",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 5
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-006.mp3",
+        "size": 1242408,
+        "sha256": "f95786849146f58f454e297b3c3b57539e6027cfbdfea9b30412fa12cd740652",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 6
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-007.mp3",
+        "size": 1902058,
+        "sha256": "0ae269ad12bac6d858a9e8ded6b0d5fa4f6dfcb44fdeff8e234ddaf80d401fa9",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 7
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-008.mp3",
+        "size": 1146383,
+        "sha256": "34c4771a2f69895d5914d36c46ee727f6ba2887a14427b178008a47258b1daac",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 8
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-009.mp3",
+        "size": 1054533,
+        "sha256": "81487c4fb8b1d40047c9ff538133e4978248536dd3cfbba0f873c690fd65c9d0",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 9
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-010.mp3",
+        "size": 1672433,
+        "sha256": "777185b122a4a31740997dd415755a220599a2971898b6799c52a5b8e9f3f398",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 10
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-011.mp3",
+        "size": 2459003,
+        "sha256": "ab33b178389ba934cd462cf4c79b2fcf59bf5589d4924ef3097467f74465a7ae",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 11
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-012.mp3",
+        "size": 2403893,
+        "sha256": "f6cf187f1048d2b67c7920272bc6da24062694a27ac800622c1f7991d13a2618",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 12
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-013.mp3",
+        "size": 2018123,
+        "sha256": "693a06fbf1b5ec4238d7ec115a1f03338d69ea65b3e9ba3d3c651620c1e53239",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 13
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-014.mp3",
+        "size": 2554193,
+        "sha256": "eaf45ddda940fd4bc7dbff5748340fdd3299b5040c0f104fb91a20ce368a5a53",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 14
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-015.mp3",
+        "size": 4830403,
+        "sha256": "461875450cc45ae00f5470ef7506becda77aa7c922793bb50baf20fb8671988a",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 15
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-016.mp3",
+        "size": 3415078,
+        "sha256": "3d468f5cb4b2da50528a0c8791af4b6957b23087076eac0c59198e79583f6184",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 16
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-017.mp3",
+        "size": 2327073,
+        "sha256": "7e6598deb2276306f7eb3a2ef1e9121672e08596f757c753e1b7d9afdba6a3d2",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 17
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-018.mp3",
+        "size": 1069563,
+        "sha256": "82244d8bb73e1abf03cf0693ba2bfcf729152e8f4de3e1f53a0b8cbe17d8a70b",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 18
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-019.mp3",
+        "size": 5937613,
+        "sha256": "be4f208821f51bfe13876f921c36de8726f70cf4cbcceab2202926f26a35b827",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 19
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-020.mp3",
+        "size": 1117158,
+        "sha256": "198be1d4b8daa1cb699ee958a3d96e77d3711d1b5ecdfc69ecaef61ffb49c6fd",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 20
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-021.mp3",
+        "size": 1083758,
+        "sha256": "cf783c9eabb8c128f5eeecd16ac6b98458eb5b4e08c0b3dfe6135e40c785ea11",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 21
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-022.mp3",
+        "size": 1158908,
+        "sha256": "3cd4662c791e7ed0f66d4fd8d882024161f2e039b98087c51a2a54856da48639",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 22
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-023.mp3",
+        "size": 1038668,
+        "sha256": "c5a65e785954959ed37ccc0b449c45333f7e4446ff3eb020441d62430abfabbe",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 23
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-024.mp3",
+        "size": 1081253,
+        "sha256": "bf06a446022ae26a0b4334fcda7279ddea9527d2d11608cc63ae82b3f2f3ce18",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 24
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-025.mp3",
+        "size": 2526638,
+        "sha256": "6a768bcb200abab4033e21bcad98f50797fe2d2f92ccedb54a43b2f60ce9809a",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 25
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-026.mp3",
+        "size": 2025638,
+        "sha256": "8927badb0ad9ef2f63b1d31ef5a09d9aacf34696e8e212bb6fb26e76b38a1304",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 26
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-027.mp3",
+        "size": 2215183,
+        "sha256": "ef9f2592d1f3a1b92d14c95898c703cd1366b4cfd9b17b5b53e474f4c92a2fda",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 27
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-028.mp3",
+        "size": 2067388,
+        "sha256": "7520b717c03b3d23a86f82fb36d53ab0bd22fbc2f0828f7305358644e98b0e97",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 28
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-029.mp3",
+        "size": 2220193,
+        "sha256": "6cd81d19bc0420d7d6630333d3725058858aba13157b898276972ac93eaf0291",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 29
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-030.mp3",
+        "size": 1861978,
+        "sha256": "1ccee38bd65fbb38f3dfc5d520b4bd9551a1069a481bae0e47528aa319fb5fce",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 30
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-031.mp3",
+        "size": 1178948,
+        "sha256": "bf34dfdcba64d6c46eda38f8bb2c0a9d59abe45f4aae05c38bb9f3ea76cfa63e",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 31
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-032.mp3",
+        "size": 966858,
+        "sha256": "1fd7c910c0d01a25c115456a862cbe7b32319a400bd4d99d632f2efaf34b7dfa",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 32
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-033.mp3",
+        "size": 1092108,
+        "sha256": "56e95b6a9a54fd2f47c05016af01da7aaafacd0636c9bf342455eebf736d220b",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 33
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-034.mp3",
+        "size": 1141373,
+        "sha256": "e662229384e264679899981769326587f962dacf7284cd2bf5cd97455296fca7",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 34
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-035.mp3",
+        "size": 1645713,
+        "sha256": "658a97952227aa5864a5f04362216dbc0cb767521e41d8b3c8e81332cee67788",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 35
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-036.mp3",
+        "size": 1735058,
+        "sha256": "d00ecdc1295d74de3270bfa81532c0a176db7c19cbdc0c018f3093b187151367",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 36
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-037.mp3",
+        "size": 2950818,
+        "sha256": "7222323b918680251bbf0d163f2511b2e0ef265bb01483a34cf3791a05bf0eb9",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 37
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-038.mp3",
+        "size": 1765953,
+        "sha256": "97de9296acd31e30297600eed239d2daf661091f5a580bb6c444a7e8b4bee2d2",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 38
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-039.mp3",
+        "size": 1136363,
+        "sha256": "f6b0c100b8261a5bab686f6df7dca3f2e4dbf05455298125450cf7947bd338e4",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 39
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-040.mp3",
+        "size": 1090438,
+        "sha256": "74b53707d7751e5ce51df6c7e27efe0d19eaf9e24bd1ee797891f18559ffda23",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 40
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-041.mp3",
+        "size": 2613478,
+        "sha256": "ea6d444062a2fa926a86ed6dba345817003524a899980153183f3cf26c4357e2",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 41
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-042.mp3",
+        "size": 2282818,
+        "sha256": "5638e8410e54f051adecc97401ce88f06ed8239dea54244c5da80eb0e2590139",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 42
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-043.mp3",
+        "size": 1624003,
+        "sha256": "45e5c9d8fe35b62da8bb0a139aadafea4fa63b97ecb47ba427abc7b8d190b45b",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 43
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-044.mp3",
+        "size": 2971693,
+        "sha256": "b8bf0fdda063e67b4f843bf1ee8a77b6d7ea94339295bc4809abb6ab3eca01d5",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 44
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-045.mp3",
+        "size": 2341268,
+        "sha256": "8dad1cc48f8f490af9710cb0f796c219f4eb0e443ab29720c8b8d8ba5eeec397",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 45
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-046.mp3",
+        "size": 1836093,
+        "sha256": "d1c3f0b352d0e4170b9b6fe81578900c54d9132ab9310c248b6e614be7f1ddbe",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 46
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-047.mp3",
+        "size": 1932118,
+        "sha256": "7324e5f48475a5d029849b69da5dea853347d7aa95f008ce7ae965d5cbe6c52b",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 47
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-048.mp3",
+        "size": 4014608,
+        "sha256": "e6c760d7515dc52ab09e4caead6174ae8972b2405ab2d52d4eab721f3d94ed50",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 48
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-049.mp3",
+        "size": 2158403,
+        "sha256": "d6ef4f3412b816bddd9ace736b7f3ffd295d467ec1cc08e24ede0d0a2758bf36",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 49
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-050.mp3",
+        "size": 2691968,
+        "sha256": "f8e875369f7a11c0500cdf05dda16e61a0108a4f26ad43c7a7d67c4269d76259",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 50
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-051.mp3",
+        "size": 1875338,
+        "sha256": "96b51e1dde70706009ca61835fdc7f55932118f4ab83e76498b7106d1527e88d",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 51
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-052.mp3",
+        "size": 2102458,
+        "sha256": "89375b1ce4dfe050743fa0be77b0e295c4865512e8dcf2de9801e70a5cb95ed4",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 52
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-053.mp3",
+        "size": 1941303,
+        "sha256": "1351eb7c7fb813ce539adeabd938869cee23fbc0269573e632bf23b81a07c196",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 53
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-054.mp3",
+        "size": 2882348,
+        "sha256": "e23c86232cce20b293400c851b4da50b31813e26ab8bfd65a8cbd484cd3d0525",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 54
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-055.mp3",
+        "size": 4759428,
+        "sha256": "189454102b0d68cb86d435451c1e254f78678d58ebba6c6b8ffa3e0e3157ed6a",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 55
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-056.mp3",
+        "size": 1586428,
+        "sha256": "d5e3fb99b21616a3de5b2d1a5965271b698761fd7e94fbf84b5092d59d64b60f",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 56
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-057.mp3",
+        "size": 2992568,
+        "sha256": "f1d5571f681e38bc820087a7d4af776784ae8bdf0cbafe5addc120aff5fd7431",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 57
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-058.mp3",
+        "size": 3117818,
+        "sha256": "408a263781bcf1017bae672c23427e96298e46fbd6b89e57d15cf007d3c7d137",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 58
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-059.mp3",
+        "size": 2730378,
+        "sha256": "89f41f2308c6a2bff01f4a113f1e0d11c42df8fefb5636779b545663f4b9e913",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 59
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-060.mp3",
+        "size": 3245573,
+        "sha256": "5feca7241e9dc2848d45146b513af4af070714a8854f760d6170449752a71c96",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 60
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-061.mp3",
+        "size": 3024298,
+        "sha256": "716bd1848575d5ce87ceb1a0f66577406416b51631397816a2f56c9dd6ec7619",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 61
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-062.mp3",
+        "size": 9729348,
+        "sha256": "5122704afd4d771b14dbae4fedea66d9baa3fb5dcbd0f6c95decb8b8c8a7e7d8",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 62
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-063.mp3",
+        "size": 1654898,
+        "sha256": "5b8994367516a1e665c5df67e0ca538a0301290e21f9ff5eedd338fbc5ade15c",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 63
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-064.mp3",
+        "size": 1307538,
+        "sha256": "101ec0fdb8574f3ecb0ad169339b10f97524c408f225bd3807fc1be2e68813d0",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 64
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-065.mp3",
+        "size": 1159743,
+        "sha256": "2ab5a1a404b684726127e8f9a857e55cd3c5183d6ee13773ff9814c161b3f888",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 65
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-066.mp3",
+        "size": 1116323,
+        "sha256": "6c9876efa7363764c031872a5e014e194ff42d0a7f4da831c7876641a7be6db4",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 66
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-067.mp3",
+        "size": 1293343,
+        "sha256": "03225f3dc88abbedaa3580eba11c2c578535952ccc7b85b47653ad887c459555",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 67
+        }
+      },
+      {
+        "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-068.mp3",
+        "size": 1354298,
+        "sha256": "04059124e57328d71b1b0d0a9bb195ded9df4780d4461d669aa13e55b1fe580a",
+        "edition": "neu",
+        "level": "A2",
+        "component": "audio",
+        "naming": {
+          "level": "A2",
+          "book": "uebungsbuch",
+          "disc": 1,
+          "track": 68
+        }
+      }
+    ],
+    "total": 189,
+    "distinct": 189,
+    "groups": [
+      {
+        "key": "A2:kursbuch:1",
+        "count": 63,
+        "firstTrack": 1,
+        "lastTrack": 63,
+        "missingTracks": 0
+      },
+      {
+        "key": "A2:kursbuch:2",
+        "count": 59,
+        "firstTrack": 1,
+        "lastTrack": 59,
+        "missingTracks": 0
+      },
+      {
+        "key": "A2:uebungsbuch:1",
+        "count": 67,
+        "firstTrack": 2,
+        "lastTrack": 68,
+        "missingTracks": 0
+      }
+    ],
+    "lessonMapping": "unresolved-no-deterministic-index"
+  },
+  "duplicates": [],
+  "parseableDocuments": [],
+  "blockedDocuments": [
+    {
+      "path": "03_COURSE_CONTENT/NETZWERK_A1/Netzwerk Neu A1 - Kursbuch.pdf",
+      "verdict": "sparse",
+      "reason": "far too little text for the page count; the pages are images, not text"
+    },
+    {
+      "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/Netzwerk neu A2 KB.pdf",
+      "verdict": "absent",
+      "reason": "the document carries no text layer at all; it is a picture of a book"
+    },
+    {
+      "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/Netzwerk neu A2 Kursbuch.pdf",
+      "verdict": "absent",
+      "reason": "the document carries no text layer at all; it is a picture of a book"
+    },
+    {
+      "path": "03_COURSE_CONTENT/NETZWERK_NEU_A2/Netzwerk neu A2 UB.pdf",
+      "verdict": "sparse",
+      "reason": "far too little text for the page count; the pages are images, not text"
+    }
+  ]
+}
