@@ -37,13 +37,24 @@
  * accepted answers do — Arabic options may be shown and explained but can never be the
  * thing that decides correctness.
  *
+ * Version 6 adds the curriculum: courses -> CEFR levels -> units -> lessons ->
+ * sections -> items, plus LEARNER PROGRESS in entirely separate tables.
+ *
+ * Two deliberate separations:
+ *   1. Content structure and learner progress never share a table. Completing a lesson
+ *      writes only to *_progress; it cannot touch review_cards, so course completion and
+ *      SRS mastery stay independent dimensions of "how well do I know this".
+ *   2. lesson_items reference content by (content_type, content_uuid) rather than by a
+ *      column per kind. Listening and pronunciation can therefore be added later as new
+ *      content_type values with no schema change.
+ *
  * Version 1 was never activated for learners (nativeStorageEnabled stayed false through
  * Gate 5), so no deployed v1 database exists and v2 is the first version any learner
  * database will see. A forward migration step becomes necessary only once a learner
  * database has actually been written.
  */
 
-export const SCHEMA_VERSION = 5;
+export const SCHEMA_VERSION = 6;
 
 export const SCHEMA_STATEMENTS = [
   `CREATE TABLE IF NOT EXISTS learner_profiles (
@@ -434,6 +445,228 @@ export const SCHEMA_STATEMENTS = [
     FOREIGN KEY (exercise_uuid) REFERENCES exercises(uuid) ON DELETE CASCADE
   )`,
 
+  /* ---------------------------------------------------------- curriculum */
+
+  `CREATE TABLE IF NOT EXISTS courses (
+    uuid TEXT PRIMARY KEY,
+    slug TEXT NOT NULL UNIQUE,
+    cefr_level TEXT NOT NULL DEFAULT '',
+    ordering INTEGER NOT NULL DEFAULT 0,
+    source_title TEXT,
+    source_publisher TEXT,
+    source_edition TEXT,
+    source_isbn TEXT,
+    content_status TEXT NOT NULL DEFAULT 'draft',
+    content_version INTEGER NOT NULL DEFAULT 1,
+    source_reference TEXT,
+    source_type TEXT,
+    verified_at INTEGER,
+    verified_by TEXT,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    revision INTEGER NOT NULL DEFAULT 1,
+    deleted INTEGER NOT NULL DEFAULT 0
+  )`,
+
+  /* A course may span several CEFR stages; most span one. */
+  `CREATE TABLE IF NOT EXISTS course_levels (
+    uuid TEXT PRIMARY KEY,
+    course_uuid TEXT NOT NULL,
+    cefr_level TEXT NOT NULL,
+    ordering INTEGER NOT NULL DEFAULT 0,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    revision INTEGER NOT NULL DEFAULT 1,
+    deleted INTEGER NOT NULL DEFAULT 0,
+    UNIQUE(course_uuid, cefr_level),
+    FOREIGN KEY (course_uuid) REFERENCES courses(uuid) ON DELETE CASCADE
+  )`,
+
+  `CREATE TABLE IF NOT EXISTS course_units (
+    uuid TEXT PRIMARY KEY,
+    course_uuid TEXT NOT NULL,
+    course_level_uuid TEXT,
+    slug TEXT NOT NULL,
+    ordering INTEGER NOT NULL DEFAULT 0,
+    content_status TEXT NOT NULL DEFAULT 'draft',
+    content_version INTEGER NOT NULL DEFAULT 1,
+    source_reference TEXT,
+    source_type TEXT,
+    verified_at INTEGER,
+    verified_by TEXT,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    revision INTEGER NOT NULL DEFAULT 1,
+    deleted INTEGER NOT NULL DEFAULT 0,
+    FOREIGN KEY (course_uuid) REFERENCES courses(uuid) ON DELETE CASCADE
+  )`,
+
+  `CREATE INDEX IF NOT EXISTS idx_course_units_course ON course_units (course_uuid, ordering)`,
+
+  `CREATE TABLE IF NOT EXISTS lessons (
+    uuid TEXT PRIMARY KEY,
+    unit_uuid TEXT NOT NULL,
+    slug TEXT NOT NULL,
+    cefr_level TEXT NOT NULL DEFAULT '',
+    ordering INTEGER NOT NULL DEFAULT 0,
+    content_status TEXT NOT NULL DEFAULT 'draft',
+    content_version INTEGER NOT NULL DEFAULT 1,
+    source_reference TEXT,
+    source_type TEXT,
+    verified_at INTEGER,
+    verified_by TEXT,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    revision INTEGER NOT NULL DEFAULT 1,
+    deleted INTEGER NOT NULL DEFAULT 0,
+    FOREIGN KEY (unit_uuid) REFERENCES course_units(uuid) ON DELETE CASCADE
+  )`,
+
+  `CREATE INDEX IF NOT EXISTS idx_lessons_unit ON lessons (unit_uuid, ordering)`,
+
+  `CREATE TABLE IF NOT EXISTS lesson_sections (
+    uuid TEXT PRIMARY KEY,
+    lesson_uuid TEXT NOT NULL,
+    slug TEXT NOT NULL,
+    section_kind TEXT NOT NULL DEFAULT 'practice',
+    ordering INTEGER NOT NULL DEFAULT 0,
+    content_status TEXT NOT NULL DEFAULT 'draft',
+    content_version INTEGER NOT NULL DEFAULT 1,
+    source_reference TEXT,
+    source_type TEXT,
+    verified_at INTEGER,
+    verified_by TEXT,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    revision INTEGER NOT NULL DEFAULT 1,
+    deleted INTEGER NOT NULL DEFAULT 0,
+    FOREIGN KEY (lesson_uuid) REFERENCES lessons(uuid) ON DELETE CASCADE
+  )`,
+
+  `CREATE INDEX IF NOT EXISTS idx_lesson_sections_lesson ON lesson_sections (lesson_uuid, ordering)`,
+
+  /*
+   * Membership: which canonical content a section teaches, in order. Referenced by
+   * (content_type, content_uuid) so listening and pronunciation become new type values
+   * rather than new columns.
+   */
+  `CREATE TABLE IF NOT EXISTS lesson_items (
+    uuid TEXT PRIMARY KEY,
+    section_uuid TEXT NOT NULL,
+    content_type TEXT NOT NULL,
+    content_uuid TEXT NOT NULL,
+    ordering INTEGER NOT NULL DEFAULT 0,
+    required INTEGER NOT NULL DEFAULT 1,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    revision INTEGER NOT NULL DEFAULT 1,
+    deleted INTEGER NOT NULL DEFAULT 0,
+    UNIQUE(section_uuid, content_type, content_uuid),
+    FOREIGN KEY (section_uuid) REFERENCES lesson_sections(uuid) ON DELETE CASCADE
+  )`,
+
+  `CREATE INDEX IF NOT EXISTS idx_lesson_items_section ON lesson_items (section_uuid, ordering)`,
+
+  `CREATE TABLE IF NOT EXISTS lesson_prerequisites (
+    uuid TEXT PRIMARY KEY,
+    lesson_uuid TEXT NOT NULL,
+    requires_lesson_uuid TEXT NOT NULL,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    revision INTEGER NOT NULL DEFAULT 1,
+    deleted INTEGER NOT NULL DEFAULT 0,
+    UNIQUE(lesson_uuid, requires_lesson_uuid),
+    FOREIGN KEY (lesson_uuid) REFERENCES lessons(uuid) ON DELETE CASCADE,
+    FOREIGN KEY (requires_lesson_uuid) REFERENCES lessons(uuid) ON DELETE CASCADE
+  )`,
+
+  /* Titles and descriptions for course/unit/lesson/section, language as a row. */
+  `CREATE TABLE IF NOT EXISTS curriculum_texts (
+    uuid TEXT PRIMARY KEY,
+    owner_type TEXT NOT NULL,
+    owner_uuid TEXT NOT NULL,
+    language TEXT NOT NULL,
+    kind TEXT NOT NULL,
+    text TEXT NOT NULL,
+    content_status TEXT NOT NULL DEFAULT 'draft',
+    content_version INTEGER NOT NULL DEFAULT 1,
+    source_reference TEXT,
+    source_type TEXT,
+    verified_at INTEGER,
+    verified_by TEXT,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    revision INTEGER NOT NULL DEFAULT 1,
+    deleted INTEGER NOT NULL DEFAULT 0,
+    UNIQUE(owner_type, owner_uuid, language, kind)
+  )`,
+
+  `CREATE INDEX IF NOT EXISTS idx_curriculum_texts_owner ON curriculum_texts (owner_type, owner_uuid)`,
+
+  /* ------------------------------------------------- learner progress ------
+   * Separate from content by construction. Nothing here writes to review_cards,
+   * so finishing a lesson can never alter SRS mastery, ease or due dates.
+   */
+
+  `CREATE TABLE IF NOT EXISTS course_progress (
+    uuid TEXT PRIMARY KEY,
+    profile_uuid TEXT NOT NULL,
+    course_uuid TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'not_started',
+    started_at INTEGER,
+    completed_at INTEGER,
+    last_lesson_uuid TEXT,
+    last_section_uuid TEXT,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    revision INTEGER NOT NULL DEFAULT 1,
+    deleted INTEGER NOT NULL DEFAULT 0,
+    UNIQUE(profile_uuid, course_uuid)
+  )`,
+
+  `CREATE TABLE IF NOT EXISTS lesson_progress (
+    uuid TEXT PRIMARY KEY,
+    profile_uuid TEXT NOT NULL,
+    lesson_uuid TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'not_started',
+    started_at INTEGER,
+    completed_at INTEGER,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    revision INTEGER NOT NULL DEFAULT 1,
+    deleted INTEGER NOT NULL DEFAULT 0,
+    UNIQUE(profile_uuid, lesson_uuid)
+  )`,
+
+  `CREATE INDEX IF NOT EXISTS idx_lesson_progress_profile ON lesson_progress (profile_uuid, status)`,
+
+  `CREATE TABLE IF NOT EXISTS section_progress (
+    uuid TEXT PRIMARY KEY,
+    profile_uuid TEXT NOT NULL,
+    section_uuid TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'not_started',
+    completed_at INTEGER,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    revision INTEGER NOT NULL DEFAULT 1,
+    deleted INTEGER NOT NULL DEFAULT 0,
+    UNIQUE(profile_uuid, section_uuid)
+  )`,
+
+  `CREATE TABLE IF NOT EXISTS cefr_progress (
+    uuid TEXT PRIMARY KEY,
+    profile_uuid TEXT NOT NULL,
+    cefr_level TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'not_started',
+    started_at INTEGER,
+    completed_at INTEGER,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    revision INTEGER NOT NULL DEFAULT 1,
+    deleted INTEGER NOT NULL DEFAULT 0,
+    UNIQUE(profile_uuid, cefr_level)
+  )`,
+
   `CREATE TABLE IF NOT EXISTS review_cards (
     uuid TEXT PRIMARY KEY,
     legacy_key TEXT,
@@ -752,6 +985,144 @@ export const TABLE_SPECS = [
     columns: [
       ["uuid", "uuid"], ["exercise_uuid", "exerciseUuid"], ["target_type", "targetType"],
       ["target_uuid", "targetUuid"],
+      ["created_at", "createdAt"], ["updated_at", "updatedAt"],
+      ["revision", "revision"], ["deleted", "deleted"]
+    ]
+  },
+  {
+    entity: "courses",
+    table: "courses",
+    columns: [
+      ["uuid", "uuid"], ["slug", "slug"], ["cefr_level", "cefrLevel"],
+      ["ordering", "ordering"], ["source_title", "sourceTitle"],
+      ["source_publisher", "sourcePublisher"], ["source_edition", "sourceEdition"],
+      ["source_isbn", "sourceIsbn"],
+      ["content_status", "contentStatus"], ["content_version", "contentVersion"],
+      ["source_reference", "sourceReference"], ["source_type", "sourceType"],
+      ["verified_at", "verifiedAt"], ["verified_by", "verifiedBy"],
+      ["created_at", "createdAt"], ["updated_at", "updatedAt"],
+      ["revision", "revision"], ["deleted", "deleted"]
+    ]
+  },
+  {
+    entity: "courseLevels",
+    table: "course_levels",
+    columns: [
+      ["uuid", "uuid"], ["course_uuid", "courseUuid"], ["cefr_level", "cefrLevel"],
+      ["ordering", "ordering"],
+      ["created_at", "createdAt"], ["updated_at", "updatedAt"],
+      ["revision", "revision"], ["deleted", "deleted"]
+    ]
+  },
+  {
+    entity: "courseUnits",
+    table: "course_units",
+    columns: [
+      ["uuid", "uuid"], ["course_uuid", "courseUuid"],
+      ["course_level_uuid", "courseLevelUuid"], ["slug", "slug"], ["ordering", "ordering"],
+      ["content_status", "contentStatus"], ["content_version", "contentVersion"],
+      ["source_reference", "sourceReference"], ["source_type", "sourceType"],
+      ["verified_at", "verifiedAt"], ["verified_by", "verifiedBy"],
+      ["created_at", "createdAt"], ["updated_at", "updatedAt"],
+      ["revision", "revision"], ["deleted", "deleted"]
+    ]
+  },
+  {
+    entity: "lessons",
+    table: "lessons",
+    columns: [
+      ["uuid", "uuid"], ["unit_uuid", "unitUuid"], ["slug", "slug"],
+      ["cefr_level", "cefrLevel"], ["ordering", "ordering"],
+      ["content_status", "contentStatus"], ["content_version", "contentVersion"],
+      ["source_reference", "sourceReference"], ["source_type", "sourceType"],
+      ["verified_at", "verifiedAt"], ["verified_by", "verifiedBy"],
+      ["created_at", "createdAt"], ["updated_at", "updatedAt"],
+      ["revision", "revision"], ["deleted", "deleted"]
+    ]
+  },
+  {
+    entity: "lessonSections",
+    table: "lesson_sections",
+    columns: [
+      ["uuid", "uuid"], ["lesson_uuid", "lessonUuid"], ["slug", "slug"],
+      ["section_kind", "sectionKind"], ["ordering", "ordering"],
+      ["content_status", "contentStatus"], ["content_version", "contentVersion"],
+      ["source_reference", "sourceReference"], ["source_type", "sourceType"],
+      ["verified_at", "verifiedAt"], ["verified_by", "verifiedBy"],
+      ["created_at", "createdAt"], ["updated_at", "updatedAt"],
+      ["revision", "revision"], ["deleted", "deleted"]
+    ]
+  },
+  {
+    entity: "lessonItems",
+    table: "lesson_items",
+    columns: [
+      ["uuid", "uuid"], ["section_uuid", "sectionUuid"], ["content_type", "contentType"],
+      ["content_uuid", "contentUuid"], ["ordering", "ordering"], ["required", "required"],
+      ["created_at", "createdAt"], ["updated_at", "updatedAt"],
+      ["revision", "revision"], ["deleted", "deleted"]
+    ]
+  },
+  {
+    entity: "lessonPrerequisites",
+    table: "lesson_prerequisites",
+    columns: [
+      ["uuid", "uuid"], ["lesson_uuid", "lessonUuid"],
+      ["requires_lesson_uuid", "requiresLessonUuid"],
+      ["created_at", "createdAt"], ["updated_at", "updatedAt"],
+      ["revision", "revision"], ["deleted", "deleted"]
+    ]
+  },
+  {
+    entity: "curriculumTexts",
+    table: "curriculum_texts",
+    columns: [
+      ["uuid", "uuid"], ["owner_type", "ownerType"], ["owner_uuid", "ownerUuid"],
+      ["language", "language"], ["kind", "kind"], ["text", "text"],
+      ["content_status", "contentStatus"], ["content_version", "contentVersion"],
+      ["source_reference", "sourceReference"], ["source_type", "sourceType"],
+      ["verified_at", "verifiedAt"], ["verified_by", "verifiedBy"],
+      ["created_at", "createdAt"], ["updated_at", "updatedAt"],
+      ["revision", "revision"], ["deleted", "deleted"]
+    ]
+  },
+  {
+    entity: "courseProgress",
+    table: "course_progress",
+    columns: [
+      ["uuid", "uuid"], ["profile_uuid", "profileUuid"], ["course_uuid", "courseUuid"],
+      ["status", "status"], ["started_at", "startedAt"], ["completed_at", "completedAt"],
+      ["last_lesson_uuid", "lastLessonUuid"], ["last_section_uuid", "lastSectionUuid"],
+      ["created_at", "createdAt"], ["updated_at", "updatedAt"],
+      ["revision", "revision"], ["deleted", "deleted"]
+    ]
+  },
+  {
+    entity: "lessonProgress",
+    table: "lesson_progress",
+    columns: [
+      ["uuid", "uuid"], ["profile_uuid", "profileUuid"], ["lesson_uuid", "lessonUuid"],
+      ["status", "status"], ["started_at", "startedAt"], ["completed_at", "completedAt"],
+      ["created_at", "createdAt"], ["updated_at", "updatedAt"],
+      ["revision", "revision"], ["deleted", "deleted"]
+    ]
+  },
+  {
+    entity: "sectionProgress",
+    table: "section_progress",
+    columns: [
+      ["uuid", "uuid"], ["profile_uuid", "profileUuid"], ["section_uuid", "sectionUuid"],
+      ["status", "status"], ["completed_at", "completedAt"],
+      ["created_at", "createdAt"], ["updated_at", "updatedAt"],
+      ["revision", "revision"], ["deleted", "deleted"]
+    ]
+  },
+  {
+    entity: "cefrProgress",
+    table: "cefr_progress",
+    columns: [
+      ["uuid", "uuid"], ["profile_uuid", "profileUuid"], ["cefr_level", "cefrLevel"],
+      ["status", "status"], ["started_at", "startedAt"], ["completed_at", "completedAt"],
       ["created_at", "createdAt"], ["updated_at", "updatedAt"],
       ["revision", "revision"], ["deleted", "deleted"]
     ]

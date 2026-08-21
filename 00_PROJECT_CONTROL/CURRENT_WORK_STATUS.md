@@ -19,7 +19,7 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
 *   **UI migration complete Git commit:** `60f2526` (feat: migrate the multiple-choice answers to Lit)
 *   **option (c) work Git commit:** `e872810` (fix: make the PWA actually work offline)
 *   **Gate 5 simulator PASSED commit:** `16807f9` (validated in Codemagic)
-*   **Last Update Timestamp:** 2026-08-21T15:10:00+03:00
+*   **Last Update Timestamp:** 2026-08-21T16:25:00+03:00
 
 ## Current Context
 *   **Current Phase:** PHASE 4 — MIGRATION MAPPING + SQLITE PARITY VALIDATION
@@ -57,6 +57,20 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
 *   **German/English scoring unchanged.** `validateArabicAnswer` survives as a pure matcher for non-scoring uses but is no longer in the submit path. `strictArabicAnswers` kept for settings compatibility; it now only tunes advisory wording.
 *   **No history touched:** no attempt, card, due date, ease, lapse, mastery or streak modified or recomputed. A test migrates a recognition card built up under the old Arabic-scored rules and asserts all 14 SRS fields survive field-for-field, including through SQLite.
 *   **Verification limit:** the in-app recognition flow was not reachable in a browser from a fresh seeded profile, because recognition cards unlock with future due dates. Covered by tests of the runtime wiring, the advisory evaluator, and the feedback component instead of a live session.
+
+## Feature E — Lessons / Courses / CEFR Structure (IMPLEMENTED)
+*   **Canonical schema v6** adds two deliberately separate groups. **Content:** `courses` (slug, CEFR level, ordering, book source metadata), `course_levels`, `course_units`, `lessons`, `lesson_sections` (kind: intro/vocabulary/grammar/reading/practice/review), `lesson_items`, `lesson_prerequisites`, `curriculum_texts`. **Progress:** `course_progress`, `lesson_progress`, `section_progress`, `cefr_progress`. 35 tables total.
+*   **Content and progress never share a table.** A lesson row knows nothing about who studied it; a progress row carries a `profile_uuid` and points at content by uuid. This is what keeps a course shareable and a learner's history private and per-profile.
+*   **Course progress does not touch SRS.** Nothing in `curriculum-service.js` reads or writes `review_cards`; a test greps the module for SRS identifiers and asserts they are absent, and another asserts a card object is unchanged across a completion. "I studied this lesson" and "I remember this word" stay separate claims, so a learner can finish a lesson and still owe reviews on its vocabulary.
+*   **Lesson items reference `(content_type, content_uuid)`**, so a section mixes vocabulary, sentences, grammar rules and exercises today, and `listening` / `pronunciation` become valid content types later with **no schema change**.
+*   **Progress percentages are derived, never stored**, so they cannot drift out of step with the lesson rows they summarize.
+*   **Resume is explicit about why**: `stored` (the saved point is still valid), `stored-point-stale` (it was completed, so move on), `first-available`, or `course-complete`.
+*   **Prerequisites fail safe.** A lesson requiring a lesson that does not exist stays locked rather than silently unlocking.
+*   **English and Arabic are peers** in `curriculum_texts`; a missing title is reported as `coverage.missing` rather than hidden, so "untranslated" is distinguishable from "not applicable".
+*   **Netzwerk A1 / Netzwerk neu A2 are representable as course sources** (title, publisher, edition, ISBN) — **no lesson content was authored or imported**.
+*   **Migration invents no curriculum.** All twelve curriculum and progress tables migrate empty, and no CEFR placement is guessed from a word's level. A test asserts this while confirming SRS fields still migrate intact.
+*   **Minimum UI:** `<df-course-outline>` (course → unit → lesson navigation, progress bar, locked lessons, resume marker; it dispatches `lesson-select` rather than navigating itself) and `<df-lesson-view>` (section and mixed-content assembly). Both read-only, both fed by the service, neither reaches storage.
+*   **Suite 399 → 453.**
 
 ## Feature D — Exercises (IMPLEMENTED)
 *   **Canonical schema v5**: `exercises` (slug, type, level, ordering, `answer_language`, lifecycle), `exercise_texts` (instruction/prompt/hint per language), `exercise_options` (choices and distractors with `is_expected` + `scoreable`), `exercise_targets` (links to vocabulary, sentence, or grammar rule).

@@ -3,7 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { createSqliteAdapter } from "../../01_APPLICATION/CURRENT_APP/src/platform/sqlite/adapter.js";
-import { SCHEMA_VERSION } from "../../01_APPLICATION/CURRENT_APP/src/platform/sqlite/schema.js";
+import { SCHEMA_VERSION, TABLE_SPECS } from "../../01_APPLICATION/CURRENT_APP/src/platform/sqlite/schema.js";
 import { createCanonicalRepositories } from "../../01_APPLICATION/CURRENT_APP/src/data/canonical-repositories.js";
 import { createNodeSqliteExecutor } from "../support/sqlite-node-executor.js";
 import { migrateToCanonical } from "../../01_APPLICATION/CURRENT_APP/src/migration/canonical-migration.js";
@@ -35,14 +35,12 @@ describe("SQLite canonical persistence adapter", () => {
     const tables = await executor.all(
       "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name", []
     );
-    expect(tables.map(t => t.name)).toEqual([
-      "accepted_answers", "exercise_options", "exercise_targets", "exercise_texts",
-      "exercises", "grammar_examples", "grammar_rules", "grammar_texts",
-      "grammar_topics", "learner_profiles", "migration_quarantine", "review_cards",
-      "review_events", "sentence_grammar", "sentence_tags", "sentence_texts",
-      "sentence_vocabulary", "sentences", "settings", "translations",
-      "vocabulary_grammar", "vocabulary_items", "vocabulary_meanings"
-    ]);
+    // Derived from TABLE_SPECS rather than hard-coded: every mapped entity must have a
+    // real table, and a new entity cannot be added without its table existing.
+    const created = tables.map(t => t.name);
+    for (const spec of TABLE_SPECS) {
+      expect(created, `missing table for entity ${spec.entity}`).toContain(spec.table);
+    }
   });
 
   it("imports a canonical dataset and reads it back unchanged", async () => {

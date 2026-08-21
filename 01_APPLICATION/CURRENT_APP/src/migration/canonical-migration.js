@@ -124,6 +124,22 @@ export function migrateToCanonical(snapshot = {}, options = {}) {
     exerciseTexts: [],
     exerciseOptions: [],
     exerciseTargets: [],
+    /*
+     * Curriculum is authored, and progress through it is earned. The legacy model has
+     * neither, so no course is invented and no CEFR placement is guessed.
+     */
+    courses: [],
+    courseLevels: [],
+    courseUnits: [],
+    lessons: [],
+    lessonSections: [],
+    lessonItems: [],
+    lessonPrerequisites: [],
+    curriculumTexts: [],
+    courseProgress: [],
+    lessonProgress: [],
+    sectionProgress: [],
+    cefrProgress: [],
     reviewCards: [],
     reviewEvents: [],
     quarantine: []

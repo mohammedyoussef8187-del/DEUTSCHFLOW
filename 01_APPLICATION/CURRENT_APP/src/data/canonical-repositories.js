@@ -41,6 +41,18 @@ export function createCanonicalRepositories(adapter) {
     exerciseTexts: readOnly("exerciseTexts"),
     exerciseOptions: readOnly("exerciseOptions"),
     exerciseTargets: readOnly("exerciseTargets"),
+    courses: readOnly("courses"),
+    courseLevels: readOnly("courseLevels"),
+    courseUnits: readOnly("courseUnits"),
+    lessons: readOnly("lessons"),
+    lessonSections: readOnly("lessonSections"),
+    lessonItems: readOnly("lessonItems"),
+    lessonPrerequisites: readOnly("lessonPrerequisites"),
+    curriculumTexts: readOnly("curriculumTexts"),
+    courseProgress: readOnly("courseProgress"),
+    lessonProgress: readOnly("lessonProgress"),
+    sectionProgress: readOnly("sectionProgress"),
+    cefrProgress: readOnly("cefrProgress"),
     cards: readOnly("reviewCards"),
     events: readOnly("reviewEvents")
   });
