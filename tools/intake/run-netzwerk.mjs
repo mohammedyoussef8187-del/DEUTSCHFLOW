@@ -85,7 +85,8 @@ export async function runNetzwerkChapter(repositories, built, options = {}) {
   }
 
   return repositories.lifecycle.transaction(async () => {
-    const written = await applyImport(repositories, built.mapped, { now });
+    // The plan above is exactly the one the write path needs; do not read it all twice.
+    const written = await applyImport(repositories, built.mapped, { now, plan });
     const services = createServices(repositories);
     const verification = await verifyImport(services, built.mapped, profileUuid, { repositories });
 

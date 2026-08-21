@@ -135,7 +135,8 @@ async function main() {
       return;
     }
 
-    const written = await applyImport(repositories, mapped);
+    // The plan above is exactly the one the write path needs; do not read it all twice.
+    const written = await applyImport(repositories, mapped, { plan });
     console.log("── written ──");
     console.log(JSON.stringify(written));
 

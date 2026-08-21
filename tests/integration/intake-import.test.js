@@ -234,6 +234,157 @@ describe("importing the sample", () => {
   });
 });
 
+/* ---------------------------------------------------------- idempotency */
+
+/*
+ * A re-import of unchanged content must be indistinguishable from never having run it.
+ *
+ * The upsert is what makes that hard: on conflict it advances `revision` and `updated_at`
+ * even when every meaningful field is identical, so an import that writes unconditionally
+ * reports a change on every run and `revision` stops meaning that content moved. These
+ * tests watch the SQL the store actually issues, so "wrote nothing" is proved rather than
+ * inferred from counts that would look the same either way.
+ */
+describe("a no-op import writes nothing at all", () => {
+  const TABLES = [
+    "courses", "courseLevels", "courseUnits", "lessons", "lessonSections", "lessonItems",
+    "curriculumTexts", "vocabulary", "meanings", "translations", "acceptedAnswers",
+    "sentences", "sentenceTexts", "exercises", "exerciseTexts", "exerciseOptions",
+    "exerciseTargets", "listeningItems", "listeningTexts", "listeningSpeakers",
+    "listeningSegments", "audioAssets"
+  ];
+
+  async function recordingStore() {
+    const executor = createNodeSqliteExecutor(":memory:");
+    cleanup.push(() => executor.close());
+    const sql = [];
+    const adapter = createSqliteAdapter({
+      ...executor,
+      exec: async statement => { sql.push(statement); return executor.exec(statement); },
+      run: async (statement, params) => { sql.push(statement); return executor.run(statement, params); },
+      transaction: async fn => { sql.push("BEGIN"); return executor.transaction(fn); }
+    });
+    await adapter.initializeSchema();
+    sql.length = 0;                        // The schema is in place; watch only the import.
+    return { repositories: createCanonicalRepositories(adapter), sql };
+  }
+
+  const writes = sql => sql.filter(statement => /^\s*(insert|update|delete)\b/i.test(statement));
+  const opened = sql => sql.filter(statement => /^\s*begin\b/i.test(statement));
+
+  const snapshot = async repositories => {
+    const rows = {};
+    for (const table of TABLES) rows[table] = await repositories[table].all();
+    return JSON.stringify(rows);
+  };
+
+  // Identity, revision and timestamp of every stored row, which is what a rewrite moves.
+  const stamps = async repositories => {
+    const out = {};
+    for (const table of TABLES) {
+      out[table] = (await repositories[table].all())
+        .map(row => [row.uuid, row.revision ?? null, row.updatedAt ?? null]);
+    }
+    return out;
+  };
+
+  it("creates the expected rows on the first import, each at revision 1", async () => {
+    const { repositories, sql } = await recordingStore();
+    const written = await applyImport(repositories, mapSample(), { now: NOW });
+
+    expect(written).toMatchObject({
+      courses: 1, vocabulary: 11, sentences: 10, listening: 1, exercises: 14
+    });
+    expect(writes(sql).length).toBeGreaterThan(0);
+    expect(opened(sql)).toHaveLength(1);   // one transaction for the whole batch
+
+    expect(await repositories.courses.count()).toBe(1);
+    expect(await repositories.lessons.count()).toBe(1);
+    expect(await repositories.lessonItems.count()).toBe(26);
+    for (const table of TABLES) {
+      for (const row of await repositories[table].all()) {
+        if (row.revision !== undefined) expect(row.revision, `${table} ${row.uuid}`).toBe(1);
+      }
+    }
+  });
+
+  it("issues no write statement at all on a second identical import", async () => {
+    const { repositories, sql } = await recordingStore();
+    await applyImport(repositories, mapSample(), { now: NOW });
+    const before = await snapshot(repositories);
+    sql.length = 0;
+
+    const written = await applyImport(repositories, mapSample(NOW + 5_000_000),
+      { now: NOW + 5_000_000 });
+
+    expect(writes(sql)).toEqual([]);
+    // Nothing to write, so not even a transaction is opened.
+    expect(opened(sql)).toEqual([]);
+    expect(written.skippedUnchanged).toBe(flattenRows(mapSample()).length);
+    // Byte-equivalent: not merely the same count of rows, the same rows.
+    expect(await snapshot(repositories)).toBe(before);
+  });
+
+  it("leaves revision and updatedAt untouched on every row", async () => {
+    const { repositories } = await recordingStore();
+    const mapped = mapSample();
+    await applyImport(repositories, mapped, { now: NOW });
+
+    const before = await stamps(repositories);
+    const courseBefore = await repositories.courses.get(mapped.keys.courseUuid);
+    expect(courseBefore.revision).toBe(1);
+
+    await applyImport(repositories, mapSample(NOW + 9_000_000), { now: NOW + 9_000_000 });
+
+    expect(await stamps(repositories)).toEqual(before);
+    const courseAfter = await repositories.courses.get(mapped.keys.courseUuid);
+    expect(courseAfter.revision).toBe(1);
+    expect(courseAfter.updatedAt).toBe(courseBefore.updatedAt);
+    expect(courseAfter).toEqual(courseBefore);
+  });
+
+  it("still advances the row a real change touches, and only that row", async () => {
+    const { repositories, sql } = await recordingStore();
+    const mapped = mapSample();
+    await applyImport(repositories, mapped, { now: NOW });
+
+    const courseBefore = await repositories.courses.get(mapped.keys.courseUuid);
+    const lessonBefore = await repositories.lessons.get(mapped.keys.lessonUuid);
+    sql.length = 0;
+
+    const changed = mapSample(NOW + 9_000_000);
+    changed.course.lessons[0].slug = "familiengeschichten-korrigiert";
+    await applyImport(repositories, changed, { now: NOW + 9_000_000 });
+
+    const lessonAfter = await repositories.lessons.get(mapped.keys.lessonUuid);
+    expect(lessonAfter.slug).toBe("familiengeschichten-korrigiert");
+    expect(lessonAfter.revision).toBe(lessonBefore.revision + 1);
+    expect(lessonAfter.updatedAt).toBeGreaterThan(lessonBefore.updatedAt);
+
+    // The course the lesson hangs off did not change, so it is not dragged along.
+    expect(await repositories.courses.get(mapped.keys.courseUuid)).toEqual(courseBefore);
+    expect(writes(sql).length).toBeGreaterThan(0);
+    expect(opened(sql)).toHaveLength(1);
+  });
+
+  it("touches no learner row when it re-imports", async () => {
+    const { repositories } = await recordingStore();
+    await applyImport(repositories, mapSample(), { now: NOW });
+    const before = {
+      cards: await repositories.cards.all(),
+      events: await repositories.events.all(),
+      progress: await repositories.courseProgress.all()
+    };
+
+    await applyImport(repositories, mapSample(NOW + 5_000_000), { now: NOW + 5_000_000 });
+
+    expect(await repositories.cards.all()).toEqual(before.cards);
+    expect(await repositories.events.all()).toEqual(before.events);
+    expect(await repositories.courseProgress.all()).toEqual(before.progress);
+  });
+});
+
+
 /* --------------------------------------------------------------- verify */
 
 describe("verification through the services", () => {

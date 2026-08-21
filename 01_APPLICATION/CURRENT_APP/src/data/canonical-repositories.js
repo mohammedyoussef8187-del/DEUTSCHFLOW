@@ -139,15 +139,20 @@ export function createCanonicalRepositories(adapter) {
    *
    * Upsert rather than insert, so re-importing corrected content updates in place
    * instead of colliding, which is what authoring actually needs.
+   *
+   * The parent row may be absent, and that is not a broken aggregate: it means the
+   * store already holds it unchanged. Writing it anyway would advance its revision
+   * and updated_at to say something moved when nothing did, so it is left alone and
+   * only its new children are saved.
    */
   const content = Object.freeze({
     async saveVocabulary({ item, meanings, translations, acceptedAnswers }, options) {
       return adapter.transaction(async () => {
-        await adapter.upsert("vocabularyItems", item, options);
+        if (item) await adapter.upsert("vocabularyItems", item, options);
         await upsertAll("vocabularyMeanings", meanings, options);
         await upsertAll("translations", translations, options);
         await upsertAll("acceptedAnswers", acceptedAnswers, options);
-        return item.uuid;
+        return item?.uuid ?? null;
       });
     },
 
@@ -163,28 +168,28 @@ export function createCanonicalRepositories(adapter) {
 
     async saveSentence({ sentence, texts, vocabulary, grammar, tags }, options) {
       return adapter.transaction(async () => {
-        await adapter.upsert("sentences", sentence, options);
+        if (sentence) await adapter.upsert("sentences", sentence, options);
         await upsertAll("sentenceTexts", texts, options);
         await upsertAll("sentenceVocabulary", vocabulary, options);
         await upsertAll("sentenceGrammar", grammar, options);
         await upsertAll("sentenceTags", tags, options);
-        return sentence.uuid;
+        return sentence?.uuid ?? null;
       });
     },
 
     async saveExercise({ exercise, texts, options: choices, targets }, options) {
       return adapter.transaction(async () => {
-        await adapter.upsert("exercises", exercise, options);
+        if (exercise) await adapter.upsert("exercises", exercise, options);
         await upsertAll("exerciseTexts", texts, options);
         await upsertAll("exerciseOptions", choices, options);
         await upsertAll("exerciseTargets", targets, options);
-        return exercise.uuid;
+        return exercise?.uuid ?? null;
       });
     },
 
     async saveCourse({ course, levels, units, lessons, sections, items, prerequisites, texts }, options) {
       return adapter.transaction(async () => {
-        await adapter.upsert("courses", course, options);
+        if (course) await adapter.upsert("courses", course, options);
         await upsertAll("courseLevels", levels, options);
         await upsertAll("courseUnits", units, options);
         await upsertAll("lessons", lessons, options);
@@ -192,7 +197,7 @@ export function createCanonicalRepositories(adapter) {
         await upsertAll("lessonItems", items, options);
         await upsertAll("lessonPrerequisites", prerequisites, options);
         await upsertAll("curriculumTexts", texts, options);
-        return course.uuid;
+        return course?.uuid ?? null;
       });
     },
 
@@ -200,13 +205,13 @@ export function createCanonicalRepositories(adapter) {
       return adapter.transaction(async () => {
         // The asset first: the activity references it.
         if (audio) await adapter.upsert("audioAssets", audio, options);
-        await adapter.upsert("listeningItems", item, options);
+        if (item) await adapter.upsert("listeningItems", item, options);
         await upsertAll("listeningTexts", texts, options);
         await upsertAll("listeningSpeakers", speakers, options);
         await upsertAll("listeningSegments", segments, options);
         await upsertAll("listeningSegmentTexts", segmentTexts, options);
         await upsertAll("listeningLinks", links, options);
-        return item.uuid;
+        return item?.uuid ?? null;
       });
     },
 

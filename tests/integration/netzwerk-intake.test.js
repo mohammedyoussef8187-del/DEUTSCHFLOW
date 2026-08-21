@@ -762,23 +762,14 @@ describe("Netzwerk neu A2 course structure", () => {
     expect(result.plan.unchanged).toHaveLength(6);
 
     /*
-     * Identity, provenance and content are all preserved. `revision` is excluded on
-     * purpose: re-writing an aggregate whose content is unchanged still advances the
-     * row's revision, which is why the diff treats revision as bookkeeping rather than
-     * as a change — and why these rows were planned as `unchanged`.
+     * Byte-identical, `revision` and `updatedAt` included: rows the diff planned as
+     * `unchanged` are never written, so nothing about them moves. Anything less than
+     * whole-row equality here would hide exactly the defect this proves is gone.
      */
-    const content = row => {
-      const { revision, updatedAt, ...rest } = row;
-      return rest;
-    };
-
-    expect(content(await repositories.courses.get(reviewed.course.uuid)))
-      .toEqual(content(reviewed.course));
-    expect(content(await repositories.courseUnits.get(reviewed.unit.uuid)))
-      .toEqual(content(reviewed.unit));
-    // The reviewed Kapitel 2 lesson keeps its uuid, slug, ordering and citation.
-    expect(content(await repositories.lessons.get(reviewed.lesson.uuid)))
-      .toEqual(content(reviewed.lesson));
+    expect(await repositories.courses.get(reviewed.course.uuid)).toEqual(reviewed.course);
+    expect(await repositories.courseUnits.get(reviewed.unit.uuid)).toEqual(reviewed.unit);
+    // The reviewed Kapitel 2 lesson keeps its uuid, slug, ordering, citation and revision.
+    expect(await repositories.lessons.get(reviewed.lesson.uuid)).toEqual(reviewed.lesson);
     // The registered assets are never touched by a structural import.
     expect(await repositories.audioAssets.all()).toEqual(reviewed.assets);
   });

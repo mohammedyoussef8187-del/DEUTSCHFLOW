@@ -84,7 +84,10 @@ export function classifyRow(existing, proposed) {
 /** Every row a mapping would write, flattened with the entity it belongs to. */
 export function flattenRows(mapped) {
   const rows = [];
-  const push = (entity, list) => { for (const row of list ?? []) rows.push({ entity, row }); };
+  const push = (entity, list) => {
+    // A pruned batch carries an absent parent whose children still need writing.
+    for (const row of list ?? []) if (row) rows.push({ entity, row });
+  };
 
   push("courses", [mapped.course.course]);
   push("courseLevels", mapped.course.levels);
@@ -111,7 +114,7 @@ export function flattenRows(mapped) {
    * A batch may legitimately have no listening activity: source-only audio whose
    * lesson placement is unproven is a file, not something to listen to in a lesson.
    */
-  if (mapped.listening) {
+  if (mapped.listening?.item) {
     if (mapped.listening.audio) push("audioAssets", [mapped.listening.audio]);
     push("listeningItems", [mapped.listening.item]);
     push("listeningTexts", mapped.listening.texts);
@@ -156,6 +159,92 @@ export async function planImport(repositories, mapped) {
 }
 
 /**
+ * Drop from a mapped batch every row the store already holds unchanged.
+ *
+ * Pure. It returns a batch of the same shape carrying only rows that would really
+ * create or update, plus what was skipped, so an import can report honestly that it
+ * reused rows rather than pretending it wrote them.
+ *
+ * A parent is dropped independently of its children: an unchanged course whose twelfth
+ * chapter is new must write the chapter and leave the course row alone, which is why
+ * the aggregate writers accept an absent parent.
+ */
+export function pruneUnchanged(mapped, unchanged) {
+  const skip = new Set(unchanged ?? []);
+  const keep = row => Boolean(row) && !skip.has(row.uuid);
+  const one = row => (keep(row) ? row : null);
+  const filter = rows => (rows ?? []).filter(keep);
+
+  const skipped = { vocabulary: 0 };
+
+  const course = {
+    course: one(mapped.course.course),
+    levels: filter(mapped.course.levels),
+    units: filter(mapped.course.units),
+    lessons: filter(mapped.course.lessons),
+    sections: filter(mapped.course.sections),
+    items: filter(mapped.course.items),
+    prerequisites: mapped.course.prerequisites ?? [],
+    texts: filter(mapped.course.texts)
+  };
+
+  /*
+   * An aggregate is kept when ANY of its rows still needs writing, with its unchanged
+   * rows pruned out, so a sentence whose Arabic translation was corrected rewrites the
+   * translation without touching the sentence.
+   */
+  const vocabulary = (mapped.vocabulary ?? []).map(entry => ({
+    item: one(entry.item),
+    meanings: filter(entry.meanings),
+    translations: filter(entry.translations),
+    acceptedAnswers: filter(entry.acceptedAnswers)
+  })).filter(entry => {
+    const pending = Boolean(entry.item) || entry.meanings.length ||
+      entry.translations.length || entry.acceptedAnswers.length;
+    if (!pending) skipped.vocabulary += 1;
+    return pending;
+  });
+
+  const sentences = (mapped.sentences ?? []).map(entry => ({
+    sentence: one(entry.sentence),
+    texts: filter(entry.texts)
+  })).filter(entry => Boolean(entry.sentence) || entry.texts.length);
+
+  const exercises = (mapped.exercises ?? []).map(entry => ({
+    exercise: one(entry.exercise),
+    texts: filter(entry.texts),
+    options: filter(entry.options),
+    targets: filter(entry.targets)
+  })).filter(entry => Boolean(entry.exercise) || entry.texts.length ||
+    entry.options.length || entry.targets.length);
+
+  /*
+   * A listening activity is kept or dropped whole. Its rows are only ever planned when
+   * the item itself is present, so pruning the item out from under its own segments
+   * would hide them from the row count and silently drop a real change.
+   */
+  const listeningRows = mapped.listening?.item
+    ? [mapped.listening.audio, mapped.listening.item, ...(mapped.listening.texts ?? []),
+       ...(mapped.listening.speakers ?? []), ...(mapped.listening.segments ?? []),
+       ...(mapped.listening.segmentTexts ?? [])]
+    : [];
+  const listening = listeningRows.some(keep) ? mapped.listening : null;
+
+  const batch = {
+    ...mapped,
+    course,
+    audioAssets: filter(mapped.audioAssets),
+    vocabulary,
+    sentences,
+    exercises,
+    listening
+  };
+  const rowCount = flattenRows(batch).length;
+
+  return { batch, rowCount, skipped, skippedTotal: flattenRows(mapped).length - rowCount };
+}
+
+/**
  * Apply a mapping through the repository write APIs.
  *
  * Order matters because foreign keys do: the course frame before the content that hangs
@@ -167,18 +256,47 @@ export async function applyImport(repositories, mapped, options = {}) {
   if (!repositories.write) throw new Error("This store is read-only; nothing was imported");
 
   /*
+   * Consult the diff BEFORE writing.
+   *
+   * An upsert is never free: on conflict it advances the revision and updated_at of the
+   * row even when every meaningful field is identical. Rewriting rows the store already
+   * holds unchanged would make a re-run indistinguishable from an edit, and would erode
+   * `revision` as the signal that content actually moved.
+   *
+   * The plan already decides this, over exactly the fields that carry meaning, so the
+   * batch is pruned to what would really create or update. A caller that has already
+   * planned can pass its plan in rather than paying for the read twice.
+   */
+  const plan = options.plan ?? await planImport(repositories, mapped);
+  const pending = pruneUnchanged(mapped, plan.unchanged.map(entry => entry.uuid));
+
+  if (!pending.rowCount) {
+    // Nothing to write: no transaction is opened and no row is touched at all.
+    return {
+      courses: 0, audioAssets: 0, vocabulary: 0,
+      vocabularyReused: pending.skipped.vocabulary,
+      sentences: 0, listening: 0, exercises: 0,
+      skippedUnchanged: pending.skippedTotal
+    };
+  }
+
+  /*
    * ONE transaction around the whole batch, not one per aggregate. Each aggregate is
    * already atomic, but a failure in a later one used to leave earlier ones committed —
    * a half-imported lesson that reads as a real one. Nesting runs inline (the adapter
    * tracks depth), so the outermost call owns the single commit and rollback.
    */
-  return repositories.lifecycle.transaction(() => writeBatch(repositories, mapped, now));
+  return repositories.lifecycle.transaction(() => writeBatch(repositories, pending, now));
 }
 
-async function writeBatch(repositories, mapped, now) {
+async function writeBatch(repositories, pending, now) {
+  const mapped = pending.batch;
   const written = {
-    courses: 0, audioAssets: 0, vocabulary: 0, vocabularyReused: 0,
-    sentences: 0, listening: 0, exercises: 0
+    courses: 0, audioAssets: 0, vocabulary: 0,
+    // A row the store already holds unchanged is reused, never rewritten.
+    vocabularyReused: pending.skipped.vocabulary,
+    sentences: 0, listening: 0, exercises: 0,
+    skippedUnchanged: pending.skippedTotal
   };
 
   await repositories.write.content.saveCourse({
@@ -192,7 +310,7 @@ async function writeBatch(repositories, mapped, now) {
     prerequisites: mapped.course.prerequisites,
     texts: mapped.course.texts
   }, { now });
-  written.courses = 1;
+  written.courses = mapped.course.course ? 1 : 0;
 
   /*
    * Source-only assets are registered in their own right. They are upserted rather than
@@ -211,7 +329,7 @@ async function writeBatch(repositories, mapped, now) {
      * was first read from, and this lesson joins it through lesson_items instead.
      * Rewriting would silently move the citation to whichever episode imported last.
      */
-    if (await repositories.vocabulary.exists(entry.item.uuid)) {
+    if (!entry.item || await repositories.vocabulary.exists(entry.item.uuid)) {
       written.vocabularyReused += 1;
       continue;
     }
@@ -223,7 +341,7 @@ async function writeBatch(repositories, mapped, now) {
     written.sentences += 1;
   }
 
-  if (mapped.listening) {
+  if (mapped.listening?.item) {
     await repositories.write.content.saveListening(mapped.listening, { now });
     written.listening = 1;
   }
@@ -241,7 +359,8 @@ async function writeBatch(repositories, mapped, now) {
   // bump the course revision for nothing.
   if ((mapped.course.items ?? []).length) {
     await repositories.write.content.saveCourse({
-      course: mapped.course.course,
+      // Only the items are hung here; the course row is already correct.
+      course: null,
       levels: [], units: [], lessons: [], sections: [],
       items: mapped.course.items,
       prerequisites: [], texts: []
