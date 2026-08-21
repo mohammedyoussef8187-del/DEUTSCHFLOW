@@ -13,6 +13,7 @@ import "./ui/components/df-answer-input.js";
 import "./ui/components/df-answer-actions.js";
 import "./ui/components/df-rating-row.js";
 import "./ui/components/df-answer-feedback.js";
+import "./ui/components/df-question-prompt.js";
 
 (function(){
   "use strict";
@@ -723,16 +724,17 @@ async function submitAnswer(state,payload){
   }
   function itemTypeLabel(t){return({noun:"اسم",word:"كلمة",phrase:"تركيب",sentence:"جملة"})[t]||t;}
 function renderQuestion(state,q){
-    const result=state.session.result;let prompt=`<section class="card question-card"><div class="question-label">${q.label}</div><div class="${q.promptLang==='de'?'question-de':'question-ar'}" ${q.promptLang==='de'?'lang="de"':''}>${DF.esc(q.prompt)}</div>`;
-    const canShowPron=state.settings.showPronunciation&&q.word.pronunciation&&(q.promptLang==="de"||(q.usedHint&&state.settings.difficultyMode!=="hard"));
-    if(canShowPron)prompt+=`<div class="pronunciation">${DF.esc(q.word.pronunciation)}</div>`;
+    const result=state.session.result;
+    /* التلميحات تُحسب هنا بدوال المجال، والمكوّن يعرضها فقط. */
+    const hints=[];
     if(q.usedHint&&q.skill==="recall"){
       const rest=DF.splitArticle(q.word.german).rest;
-      const first=rest.charAt(0).toUpperCase(),length=DF.normalizeGerman(rest).replace(/\s/g,"").length;
-      prompt+=`<div class="word-details"><span class="pill due">الحرف الأول: <b lang="de">${DF.esc(first)}</b></span><span class="pill due">عدد الحروف تقريباً: ${length}</span></div>`;
+      hints.push({text:"الحرف الأول:",value:rest.charAt(0).toUpperCase()});
+      hints.push({text:"عدد الحروف تقريباً: "+DF.normalizeGerman(rest).replace(/\s/g,"").length});
     }
-    if(q.usedHint&&q.skill==="recognition")prompt+=`<div class="word-details"><span class="pill due">عدد كلمات المعنى التقريبي: ${DF.normalizeArabic(q.word.arabic).split(" ").filter(Boolean).length}</span></div>`;
-    prompt+=`</section>`;
+    if(q.usedHint&&q.skill==="recognition")hints.push({text:"عدد كلمات المعنى التقريبي: "+DF.normalizeArabic(q.word.arabic).split(" ").filter(Boolean).length});
+    const canShowPron=state.settings.showPronunciation&&q.word.pronunciation&&(q.promptLang==="de"||(q.usedHint&&state.settings.difficultyMode!=="hard"));
+    const prompt=`<df-question-prompt label="${DF.esc(q.label)}" prompt="${DF.esc(q.prompt)}" promptlang="${q.promptLang==="de"?"de":"ar"}" pronunciation="${canShowPron?DF.esc(q.word.pronunciation):""}" hints="${hints.length?DF.esc(JSON.stringify(hints)):""}"></df-question-prompt>`;
     let body="";
     if(q.choices)body=`<div class="choices">${q.choices.map(c=>{let cls="answer-btn";if(result){if(String(c.id)===String(q.correctId))cls+=" correct";else if(String(c.id)===String(state.lastChoice))cls+=" wrong";else cls+=" dim";}return `<button class="${cls}" data-action="choose-answer" data-choice="${DF.esc(c.id)}" ${result?'disabled':''}><span lang="de">${DF.esc(c.label)}</span></button>`;}).join("")}</div>`;
     else if(q.skill==="order")body=renderOrder(state,q,result);
