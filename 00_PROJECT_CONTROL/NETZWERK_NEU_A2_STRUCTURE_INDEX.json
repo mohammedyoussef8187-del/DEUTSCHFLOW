@@ -1,0 +1,1450 @@
+{
+  "indexVersion": 1,
+  "generatedAt": "2026-08-22",
+  "scope": "Netzwerk neu A2 official rights-safe structure metadata",
+  "constraints": {
+    "officialSourcesOnly": true,
+    "noEducationalBodyText": true,
+    "noPublisherAudio": true,
+    "audioPageExerciseMappings": "all null",
+    "localScans": "comparison-only",
+    "kapitel1TitlePolicy": "preserve printed title and transcript anomaly separately"
+  },
+  "recordCounts": {
+    "editions": 4,
+    "officialResources": 26,
+    "chapters": 12,
+    "audioRangeRelations": 24
+  },
+  "editions": [
+    {
+      "id": "edition-full-a2-kursbuch",
+      "edition": "full A2 print edition",
+      "component": "kursbuch",
+      "isbn": "978-3-12-607164-2",
+      "alternateHybridIsbn": "978-3-12-607153-6",
+      "pages": 176,
+      "officialEvidence": [
+        "source-product-full-kb"
+      ]
+    },
+    {
+      "id": "edition-full-a2-uebungsbuch",
+      "edition": "full A2 print edition",
+      "component": "uebungsbuch",
+      "isbn": "978-3-12-607165-9",
+      "alternateHybridIsbn": "978-3-12-607018-8",
+      "pages": 176,
+      "officialEvidence": [
+        "source-product-full-ueb"
+      ]
+    },
+    {
+      "id": "edition-a2-1-combined",
+      "edition": "A2.1 combined half edition",
+      "component": "kurs-und-uebungsbuch",
+      "isbn": "978-3-12-607162-8",
+      "alternateHybridIsbn": "978-3-12-607286-1",
+      "pages": 176,
+      "officialEvidence": [
+        "source-product-a2-1",
+        "source-plan-a2-1"
+      ]
+    },
+    {
+      "id": "edition-a2-2-combined",
+      "edition": "A2.2 combined half edition",
+      "component": "kurs-und-uebungsbuch",
+      "isbn": "978-3-12-607163-5",
+      "alternateHybridIsbn": "978-3-12-607287-8",
+      "pages": 176,
+      "officialEvidence": [
+        "source-product-a2-2",
+        "source-plan-a2-2"
+      ]
+    }
+  ],
+  "officialResources": [
+    {
+      "id": "source-product-full-kb",
+      "resourceType": "official-product-record",
+      "component": "kursbuch",
+      "scope": "full A2",
+      "officialUrls": [
+        "https://www.klett-sprachen.de/netzwerk-neu-a2/t-1/9783126071642",
+        "https://www.allango.net/api/product/MAXP-607164"
+      ],
+      "officialDomains": [
+        "www.klett-sprachen.de",
+        "www.allango.net"
+      ],
+      "access": "public-product-metadata",
+      "verificationStatus": "VERIFIED_OFFICIAL_SOURCE",
+      "localRelation": "local KB scans report the same ISBN; comparison-only"
+    },
+    {
+      "id": "source-product-full-ueb",
+      "resourceType": "official-product-record",
+      "component": "uebungsbuch",
+      "scope": "full A2",
+      "officialUrls": [
+        "https://www.klett-sprachen.de/netzwerk-neu-a2/t-1/9783126071659",
+        "https://www.allango.net/api/product/MAXP-607165"
+      ],
+      "officialDomains": [
+        "www.klett-sprachen.de",
+        "www.allango.net"
+      ],
+      "access": "public-product-metadata",
+      "verificationStatus": "VERIFIED_OFFICIAL_SOURCE",
+      "localRelation": "local ÜB scan reports the same ISBN; comparison-only"
+    },
+    {
+      "id": "source-product-a2-1",
+      "resourceType": "official-product-record",
+      "component": "kurs-und-uebungsbuch",
+      "scope": "A2.1",
+      "officialUrls": [
+        "https://www.allango.net/api/product/MAXP-607162",
+        "https://www.klett-sprachen.de/netzwerk-neu-a2-1-hybride-ausgabe-allango/t-1/9783126072861"
+      ],
+      "officialDomains": [
+        "www.allango.net",
+        "www.klett-sprachen.de"
+      ],
+      "access": "public-product-metadata/licensed-content",
+      "verificationStatus": "VERIFIED_OFFICIAL_SOURCE",
+      "localRelation": null
+    },
+    {
+      "id": "source-product-a2-2",
+      "resourceType": "official-product-record",
+      "component": "kurs-und-uebungsbuch",
+      "scope": "A2.2",
+      "officialUrls": [
+        "https://www.allango.net/api/product/MAXP-607163",
+        "https://www.klett-sprachen.de/netzwerk-neu-a2-2-hybride-ausgabe-allango/t-1/9783126072878"
+      ],
+      "officialDomains": [
+        "www.allango.net",
+        "www.klett-sprachen.de"
+      ],
+      "access": "public-product-metadata/licensed-content",
+      "verificationStatus": "VERIFIED_OFFICIAL_SOURCE",
+      "localRelation": null
+    },
+    {
+      "id": "source-plan-a2-1",
+      "resourceType": "pacing-plan",
+      "component": "kurs-und-uebungsbuch",
+      "scope": "Kapitel 1-6",
+      "officialUrls": [
+        "https://www.klett-sprachen.de/downloads/31656/netzwerk-neu-a2-1-stoffverteilungsplan/pdf"
+      ],
+      "officialDomains": [
+        "www.klett-sprachen.de"
+      ],
+      "access": "public",
+      "verificationStatus": "VERIFIED_OFFICIAL_SOURCE",
+      "localRelation": "half-edition pages only"
+    },
+    {
+      "id": "source-plan-a2-2",
+      "resourceType": "pacing-plan",
+      "component": "kurs-und-uebungsbuch",
+      "scope": "Kapitel 7-12",
+      "officialUrls": [
+        "https://www.klett-sprachen.de/downloads/31657/netzwerk-neu-a2-2-stoffverteilungsplan/pdf"
+      ],
+      "officialDomains": [
+        "www.klett-sprachen.de"
+      ],
+      "access": "public",
+      "verificationStatus": "VERIFIED_OFFICIAL_SOURCE",
+      "localRelation": "half-edition pages only"
+    },
+    {
+      "id": "source-online-overview-1-6",
+      "resourceType": "online-exercise-index",
+      "component": "kursbuch",
+      "scope": "Kapitel 1-6",
+      "officialUrls": [
+        "https://www.klett-sprachen.de/downloads/26412/netzwerk-neu-a2-uebersicht-online-uebungen-kapitel-1-6/pdf"
+      ],
+      "officialDomains": [
+        "www.klett-sprachen.de"
+      ],
+      "access": "public",
+      "verificationStatus": "VERIFIED_OFFICIAL_SOURCE",
+      "localRelation": null
+    },
+    {
+      "id": "source-online-overview-7-12",
+      "resourceType": "online-exercise-index",
+      "component": "kursbuch",
+      "scope": "Kapitel 7-12",
+      "officialUrls": [
+        "https://www.klett-sprachen.de/downloads/26413/netzwerk-neu-a2-uebersicht-online-uebungen-kapitel-7-12/pdf"
+      ],
+      "officialDomains": [
+        "www.klett-sprachen.de"
+      ],
+      "access": "public",
+      "verificationStatus": "VERIFIED_OFFICIAL_SOURCE",
+      "localRelation": null
+    },
+    {
+      "id": "source-clip-overview",
+      "resourceType": "clip-index",
+      "component": "kursbuch",
+      "scope": "Kapitel 1-12",
+      "officialUrls": [
+        "https://www.klett-sprachen.de/downloads/26408/netzwerk-neu-a2-uebersicht-clips-kapitel-1-12/pdf"
+      ],
+      "officialDomains": [
+        "www.klett-sprachen.de"
+      ],
+      "access": "public",
+      "verificationStatus": "VERIFIED_OFFICIAL_SOURCE",
+      "localRelation": null
+    },
+    {
+      "id": "source-copy-templates",
+      "resourceType": "copy-template-index",
+      "component": "supplement",
+      "scope": "Kapitel 1-12",
+      "officialUrls": [
+        "https://www.klett-sprachen.de/downloads/28003/netzwerk-neu-a2-kopiervorlagen-fuer-den-online-unterricht/zip"
+      ],
+      "officialDomains": [
+        "www.klett-sprachen.de"
+      ],
+      "access": "public",
+      "verificationStatus": "VERIFIED_OFFICIAL_SOURCE",
+      "localRelation": null
+    },
+    {
+      "id": "source-audio-transcript-kb-1-6",
+      "resourceType": "audio-transcript-index",
+      "component": "kursbuch",
+      "scope": "Kapitel 1-6",
+      "officialUrls": [
+        "https://www.klett-sprachen.de/downloads/23661/netzwerk-neu-a2-transkript-audios-kursbuch-kapitel-1-6/pdf"
+      ],
+      "officialDomains": [
+        "www.klett-sprachen.de"
+      ],
+      "access": "public",
+      "verificationStatus": "VERIFIED_OFFICIAL_SOURCE",
+      "localRelation": "maps local KB CD1 files to component/disc/track/Kapitel only"
+    },
+    {
+      "id": "source-audio-transcript-kb-7-12",
+      "resourceType": "audio-transcript-index",
+      "component": "kursbuch",
+      "scope": "Kapitel 7-12",
+      "officialUrls": [
+        "https://www.klett-sprachen.de/downloads/24678/netzwerk-neu-a2-transkript-audios-kursbuch-kapitel-7-12/pdf"
+      ],
+      "officialDomains": [
+        "www.klett-sprachen.de"
+      ],
+      "access": "public",
+      "verificationStatus": "VERIFIED_OFFICIAL_SOURCE",
+      "localRelation": "maps local KB CD2 files to component/disc/track/Kapitel only"
+    },
+    {
+      "id": "source-audio-transcript-ueb-1-6",
+      "resourceType": "audio-transcript-index",
+      "component": "uebungsbuch",
+      "scope": "Kapitel 1-6",
+      "officialUrls": [
+        "https://www.klett-sprachen.de/downloads/23662/netzwerk-neu-a2-transkript-audios-uebungsbuch-kapitel-1-6/pdf"
+      ],
+      "officialDomains": [
+        "www.klett-sprachen.de"
+      ],
+      "access": "public",
+      "verificationStatus": "VERIFIED_OFFICIAL_SOURCE",
+      "localRelation": "maps local ÜB CD1 files to component/disc/track/Kapitel only; local track 1 absent"
+    },
+    {
+      "id": "source-audio-transcript-ueb-7-12",
+      "resourceType": "audio-transcript-index",
+      "component": "uebungsbuch",
+      "scope": "Kapitel 7-12",
+      "officialUrls": [
+        "https://www.klett-sprachen.de/downloads/24679/netzwerk-neu-a2-transkript-audios-uebungsbuch-kapitel-7-12/pdf"
+      ],
+      "officialDomains": [
+        "www.klett-sprachen.de"
+      ],
+      "access": "public",
+      "verificationStatus": "VERIFIED_OFFICIAL_SOURCE",
+      "localRelation": "no corresponding local ÜB CD2 files in the 189-file inventory"
+    },
+    {
+      "id": "source-teacher-board-k1",
+      "resourceType": "teacher-board",
+      "component": "kursbuch",
+      "scope": "Kapitel 1",
+      "officialUrls": [
+        "https://einstufungstests.klett-sprachen.de/eks/Netzwerk-neu-A2-TB/files/lessons/lesson-1-1/Tafel-1-Lehrerhandreichung.pdf"
+      ],
+      "officialDomains": [
+        "einstufungstests.klett-sprachen.de"
+      ],
+      "access": "public",
+      "verificationStatus": "VERIFIED_OFFICIAL_SOURCE",
+      "localRelation": "does not prove numbered audio mapping"
+    },
+    {
+      "id": "source-teacher-board-k2",
+      "resourceType": "teacher-board",
+      "component": "kursbuch",
+      "scope": "Kapitel 2",
+      "officialUrls": [
+        "https://einstufungstests.klett-sprachen.de/eks/Netzwerk-neu-A2-TB/files/lessons/lesson-2-1/Tafel-2-Lehrerhandreichung.pdf"
+      ],
+      "officialDomains": [
+        "einstufungstests.klett-sprachen.de"
+      ],
+      "access": "public",
+      "verificationStatus": "VERIFIED_OFFICIAL_SOURCE",
+      "localRelation": "does not prove numbered audio mapping"
+    },
+    {
+      "id": "source-teacher-board-k3",
+      "resourceType": "teacher-board",
+      "component": "kursbuch",
+      "scope": "Kapitel 3",
+      "officialUrls": [
+        "https://einstufungstests.klett-sprachen.de/eks/Netzwerk-neu-A2-TB/files/lessons/lesson-3-1/Tafel-3-Lehrerhandreichung.pdf"
+      ],
+      "officialDomains": [
+        "einstufungstests.klett-sprachen.de"
+      ],
+      "access": "public",
+      "verificationStatus": "VERIFIED_OFFICIAL_SOURCE",
+      "localRelation": "does not prove numbered audio mapping"
+    },
+    {
+      "id": "source-teacher-board-k4",
+      "resourceType": "teacher-board",
+      "component": "kursbuch",
+      "scope": "Kapitel 4",
+      "officialUrls": [
+        "https://einstufungstests.klett-sprachen.de/eks/Netzwerk-neu-A2-TB/files/lessons/lesson-4-1/Tafel-4-Lehrerhandreichung.pdf"
+      ],
+      "officialDomains": [
+        "einstufungstests.klett-sprachen.de"
+      ],
+      "access": "public",
+      "verificationStatus": "VERIFIED_OFFICIAL_SOURCE",
+      "localRelation": "does not prove numbered audio mapping"
+    },
+    {
+      "id": "source-teacher-board-k5",
+      "resourceType": "teacher-board",
+      "component": "kursbuch",
+      "scope": "Kapitel 5",
+      "officialUrls": [
+        "https://einstufungstests.klett-sprachen.de/eks/Netzwerk-neu-A2-TB/files/lessons/lesson-5-1/Tafel-5-Lehrerhandreichung.pdf"
+      ],
+      "officialDomains": [
+        "einstufungstests.klett-sprachen.de"
+      ],
+      "access": "public",
+      "verificationStatus": "VERIFIED_OFFICIAL_SOURCE",
+      "localRelation": "does not prove numbered audio mapping"
+    },
+    {
+      "id": "source-teacher-board-k6",
+      "resourceType": "teacher-board",
+      "component": "kursbuch",
+      "scope": "Kapitel 6",
+      "officialUrls": [
+        "https://einstufungstests.klett-sprachen.de/eks/Netzwerk-neu-A2-TB/files/lessons/lesson-6-1/Tafel-6-Lehrerhandreichung.pdf"
+      ],
+      "officialDomains": [
+        "einstufungstests.klett-sprachen.de"
+      ],
+      "access": "public",
+      "verificationStatus": "VERIFIED_OFFICIAL_SOURCE",
+      "localRelation": "does not prove numbered audio mapping"
+    },
+    {
+      "id": "source-teacher-board-k7",
+      "resourceType": "teacher-board",
+      "component": "kursbuch",
+      "scope": "Kapitel 7",
+      "officialUrls": [
+        "https://einstufungstests.klett-sprachen.de/eks/Netzwerk-neu-A2-TB/files/lessons/lesson-7-1/Tafel-7-Lehrerhandreichung.pdf"
+      ],
+      "officialDomains": [
+        "einstufungstests.klett-sprachen.de"
+      ],
+      "access": "public",
+      "verificationStatus": "VERIFIED_OFFICIAL_SOURCE",
+      "localRelation": "does not prove numbered audio mapping"
+    },
+    {
+      "id": "source-teacher-board-k8",
+      "resourceType": "teacher-board",
+      "component": "kursbuch",
+      "scope": "Kapitel 8",
+      "officialUrls": [
+        "https://einstufungstests.klett-sprachen.de/eks/Netzwerk-neu-A2-TB/files/lessons/lesson-8-1/Tafel-8-Lehrerhandreichung.pdf"
+      ],
+      "officialDomains": [
+        "einstufungstests.klett-sprachen.de"
+      ],
+      "access": "public",
+      "verificationStatus": "VERIFIED_OFFICIAL_SOURCE",
+      "localRelation": "does not prove numbered audio mapping"
+    },
+    {
+      "id": "source-teacher-board-k9",
+      "resourceType": "teacher-board",
+      "component": "kursbuch",
+      "scope": "Kapitel 9",
+      "officialUrls": [
+        "https://einstufungstests.klett-sprachen.de/eks/Netzwerk-neu-A2-TB/files/lessons/lesson-9-1/Tafel-9-Lehrerhandreichung.pdf"
+      ],
+      "officialDomains": [
+        "einstufungstests.klett-sprachen.de"
+      ],
+      "access": "public",
+      "verificationStatus": "VERIFIED_OFFICIAL_SOURCE",
+      "localRelation": "does not prove numbered audio mapping"
+    },
+    {
+      "id": "source-teacher-board-k10",
+      "resourceType": "teacher-board",
+      "component": "kursbuch",
+      "scope": "Kapitel 10",
+      "officialUrls": [
+        "https://einstufungstests.klett-sprachen.de/eks/Netzwerk-neu-A2-TB/files/lessons/lesson-10-1/Tafel-10-Lehrerhandreichung.pdf"
+      ],
+      "officialDomains": [
+        "einstufungstests.klett-sprachen.de"
+      ],
+      "access": "public",
+      "verificationStatus": "VERIFIED_OFFICIAL_SOURCE",
+      "localRelation": "does not prove numbered audio mapping"
+    },
+    {
+      "id": "source-teacher-board-k11",
+      "resourceType": "teacher-board",
+      "component": "kursbuch",
+      "scope": "Kapitel 11",
+      "officialUrls": [
+        "https://einstufungstests.klett-sprachen.de/eks/Netzwerk-neu-A2-TB/files/lessons/lesson-11-1/Tafel-11-Lehrerhandreichung.pdf"
+      ],
+      "officialDomains": [
+        "einstufungstests.klett-sprachen.de"
+      ],
+      "access": "public",
+      "verificationStatus": "VERIFIED_OFFICIAL_SOURCE",
+      "localRelation": "does not prove numbered audio mapping"
+    },
+    {
+      "id": "source-teacher-board-k12",
+      "resourceType": "teacher-board",
+      "component": "kursbuch",
+      "scope": "Kapitel 12",
+      "officialUrls": [
+        "https://einstufungstests.klett-sprachen.de/eks/Netzwerk-neu-A2-TB/files/lessons/lesson-12-1/Tafel-12-Lehrerhandreichung.pdf"
+      ],
+      "officialDomains": [
+        "einstufungstests.klett-sprachen.de"
+      ],
+      "access": "public",
+      "verificationStatus": "VERIFIED_OFFICIAL_SOURCE",
+      "localRelation": "does not prove numbered audio mapping"
+    }
+  ],
+  "chapters": [
+    {
+      "id": "netzwerk-neu-a2:chapter:1",
+      "chapter": 1,
+      "printedChapterTitle": "Und was machst du?",
+      "transcriptHeading": "Das bin ich.",
+      "titleReconciliation": "preserve both; printed title is canonical, transcript heading remains an official-source anomaly",
+      "edition": "A2.1",
+      "isbn": "978-3-12-607162-8",
+      "officialPageRanges": {
+        "kursbuch": "6-15",
+        "uebungsbuch": "78-89"
+      },
+      "explicitTaskReferences": {
+        "teacherBoard": [
+          "KB 5b"
+        ],
+        "onlineExercises": [
+          "4a",
+          "4c",
+          "7b",
+          "8b"
+        ],
+        "clipOverview": [
+          "KB 7b"
+        ],
+        "copyTemplates": [
+          "A10a",
+          "A7d"
+        ]
+      },
+      "audioRanges": [
+        {
+          "component": "kursbuch",
+          "disc": 1,
+          "firstTrack": 1,
+          "lastTrack": 7,
+          "page": null,
+          "exercise": null,
+          "verificationStatus": "PARTIALLY_PROVEN",
+          "evidenceSourceId": "source-audio-transcript-kb-1-6"
+        },
+        {
+          "component": "uebungsbuch",
+          "disc": 1,
+          "firstTrack": 1,
+          "lastTrack": 10,
+          "page": null,
+          "exercise": null,
+          "verificationStatus": "PARTIALLY_PROVEN",
+          "evidenceSourceId": "source-audio-transcript-ueb-1-6"
+        }
+      ],
+      "officialEvidenceSourceIds": [
+        "source-plan-a2-1",
+        "source-teacher-board-k1",
+        "source-online-overview-1-6",
+        "source-clip-overview",
+        "source-copy-templates",
+        "source-audio-transcript-kb-1-6",
+        "source-audio-transcript-ueb-1-6"
+      ],
+      "localAudioSourceAssetIds": [
+        "netzwerk-neu-a2:kursbuch:disc-1:track-001",
+        "netzwerk-neu-a2:kursbuch:disc-1:track-002",
+        "netzwerk-neu-a2:kursbuch:disc-1:track-003",
+        "netzwerk-neu-a2:kursbuch:disc-1:track-004",
+        "netzwerk-neu-a2:kursbuch:disc-1:track-005",
+        "netzwerk-neu-a2:kursbuch:disc-1:track-006",
+        "netzwerk-neu-a2:kursbuch:disc-1:track-007",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-002",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-003",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-004",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-005",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-006",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-007",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-008",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-009",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-010"
+      ],
+      "localAudioCount": 16,
+      "rightsSafeUse": "structural metadata and source relationships only"
+    },
+    {
+      "id": "netzwerk-neu-a2:chapter:2",
+      "chapter": 2,
+      "printedChapterTitle": "Nach der Schulzeit",
+      "transcriptHeading": null,
+      "titleReconciliation": "no recorded title anomaly",
+      "edition": "A2.1",
+      "isbn": "978-3-12-607162-8",
+      "officialPageRanges": {
+        "kursbuch": "16-25",
+        "uebungsbuch": "90-101"
+      },
+      "explicitTaskReferences": {
+        "teacherBoard": [
+          "KB 7d"
+        ],
+        "onlineExercises": [
+          "2",
+          "3c",
+          "4a",
+          "7d"
+        ],
+        "clipOverview": [
+          "KB 6a"
+        ],
+        "copyTemplates": [
+          "A2",
+          "A7d"
+        ]
+      },
+      "audioRanges": [
+        {
+          "component": "kursbuch",
+          "disc": 1,
+          "firstTrack": 8,
+          "lastTrack": 17,
+          "page": null,
+          "exercise": null,
+          "verificationStatus": "PARTIALLY_PROVEN",
+          "evidenceSourceId": "source-audio-transcript-kb-1-6"
+        },
+        {
+          "component": "uebungsbuch",
+          "disc": 1,
+          "firstTrack": 11,
+          "lastTrack": 16,
+          "page": null,
+          "exercise": null,
+          "verificationStatus": "PARTIALLY_PROVEN",
+          "evidenceSourceId": "source-audio-transcript-ueb-1-6"
+        }
+      ],
+      "officialEvidenceSourceIds": [
+        "source-plan-a2-1",
+        "source-teacher-board-k2",
+        "source-online-overview-1-6",
+        "source-clip-overview",
+        "source-copy-templates",
+        "source-audio-transcript-kb-1-6",
+        "source-audio-transcript-ueb-1-6"
+      ],
+      "localAudioSourceAssetIds": [
+        "netzwerk-neu-a2:kursbuch:disc-1:track-008",
+        "netzwerk-neu-a2:kursbuch:disc-1:track-009",
+        "netzwerk-neu-a2:kursbuch:disc-1:track-010",
+        "netzwerk-neu-a2:kursbuch:disc-1:track-011",
+        "netzwerk-neu-a2:kursbuch:disc-1:track-012",
+        "netzwerk-neu-a2:kursbuch:disc-1:track-013",
+        "netzwerk-neu-a2:kursbuch:disc-1:track-014",
+        "netzwerk-neu-a2:kursbuch:disc-1:track-015",
+        "netzwerk-neu-a2:kursbuch:disc-1:track-016",
+        "netzwerk-neu-a2:kursbuch:disc-1:track-017",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-011",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-012",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-013",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-014",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-015",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-016"
+      ],
+      "localAudioCount": 16,
+      "rightsSafeUse": "structural metadata and source relationships only"
+    },
+    {
+      "id": "netzwerk-neu-a2:chapter:3",
+      "chapter": 3,
+      "printedChapterTitle": "Immer online?",
+      "transcriptHeading": null,
+      "titleReconciliation": "no recorded title anomaly",
+      "edition": "A2.1",
+      "isbn": "978-3-12-607162-8",
+      "officialPageRanges": {
+        "kursbuch": "26-35",
+        "uebungsbuch": "102-113"
+      },
+      "explicitTaskReferences": {
+        "teacherBoard": [
+          "KB 5b"
+        ],
+        "onlineExercises": [
+          "1b",
+          "5b",
+          "6c",
+          "9b"
+        ],
+        "clipOverview": [
+          "KB 5a"
+        ],
+        "copyTemplates": [
+          "A13c",
+          "A5b"
+        ]
+      },
+      "audioRanges": [
+        {
+          "component": "kursbuch",
+          "disc": 1,
+          "firstTrack": 18,
+          "lastTrack": 28,
+          "page": null,
+          "exercise": null,
+          "verificationStatus": "PARTIALLY_PROVEN",
+          "evidenceSourceId": "source-audio-transcript-kb-1-6"
+        },
+        {
+          "component": "uebungsbuch",
+          "disc": 1,
+          "firstTrack": 17,
+          "lastTrack": 30,
+          "page": null,
+          "exercise": null,
+          "verificationStatus": "PARTIALLY_PROVEN",
+          "evidenceSourceId": "source-audio-transcript-ueb-1-6"
+        }
+      ],
+      "officialEvidenceSourceIds": [
+        "source-plan-a2-1",
+        "source-teacher-board-k3",
+        "source-online-overview-1-6",
+        "source-clip-overview",
+        "source-copy-templates",
+        "source-audio-transcript-kb-1-6",
+        "source-audio-transcript-ueb-1-6"
+      ],
+      "localAudioSourceAssetIds": [
+        "netzwerk-neu-a2:kursbuch:disc-1:track-018",
+        "netzwerk-neu-a2:kursbuch:disc-1:track-019",
+        "netzwerk-neu-a2:kursbuch:disc-1:track-020",
+        "netzwerk-neu-a2:kursbuch:disc-1:track-021",
+        "netzwerk-neu-a2:kursbuch:disc-1:track-022",
+        "netzwerk-neu-a2:kursbuch:disc-1:track-023",
+        "netzwerk-neu-a2:kursbuch:disc-1:track-024",
+        "netzwerk-neu-a2:kursbuch:disc-1:track-025",
+        "netzwerk-neu-a2:kursbuch:disc-1:track-026",
+        "netzwerk-neu-a2:kursbuch:disc-1:track-027",
+        "netzwerk-neu-a2:kursbuch:disc-1:track-028",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-017",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-018",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-019",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-020",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-021",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-022",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-023",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-024",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-025",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-026",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-027",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-028",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-029",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-030"
+      ],
+      "localAudioCount": 25,
+      "rightsSafeUse": "structural metadata and source relationships only"
+    },
+    {
+      "id": "netzwerk-neu-a2:chapter:4",
+      "chapter": 4,
+      "printedChapterTitle": "Große und kleine Gefühle",
+      "transcriptHeading": null,
+      "titleReconciliation": "no recorded title anomaly",
+      "edition": "A2.1",
+      "isbn": "978-3-12-607162-8",
+      "officialPageRanges": {
+        "kursbuch": "42-51",
+        "uebungsbuch": "118-129"
+      },
+      "explicitTaskReferences": {
+        "teacherBoard": [
+          "KB 8b"
+        ],
+        "onlineExercises": [
+          "3d",
+          "6c",
+          "8b",
+          "11a"
+        ],
+        "clipOverview": [
+          "KB 8b"
+        ],
+        "copyTemplates": [
+          "A3d"
+        ]
+      },
+      "audioRanges": [
+        {
+          "component": "kursbuch",
+          "disc": 1,
+          "firstTrack": 29,
+          "lastTrack": 39,
+          "page": null,
+          "exercise": null,
+          "verificationStatus": "PARTIALLY_PROVEN",
+          "evidenceSourceId": "source-audio-transcript-kb-1-6"
+        },
+        {
+          "component": "uebungsbuch",
+          "disc": 1,
+          "firstTrack": 31,
+          "lastTrack": 40,
+          "page": null,
+          "exercise": null,
+          "verificationStatus": "PARTIALLY_PROVEN",
+          "evidenceSourceId": "source-audio-transcript-ueb-1-6"
+        }
+      ],
+      "officialEvidenceSourceIds": [
+        "source-plan-a2-1",
+        "source-teacher-board-k4",
+        "source-online-overview-1-6",
+        "source-clip-overview",
+        "source-copy-templates",
+        "source-audio-transcript-kb-1-6",
+        "source-audio-transcript-ueb-1-6"
+      ],
+      "localAudioSourceAssetIds": [
+        "netzwerk-neu-a2:kursbuch:disc-1:track-029",
+        "netzwerk-neu-a2:kursbuch:disc-1:track-030",
+        "netzwerk-neu-a2:kursbuch:disc-1:track-031",
+        "netzwerk-neu-a2:kursbuch:disc-1:track-032",
+        "netzwerk-neu-a2:kursbuch:disc-1:track-033",
+        "netzwerk-neu-a2:kursbuch:disc-1:track-034",
+        "netzwerk-neu-a2:kursbuch:disc-1:track-035",
+        "netzwerk-neu-a2:kursbuch:disc-1:track-036",
+        "netzwerk-neu-a2:kursbuch:disc-1:track-037",
+        "netzwerk-neu-a2:kursbuch:disc-1:track-038",
+        "netzwerk-neu-a2:kursbuch:disc-1:track-039",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-031",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-032",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-033",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-034",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-035",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-036",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-037",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-038",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-039",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-040"
+      ],
+      "localAudioCount": 21,
+      "rightsSafeUse": "structural metadata and source relationships only"
+    },
+    {
+      "id": "netzwerk-neu-a2:chapter:5",
+      "chapter": 5,
+      "printedChapterTitle": "Leben in der Stadt",
+      "transcriptHeading": null,
+      "titleReconciliation": "no recorded title anomaly",
+      "edition": "A2.1",
+      "isbn": "978-3-12-607162-8",
+      "officialPageRanges": {
+        "kursbuch": "52-61",
+        "uebungsbuch": "130-141"
+      },
+      "explicitTaskReferences": {
+        "teacherBoard": [
+          "KB 8b"
+        ],
+        "onlineExercises": [
+          "4c",
+          "5a",
+          "7a",
+          "6c"
+        ],
+        "clipOverview": [
+          "KB 7a"
+        ],
+        "copyTemplates": [
+          "A4b",
+          "A5a",
+          "A9b"
+        ]
+      },
+      "audioRanges": [
+        {
+          "component": "kursbuch",
+          "disc": 1,
+          "firstTrack": 40,
+          "lastTrack": 51,
+          "page": null,
+          "exercise": null,
+          "verificationStatus": "PARTIALLY_PROVEN",
+          "evidenceSourceId": "source-audio-transcript-kb-1-6"
+        },
+        {
+          "component": "uebungsbuch",
+          "disc": 1,
+          "firstTrack": 41,
+          "lastTrack": 45,
+          "page": null,
+          "exercise": null,
+          "verificationStatus": "PARTIALLY_PROVEN",
+          "evidenceSourceId": "source-audio-transcript-ueb-1-6"
+        }
+      ],
+      "officialEvidenceSourceIds": [
+        "source-plan-a2-1",
+        "source-teacher-board-k5",
+        "source-online-overview-1-6",
+        "source-clip-overview",
+        "source-copy-templates",
+        "source-audio-transcript-kb-1-6",
+        "source-audio-transcript-ueb-1-6"
+      ],
+      "localAudioSourceAssetIds": [
+        "netzwerk-neu-a2:kursbuch:disc-1:track-040",
+        "netzwerk-neu-a2:kursbuch:disc-1:track-041",
+        "netzwerk-neu-a2:kursbuch:disc-1:track-042",
+        "netzwerk-neu-a2:kursbuch:disc-1:track-043",
+        "netzwerk-neu-a2:kursbuch:disc-1:track-044",
+        "netzwerk-neu-a2:kursbuch:disc-1:track-045",
+        "netzwerk-neu-a2:kursbuch:disc-1:track-046",
+        "netzwerk-neu-a2:kursbuch:disc-1:track-047",
+        "netzwerk-neu-a2:kursbuch:disc-1:track-048",
+        "netzwerk-neu-a2:kursbuch:disc-1:track-049",
+        "netzwerk-neu-a2:kursbuch:disc-1:track-050",
+        "netzwerk-neu-a2:kursbuch:disc-1:track-051",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-041",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-042",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-043",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-044",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-045"
+      ],
+      "localAudioCount": 17,
+      "rightsSafeUse": "structural metadata and source relationships only"
+    },
+    {
+      "id": "netzwerk-neu-a2:chapter:6",
+      "chapter": 6,
+      "printedChapterTitle": "Arbeitswelten",
+      "transcriptHeading": null,
+      "titleReconciliation": "no recorded title anomaly",
+      "edition": "A2.1",
+      "isbn": "978-3-12-607162-8",
+      "officialPageRanges": {
+        "kursbuch": "62-71",
+        "uebungsbuch": "142-153"
+      },
+      "explicitTaskReferences": {
+        "teacherBoard": [
+          "KB 2c"
+        ],
+        "onlineExercises": [
+          "4b",
+          "5b",
+          "5c",
+          "8b"
+        ],
+        "clipOverview": [
+          "KB 12b"
+        ],
+        "copyTemplates": [
+          "A6",
+          "A9"
+        ]
+      },
+      "audioRanges": [
+        {
+          "component": "kursbuch",
+          "disc": 1,
+          "firstTrack": 52,
+          "lastTrack": 63,
+          "page": null,
+          "exercise": null,
+          "verificationStatus": "PARTIALLY_PROVEN",
+          "evidenceSourceId": "source-audio-transcript-kb-1-6"
+        },
+        {
+          "component": "uebungsbuch",
+          "disc": 1,
+          "firstTrack": 46,
+          "lastTrack": 68,
+          "page": null,
+          "exercise": null,
+          "verificationStatus": "PARTIALLY_PROVEN",
+          "evidenceSourceId": "source-audio-transcript-ueb-1-6"
+        }
+      ],
+      "officialEvidenceSourceIds": [
+        "source-plan-a2-1",
+        "source-teacher-board-k6",
+        "source-online-overview-1-6",
+        "source-clip-overview",
+        "source-copy-templates",
+        "source-audio-transcript-kb-1-6",
+        "source-audio-transcript-ueb-1-6"
+      ],
+      "localAudioSourceAssetIds": [
+        "netzwerk-neu-a2:kursbuch:disc-1:track-052",
+        "netzwerk-neu-a2:kursbuch:disc-1:track-053",
+        "netzwerk-neu-a2:kursbuch:disc-1:track-054",
+        "netzwerk-neu-a2:kursbuch:disc-1:track-055",
+        "netzwerk-neu-a2:kursbuch:disc-1:track-056",
+        "netzwerk-neu-a2:kursbuch:disc-1:track-057",
+        "netzwerk-neu-a2:kursbuch:disc-1:track-058",
+        "netzwerk-neu-a2:kursbuch:disc-1:track-059",
+        "netzwerk-neu-a2:kursbuch:disc-1:track-060",
+        "netzwerk-neu-a2:kursbuch:disc-1:track-061",
+        "netzwerk-neu-a2:kursbuch:disc-1:track-062",
+        "netzwerk-neu-a2:kursbuch:disc-1:track-063",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-046",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-047",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-048",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-049",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-050",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-051",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-052",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-053",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-054",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-055",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-056",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-057",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-058",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-059",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-060",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-061",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-062",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-063",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-064",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-065",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-066",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-067",
+        "netzwerk-neu-a2:uebungsbuch:disc-1:track-068"
+      ],
+      "localAudioCount": 35,
+      "rightsSafeUse": "structural metadata and source relationships only"
+    },
+    {
+      "id": "netzwerk-neu-a2:chapter:7",
+      "chapter": 7,
+      "printedChapterTitle": "Ganz schön mobil",
+      "transcriptHeading": null,
+      "titleReconciliation": "no recorded title anomaly",
+      "edition": "A2.2",
+      "isbn": "978-3-12-607163-5",
+      "officialPageRanges": {
+        "kursbuch": "6-15",
+        "uebungsbuch": "78-89"
+      },
+      "explicitTaskReferences": {
+        "teacherBoard": [
+          "KB 6d"
+        ],
+        "onlineExercises": [
+          "6d",
+          "8d",
+          "9a",
+          "10c"
+        ],
+        "clipOverview": [
+          "KB 10c"
+        ],
+        "copyTemplates": [
+          "A7",
+          "A8f"
+        ]
+      },
+      "audioRanges": [
+        {
+          "component": "kursbuch",
+          "disc": 2,
+          "firstTrack": 1,
+          "lastTrack": 9,
+          "page": null,
+          "exercise": null,
+          "verificationStatus": "PARTIALLY_PROVEN",
+          "evidenceSourceId": "source-audio-transcript-kb-7-12"
+        },
+        {
+          "component": "uebungsbuch",
+          "disc": 2,
+          "firstTrack": 1,
+          "lastTrack": 9,
+          "page": null,
+          "exercise": null,
+          "verificationStatus": "PARTIALLY_PROVEN",
+          "evidenceSourceId": "source-audio-transcript-ueb-7-12"
+        }
+      ],
+      "officialEvidenceSourceIds": [
+        "source-plan-a2-2",
+        "source-teacher-board-k7",
+        "source-online-overview-7-12",
+        "source-clip-overview",
+        "source-copy-templates",
+        "source-audio-transcript-kb-7-12",
+        "source-audio-transcript-ueb-7-12"
+      ],
+      "localAudioSourceAssetIds": [
+        "netzwerk-neu-a2:kursbuch:disc-2:track-001",
+        "netzwerk-neu-a2:kursbuch:disc-2:track-002",
+        "netzwerk-neu-a2:kursbuch:disc-2:track-003",
+        "netzwerk-neu-a2:kursbuch:disc-2:track-004",
+        "netzwerk-neu-a2:kursbuch:disc-2:track-005",
+        "netzwerk-neu-a2:kursbuch:disc-2:track-006",
+        "netzwerk-neu-a2:kursbuch:disc-2:track-007",
+        "netzwerk-neu-a2:kursbuch:disc-2:track-008",
+        "netzwerk-neu-a2:kursbuch:disc-2:track-009"
+      ],
+      "localAudioCount": 9,
+      "rightsSafeUse": "structural metadata and source relationships only"
+    },
+    {
+      "id": "netzwerk-neu-a2:chapter:8",
+      "chapter": 8,
+      "printedChapterTitle": "Gelernt ist gelernt!",
+      "transcriptHeading": null,
+      "titleReconciliation": "no recorded title anomaly",
+      "edition": "A2.2",
+      "isbn": "978-3-12-607163-5",
+      "officialPageRanges": {
+        "kursbuch": "16-25",
+        "uebungsbuch": "90-101"
+      },
+      "explicitTaskReferences": {
+        "teacherBoard": [
+          "KB 10b"
+        ],
+        "onlineExercises": [
+          "1c",
+          "4d",
+          "7b",
+          "10b"
+        ],
+        "clipOverview": [
+          "KB 8a"
+        ],
+        "copyTemplates": [
+          "A11b",
+          "A6c"
+        ]
+      },
+      "audioRanges": [
+        {
+          "component": "kursbuch",
+          "disc": 2,
+          "firstTrack": 10,
+          "lastTrack": 18,
+          "page": null,
+          "exercise": null,
+          "verificationStatus": "PARTIALLY_PROVEN",
+          "evidenceSourceId": "source-audio-transcript-kb-7-12"
+        },
+        {
+          "component": "uebungsbuch",
+          "disc": 2,
+          "firstTrack": 10,
+          "lastTrack": 13,
+          "page": null,
+          "exercise": null,
+          "verificationStatus": "PARTIALLY_PROVEN",
+          "evidenceSourceId": "source-audio-transcript-ueb-7-12"
+        }
+      ],
+      "officialEvidenceSourceIds": [
+        "source-plan-a2-2",
+        "source-teacher-board-k8",
+        "source-online-overview-7-12",
+        "source-clip-overview",
+        "source-copy-templates",
+        "source-audio-transcript-kb-7-12",
+        "source-audio-transcript-ueb-7-12"
+      ],
+      "localAudioSourceAssetIds": [
+        "netzwerk-neu-a2:kursbuch:disc-2:track-010",
+        "netzwerk-neu-a2:kursbuch:disc-2:track-011",
+        "netzwerk-neu-a2:kursbuch:disc-2:track-012",
+        "netzwerk-neu-a2:kursbuch:disc-2:track-013",
+        "netzwerk-neu-a2:kursbuch:disc-2:track-014",
+        "netzwerk-neu-a2:kursbuch:disc-2:track-015",
+        "netzwerk-neu-a2:kursbuch:disc-2:track-016",
+        "netzwerk-neu-a2:kursbuch:disc-2:track-017",
+        "netzwerk-neu-a2:kursbuch:disc-2:track-018"
+      ],
+      "localAudioCount": 9,
+      "rightsSafeUse": "structural metadata and source relationships only"
+    },
+    {
+      "id": "netzwerk-neu-a2:chapter:9",
+      "chapter": 9,
+      "printedChapterTitle": "Sportlich, sportlich",
+      "transcriptHeading": null,
+      "titleReconciliation": "no recorded title anomaly",
+      "edition": "A2.2",
+      "isbn": "978-3-12-607163-5",
+      "officialPageRanges": {
+        "kursbuch": "26-35",
+        "uebungsbuch": "102-113"
+      },
+      "explicitTaskReferences": {
+        "teacherBoard": [
+          "KB 5c"
+        ],
+        "onlineExercises": [
+          "1a",
+          "3d",
+          "5c",
+          "11a"
+        ],
+        "clipOverview": [
+          "KB 9a"
+        ],
+        "copyTemplates": [
+          "A9"
+        ]
+      },
+      "audioRanges": [
+        {
+          "component": "kursbuch",
+          "disc": 2,
+          "firstTrack": 19,
+          "lastTrack": 29,
+          "page": null,
+          "exercise": null,
+          "verificationStatus": "PARTIALLY_PROVEN",
+          "evidenceSourceId": "source-audio-transcript-kb-7-12"
+        },
+        {
+          "component": "uebungsbuch",
+          "disc": 2,
+          "firstTrack": 14,
+          "lastTrack": 25,
+          "page": null,
+          "exercise": null,
+          "verificationStatus": "PARTIALLY_PROVEN",
+          "evidenceSourceId": "source-audio-transcript-ueb-7-12"
+        }
+      ],
+      "officialEvidenceSourceIds": [
+        "source-plan-a2-2",
+        "source-teacher-board-k9",
+        "source-online-overview-7-12",
+        "source-clip-overview",
+        "source-copy-templates",
+        "source-audio-transcript-kb-7-12",
+        "source-audio-transcript-ueb-7-12"
+      ],
+      "localAudioSourceAssetIds": [
+        "netzwerk-neu-a2:kursbuch:disc-2:track-019",
+        "netzwerk-neu-a2:kursbuch:disc-2:track-020",
+        "netzwerk-neu-a2:kursbuch:disc-2:track-021",
+        "netzwerk-neu-a2:kursbuch:disc-2:track-022",
+        "netzwerk-neu-a2:kursbuch:disc-2:track-023",
+        "netzwerk-neu-a2:kursbuch:disc-2:track-024",
+        "netzwerk-neu-a2:kursbuch:disc-2:track-025",
+        "netzwerk-neu-a2:kursbuch:disc-2:track-026",
+        "netzwerk-neu-a2:kursbuch:disc-2:track-027",
+        "netzwerk-neu-a2:kursbuch:disc-2:track-028",
+        "netzwerk-neu-a2:kursbuch:disc-2:track-029"
+      ],
+      "localAudioCount": 11,
+      "rightsSafeUse": "structural metadata and source relationships only"
+    },
+    {
+      "id": "netzwerk-neu-a2:chapter:10",
+      "chapter": 10,
+      "printedChapterTitle": "Zusammen leben",
+      "transcriptHeading": null,
+      "titleReconciliation": "no recorded title anomaly",
+      "edition": "A2.2",
+      "isbn": "978-3-12-607163-5",
+      "officialPageRanges": {
+        "kursbuch": "42-51",
+        "uebungsbuch": "118-129"
+      },
+      "explicitTaskReferences": {
+        "teacherBoard": [
+          "KB 5d"
+        ],
+        "onlineExercises": [
+          "4a",
+          "4b",
+          "5c",
+          "7a"
+        ],
+        "clipOverview": [
+          "KB 5c"
+        ],
+        "copyTemplates": [
+          "A10d",
+          "A12d-e"
+        ]
+      },
+      "audioRanges": [
+        {
+          "component": "kursbuch",
+          "disc": 2,
+          "firstTrack": 30,
+          "lastTrack": 41,
+          "page": null,
+          "exercise": null,
+          "verificationStatus": "PARTIALLY_PROVEN",
+          "evidenceSourceId": "source-audio-transcript-kb-7-12"
+        },
+        {
+          "component": "uebungsbuch",
+          "disc": 2,
+          "firstTrack": 26,
+          "lastTrack": 32,
+          "page": null,
+          "exercise": null,
+          "verificationStatus": "PARTIALLY_PROVEN",
+          "evidenceSourceId": "source-audio-transcript-ueb-7-12"
+        }
+      ],
+      "officialEvidenceSourceIds": [
+        "source-plan-a2-2",
+        "source-teacher-board-k10",
+        "source-online-overview-7-12",
+        "source-clip-overview",
+        "source-copy-templates",
+        "source-audio-transcript-kb-7-12",
+        "source-audio-transcript-ueb-7-12"
+      ],
+      "localAudioSourceAssetIds": [
+        "netzwerk-neu-a2:kursbuch:disc-2:track-030",
+        "netzwerk-neu-a2:kursbuch:disc-2:track-031",
+        "netzwerk-neu-a2:kursbuch:disc-2:track-032",
+        "netzwerk-neu-a2:kursbuch:disc-2:track-033",
+        "netzwerk-neu-a2:kursbuch:disc-2:track-034",
+        "netzwerk-neu-a2:kursbuch:disc-2:track-035",
+        "netzwerk-neu-a2:kursbuch:disc-2:track-036",
+        "netzwerk-neu-a2:kursbuch:disc-2:track-037",
+        "netzwerk-neu-a2:kursbuch:disc-2:track-038",
+        "netzwerk-neu-a2:kursbuch:disc-2:track-039",
+        "netzwerk-neu-a2:kursbuch:disc-2:track-040",
+        "netzwerk-neu-a2:kursbuch:disc-2:track-041"
+      ],
+      "localAudioCount": 12,
+      "rightsSafeUse": "structural metadata and source relationships only"
+    },
+    {
+      "id": "netzwerk-neu-a2:chapter:11",
+      "chapter": 11,
+      "printedChapterTitle": "Wie die Zeit vergeht!",
+      "transcriptHeading": null,
+      "titleReconciliation": "no recorded title anomaly",
+      "edition": "A2.2",
+      "isbn": "978-3-12-607163-5",
+      "officialPageRanges": {
+        "kursbuch": "52-61",
+        "uebungsbuch": "130-141"
+      },
+      "explicitTaskReferences": {
+        "teacherBoard": [
+          "KB 5c"
+        ],
+        "onlineExercises": [
+          "3a",
+          "4a",
+          "7c",
+          "9b"
+        ],
+        "clipOverview": [
+          "KB 10a"
+        ],
+        "copyTemplates": [
+          "A10b",
+          "A6",
+          "A9d"
+        ]
+      },
+      "audioRanges": [
+        {
+          "component": "kursbuch",
+          "disc": 2,
+          "firstTrack": 42,
+          "lastTrack": 46,
+          "page": null,
+          "exercise": null,
+          "verificationStatus": "PARTIALLY_PROVEN",
+          "evidenceSourceId": "source-audio-transcript-kb-7-12"
+        },
+        {
+          "component": "uebungsbuch",
+          "disc": 2,
+          "firstTrack": 33,
+          "lastTrack": 38,
+          "page": null,
+          "exercise": null,
+          "verificationStatus": "PARTIALLY_PROVEN",
+          "evidenceSourceId": "source-audio-transcript-ueb-7-12"
+        }
+      ],
+      "officialEvidenceSourceIds": [
+        "source-plan-a2-2",
+        "source-teacher-board-k11",
+        "source-online-overview-7-12",
+        "source-clip-overview",
+        "source-copy-templates",
+        "source-audio-transcript-kb-7-12",
+        "source-audio-transcript-ueb-7-12"
+      ],
+      "localAudioSourceAssetIds": [
+        "netzwerk-neu-a2:kursbuch:disc-2:track-042",
+        "netzwerk-neu-a2:kursbuch:disc-2:track-043",
+        "netzwerk-neu-a2:kursbuch:disc-2:track-044",
+        "netzwerk-neu-a2:kursbuch:disc-2:track-045",
+        "netzwerk-neu-a2:kursbuch:disc-2:track-046"
+      ],
+      "localAudioCount": 5,
+      "rightsSafeUse": "structural metadata and source relationships only"
+    },
+    {
+      "id": "netzwerk-neu-a2:chapter:12",
+      "chapter": 12,
+      "printedChapterTitle": "Gute Unterhaltung!",
+      "transcriptHeading": null,
+      "titleReconciliation": "no recorded title anomaly",
+      "edition": "A2.2",
+      "isbn": "978-3-12-607163-5",
+      "officialPageRanges": {
+        "kursbuch": "62-71",
+        "uebungsbuch": "142-153"
+      },
+      "explicitTaskReferences": {
+        "teacherBoard": [
+          "KB 8b"
+        ],
+        "onlineExercises": [
+          "4d",
+          "6b",
+          "8b",
+          "11a"
+        ],
+        "clipOverview": [
+          "KB 8b"
+        ],
+        "copyTemplates": [
+          "A10",
+          "A7b"
+        ]
+      },
+      "audioRanges": [
+        {
+          "component": "kursbuch",
+          "disc": 2,
+          "firstTrack": 47,
+          "lastTrack": 59,
+          "page": null,
+          "exercise": null,
+          "verificationStatus": "PARTIALLY_PROVEN",
+          "evidenceSourceId": "source-audio-transcript-kb-7-12"
+        },
+        {
+          "component": "uebungsbuch",
+          "disc": 2,
+          "firstTrack": 39,
+          "lastTrack": 49,
+          "page": null,
+          "exercise": null,
+          "verificationStatus": "PARTIALLY_PROVEN",
+          "evidenceSourceId": "source-audio-transcript-ueb-7-12"
+        }
+      ],
+      "officialEvidenceSourceIds": [
+        "source-plan-a2-2",
+        "source-teacher-board-k12",
+        "source-online-overview-7-12",
+        "source-clip-overview",
+        "source-copy-templates",
+        "source-audio-transcript-kb-7-12",
+        "source-audio-transcript-ueb-7-12"
+      ],
+      "localAudioSourceAssetIds": [
+        "netzwerk-neu-a2:kursbuch:disc-2:track-047",
+        "netzwerk-neu-a2:kursbuch:disc-2:track-048",
+        "netzwerk-neu-a2:kursbuch:disc-2:track-049",
+        "netzwerk-neu-a2:kursbuch:disc-2:track-050",
+        "netzwerk-neu-a2:kursbuch:disc-2:track-051",
+        "netzwerk-neu-a2:kursbuch:disc-2:track-052",
+        "netzwerk-neu-a2:kursbuch:disc-2:track-053",
+        "netzwerk-neu-a2:kursbuch:disc-2:track-054",
+        "netzwerk-neu-a2:kursbuch:disc-2:track-055",
+        "netzwerk-neu-a2:kursbuch:disc-2:track-056",
+        "netzwerk-neu-a2:kursbuch:disc-2:track-057",
+        "netzwerk-neu-a2:kursbuch:disc-2:track-058",
+        "netzwerk-neu-a2:kursbuch:disc-2:track-059"
+      ],
+      "localAudioCount": 13,
+      "rightsSafeUse": "structural metadata and source relationships only"
+    }
+  ]
+}

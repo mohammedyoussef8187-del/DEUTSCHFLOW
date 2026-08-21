@@ -1,0 +1,1594 @@
+{
+  "fixtureVersion": 1,
+  "generatedAt": "2026-08-22",
+  "scope": "Rights-safe Kapitel 2 implementation target; metadata and source-only assets only",
+  "sourceArtifacts": [
+    "NETZWERK_NEU_A2_KAPITEL_02_MANIFEST.json",
+    "NETZWERK_NEU_A2_AUDIO_ASSET_INDEX.json",
+    "NETZWERK_NEU_A2_STRUCTURE_INDEX.json"
+  ],
+  "policy": {
+    "educationalContentImported": false,
+    "publisherAudioImported": false,
+    "guessedMappingsAllowed": false,
+    "pageExerciseMappings": "all null",
+    "timestamps": "supplied by the importer at runtime; excluded from deterministic identity comparisons"
+  },
+  "expectedCounts": {
+    "totalRows": 22,
+    "course": 1,
+    "courseLevel": 1,
+    "courseUnit": 1,
+    "lesson": 1,
+    "curriculumText": 2,
+    "audioAsset": 16,
+    "educationalEntities": 0,
+    "listeningEntities": 0,
+    "lessonSections": 0,
+    "lessonItems": 0
+  },
+  "stableKeys": {
+    "courseUuid": "0d79e45f-2d91-5194-b0e2-5aad85b31052",
+    "levelUuid": "c88ab7f5-886c-58d9-bac6-9a86d6c7201c",
+    "unitUuid": "1eed7ec9-ef60-5bd0-8da3-9e9f353e4599",
+    "lessonUuid": "4a0724e9-b607-5b68-8da8-e58a0b2c658a"
+  },
+  "rows": [
+    {
+      "externalId": "netzwerk-neu-a2:course",
+      "canonicalTargetEntity": "course",
+      "sourceRecordIds": [
+        "k2-allango-a2-1-product",
+        "k2-allango-full-a2-product"
+      ],
+      "sourceRecord": {
+        "kind": "course-product-family",
+        "key": "netzwerk-neu-a2",
+        "evidence": "official Klett/Allango product records identify the title, publisher, and A2 level"
+      },
+      "provenance": {
+        "officialUrls": [
+          "https://www.klett-sprachen.de/netzwerk-neu-a2/t-1/9783126071642",
+          "https://www.allango.net/api/product/MAXP-607164",
+          "https://www.klett-sprachen.de/netzwerk-neu-a2/t-1/9783126071659",
+          "https://www.allango.net/api/product/MAXP-607165",
+          "https://www.allango.net/api/product/MAXP-607162",
+          "https://www.klett-sprachen.de/netzwerk-neu-a2-1-hybride-ausgabe-allango/t-1/9783126072861"
+        ],
+        "structureIndex": "NETZWERK_NEU_A2_STRUCTURE_INDEX.json"
+      },
+      "rightsClassification": {
+        "classification": "RIGHTS_SAFE_STRUCTURAL_METADATA",
+        "payloadPolicy": "non-expressive bibliographic/structural metadata only; no publisher exercise, transcript, vocabulary, grammar, translation, or audio payload"
+      },
+      "verificationStatus": "VERIFIED_OFFICIAL_SOURCE",
+      "fieldsAllowedForImport": {
+        "uuid": "0d79e45f-2d91-5194-b0e2-5aad85b31052",
+        "slug": "netzwerk-neu-a2",
+        "cefrLevel": "A2",
+        "ordering": 1,
+        "sourceTitle": "Netzwerk neu A2",
+        "sourcePublisher": "Ernst Klett Sprachen",
+        "contentStatus": "imported",
+        "contentVersion": 1,
+        "sourceReference": "https://www.allango.net/api/product/MAXP-607162 | https://www.klett-sprachen.de/netzwerk-neu-a2-1-hybride-ausgabe-allango/t-1/9783126072861",
+        "sourceType": "official-structure-metadata",
+        "revision": 1,
+        "deleted": 0
+      },
+      "fieldsMustRemainNullOrUnset": [
+        "sourceEdition",
+        "sourceIsbn",
+        "verifiedAt",
+        "verifiedBy"
+      ],
+      "fieldsSuppliedAtRuntime": [
+        "createdAt",
+        "updatedAt"
+      ],
+      "structureEvidenceSourceIds": [
+        "source-product-full-kb",
+        "source-product-full-ueb",
+        "source-product-a2-1"
+      ],
+      "sourceEditionIds": [
+        "full-a2-kursbuch",
+        "full-a2-uebungsbuch",
+        "combined-a2-1"
+      ]
+    },
+    {
+      "externalId": "netzwerk-neu-a2:course-level:a2",
+      "canonicalTargetEntity": "courseLevel",
+      "sourceRecordIds": [
+        "k2-allango-a2-1-product",
+        "k2-a2-1-plan"
+      ],
+      "sourceRecord": {
+        "kind": "cefr-level",
+        "key": "A2",
+        "evidence": "official A2.1 product and plan identify CEFR A2"
+      },
+      "provenance": {
+        "officialUrls": [
+          "https://www.allango.net/api/product/MAXP-607162",
+          "https://www.klett-sprachen.de/netzwerk-neu-a2-1-hybride-ausgabe-allango/t-1/9783126072861",
+          "https://www.klett-sprachen.de/downloads/31656/netzwerk-neu-a2-1-stoffverteilungsplan/pdf"
+        ],
+        "structureIndex": "NETZWERK_NEU_A2_STRUCTURE_INDEX.json"
+      },
+      "rightsClassification": {
+        "classification": "RIGHTS_SAFE_STRUCTURAL_METADATA",
+        "payloadPolicy": "non-expressive bibliographic/structural metadata only; no publisher exercise, transcript, vocabulary, grammar, translation, or audio payload"
+      },
+      "verificationStatus": "VERIFIED_OFFICIAL_SOURCE",
+      "fieldsAllowedForImport": {
+        "uuid": "c88ab7f5-886c-58d9-bac6-9a86d6c7201c",
+        "courseUuid": "0d79e45f-2d91-5194-b0e2-5aad85b31052",
+        "cefrLevel": "A2",
+        "ordering": 1,
+        "revision": 1,
+        "deleted": 0
+      },
+      "fieldsMustRemainNullOrUnset": [],
+      "fieldsSuppliedAtRuntime": [
+        "createdAt",
+        "updatedAt"
+      ],
+      "structureEvidenceSourceIds": [
+        "source-product-a2-1",
+        "source-plan-a2-1"
+      ],
+      "sourceEditionIds": [
+        "combined-a2-1"
+      ]
+    },
+    {
+      "externalId": "netzwerk-neu-a2:course-unit:a2-1",
+      "canonicalTargetEntity": "courseUnit",
+      "sourceRecordIds": [
+        "k2-allango-a2-1-product",
+        "k2-a2-1-plan"
+      ],
+      "sourceRecord": {
+        "kind": "course-unit",
+        "key": "A2.1",
+        "evidence": "official product and plan distinguish the A2.1 half edition"
+      },
+      "provenance": {
+        "officialUrls": [
+          "https://www.allango.net/api/product/MAXP-607162",
+          "https://www.klett-sprachen.de/netzwerk-neu-a2-1-hybride-ausgabe-allango/t-1/9783126072861",
+          "https://www.klett-sprachen.de/downloads/31656/netzwerk-neu-a2-1-stoffverteilungsplan/pdf"
+        ],
+        "structureIndex": "NETZWERK_NEU_A2_STRUCTURE_INDEX.json"
+      },
+      "rightsClassification": {
+        "classification": "RIGHTS_SAFE_STRUCTURAL_METADATA",
+        "payloadPolicy": "non-expressive bibliographic/structural metadata only; no publisher exercise, transcript, vocabulary, grammar, translation, or audio payload"
+      },
+      "verificationStatus": "VERIFIED_OFFICIAL_SOURCE",
+      "fieldsAllowedForImport": {
+        "uuid": "1eed7ec9-ef60-5bd0-8da3-9e9f353e4599",
+        "courseUuid": "0d79e45f-2d91-5194-b0e2-5aad85b31052",
+        "courseLevelUuid": "c88ab7f5-886c-58d9-bac6-9a86d6c7201c",
+        "slug": "a2-1",
+        "ordering": 1,
+        "contentStatus": "imported",
+        "contentVersion": 1,
+        "sourceReference": "https://www.allango.net/api/product/MAXP-607162 | https://www.klett-sprachen.de/netzwerk-neu-a2-1-hybride-ausgabe-allango/t-1/9783126072861",
+        "sourceType": "official-structure-metadata",
+        "revision": 1,
+        "deleted": 0
+      },
+      "fieldsMustRemainNullOrUnset": [
+        "verifiedAt",
+        "verifiedBy"
+      ],
+      "fieldsSuppliedAtRuntime": [
+        "createdAt",
+        "updatedAt"
+      ],
+      "structureEvidenceSourceIds": [
+        "source-product-a2-1",
+        "source-plan-a2-1"
+      ],
+      "sourceEditionIds": [
+        "combined-a2-1"
+      ]
+    },
+    {
+      "externalId": "netzwerk-neu-a2:chapter:2",
+      "canonicalTargetEntity": "lesson",
+      "sourceRecordIds": [
+        "k2-a2-1-plan",
+        "k2-teacher-board"
+      ],
+      "sourceRecord": {
+        "kind": "chapter",
+        "key": "2",
+        "evidence": "official A2.1 plan and teacher board identify Kapitel 2 and its printed title"
+      },
+      "provenance": {
+        "officialUrls": [
+          "https://www.klett-sprachen.de/downloads/31656/netzwerk-neu-a2-1-stoffverteilungsplan/pdf",
+          "https://einstufungstests.klett-sprachen.de/eks/Netzwerk-neu-A2-TB/files/lessons/lesson-2-1/Tafel-2-Lehrerhandreichung.pdf"
+        ],
+        "structureIndexRecordId": "netzwerk-neu-a2:chapter:2"
+      },
+      "rightsClassification": {
+        "classification": "RIGHTS_SAFE_STRUCTURAL_METADATA",
+        "payloadPolicy": "non-expressive bibliographic/structural metadata only; no publisher exercise, transcript, vocabulary, grammar, translation, or audio payload"
+      },
+      "verificationStatus": "VERIFIED_OFFICIAL_SOURCE",
+      "fieldsAllowedForImport": {
+        "uuid": "4a0724e9-b607-5b68-8da8-e58a0b2c658a",
+        "unitUuid": "1eed7ec9-ef60-5bd0-8da3-9e9f353e4599",
+        "slug": "nach-der-schulzeit",
+        "cefrLevel": "A2",
+        "ordering": 2,
+        "contentStatus": "imported",
+        "contentVersion": 1,
+        "sourceReference": "https://einstufungstests.klett-sprachen.de/eks/Netzwerk-neu-A2-TB/files/lessons/lesson-2-1/Tafel-2-Lehrerhandreichung.pdf",
+        "sourceType": "official-structure-metadata",
+        "revision": 1,
+        "deleted": 0
+      },
+      "fieldsMustRemainNullOrUnset": [
+        "verifiedAt",
+        "verifiedBy"
+      ],
+      "fieldsSuppliedAtRuntime": [
+        "createdAt",
+        "updatedAt"
+      ],
+      "structureEvidenceSourceIds": [
+        "source-plan-a2-1",
+        "source-teacher-board-k2"
+      ],
+      "sourceEditionIds": [
+        "combined-a2-1"
+      ]
+    },
+    {
+      "externalId": "netzwerk-neu-a2:text:course-title:de",
+      "canonicalTargetEntity": "curriculumText",
+      "sourceRecordIds": [
+        "k2-allango-a2-1-product",
+        "k2-allango-full-a2-product"
+      ],
+      "sourceRecord": {
+        "kind": "official-title",
+        "key": "Netzwerk neu A2",
+        "evidence": "official product title; bibliographic metadata only"
+      },
+      "provenance": {
+        "officialUrls": [
+          "https://www.allango.net/api/product/MAXP-607162",
+          "https://www.klett-sprachen.de/netzwerk-neu-a2-1-hybride-ausgabe-allango/t-1/9783126072861"
+        ],
+        "structureIndex": "NETZWERK_NEU_A2_STRUCTURE_INDEX.json"
+      },
+      "rightsClassification": {
+        "classification": "RIGHTS_SAFE_STRUCTURAL_METADATA",
+        "payloadPolicy": "non-expressive bibliographic/structural metadata only; no publisher exercise, transcript, vocabulary, grammar, translation, or audio payload"
+      },
+      "verificationStatus": "VERIFIED_OFFICIAL_SOURCE",
+      "fieldsAllowedForImport": {
+        "uuid": "b05a6854-c615-5565-8dc6-d8dc5799036d",
+        "ownerType": "course",
+        "ownerUuid": "0d79e45f-2d91-5194-b0e2-5aad85b31052",
+        "language": "de",
+        "kind": "title",
+        "text": "Netzwerk neu A2",
+        "contentStatus": "imported",
+        "contentVersion": 1,
+        "sourceReference": "https://www.allango.net/api/product/MAXP-607162",
+        "sourceType": "official-structure-metadata",
+        "revision": 1,
+        "deleted": 0
+      },
+      "fieldsMustRemainNullOrUnset": [
+        "verifiedAt",
+        "verifiedBy"
+      ],
+      "fieldsSuppliedAtRuntime": [
+        "createdAt",
+        "updatedAt"
+      ],
+      "structureEvidenceSourceIds": [
+        "source-product-a2-1"
+      ],
+      "sourceEditionIds": [
+        "full-a2-kursbuch",
+        "full-a2-uebungsbuch",
+        "combined-a2-1"
+      ]
+    },
+    {
+      "externalId": "netzwerk-neu-a2:text:chapter-2-title:de",
+      "canonicalTargetEntity": "curriculumText",
+      "sourceRecordIds": [
+        "k2-teacher-board"
+      ],
+      "sourceRecord": {
+        "kind": "official-chapter-title",
+        "key": "Nach der Schulzeit",
+        "evidence": "official printed Kapitel title; title metadata only"
+      },
+      "provenance": {
+        "officialUrls": [
+          "https://einstufungstests.klett-sprachen.de/eks/Netzwerk-neu-A2-TB/files/lessons/lesson-2-1/Tafel-2-Lehrerhandreichung.pdf"
+        ],
+        "structureIndexRecordId": "netzwerk-neu-a2:chapter:2"
+      },
+      "rightsClassification": {
+        "classification": "RIGHTS_SAFE_STRUCTURAL_METADATA",
+        "payloadPolicy": "non-expressive bibliographic/structural metadata only; no publisher exercise, transcript, vocabulary, grammar, translation, or audio payload"
+      },
+      "verificationStatus": "VERIFIED_OFFICIAL_SOURCE",
+      "fieldsAllowedForImport": {
+        "uuid": "3eeb42e3-ee76-5303-8d00-28243323ade2",
+        "ownerType": "lesson",
+        "ownerUuid": "4a0724e9-b607-5b68-8da8-e58a0b2c658a",
+        "language": "de",
+        "kind": "title",
+        "text": "Nach der Schulzeit",
+        "contentStatus": "imported",
+        "contentVersion": 1,
+        "sourceReference": "https://einstufungstests.klett-sprachen.de/eks/Netzwerk-neu-A2-TB/files/lessons/lesson-2-1/Tafel-2-Lehrerhandreichung.pdf",
+        "sourceType": "official-structure-metadata",
+        "revision": 1,
+        "deleted": 0
+      },
+      "fieldsMustRemainNullOrUnset": [
+        "verifiedAt",
+        "verifiedBy"
+      ],
+      "fieldsSuppliedAtRuntime": [
+        "createdAt",
+        "updatedAt"
+      ],
+      "structureEvidenceSourceIds": [
+        "source-teacher-board-k2"
+      ],
+      "sourceEditionIds": [
+        "combined-a2-1"
+      ]
+    },
+    {
+      "externalId": "netzwerk-neu-a2:kursbuch:disc-1:track-008",
+      "canonicalTargetEntity": "audioAsset",
+      "sourceRecordIds": [
+        "k2-kb-audio-transcript"
+      ],
+      "sourceAssetId": "netzwerk-neu-a2:kursbuch:disc-1:track-008",
+      "sourceRecord": {
+        "kind": "local-source-audio-asset",
+        "relativePath": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-008.mp3",
+        "filename": "NWn_A2_KB_Audio_1-008.mp3",
+        "component": "kursbuch",
+        "disc": 1,
+        "track": 8,
+        "chapter": 2,
+        "page": null,
+        "exercise": null,
+        "sha256": "a6d6ad634d6c93e9039a86ed2f47e65b043f50ea0b62deb18001b47857e76e67",
+        "fileSizeBytes": 1730461,
+        "technicalMetadata": {
+          "durationMs": 49293,
+          "codec": "mp3",
+          "bitrateKbps": 256,
+          "sampleRateHz": 44100,
+          "channels": 2
+        }
+      },
+      "provenance": {
+        "officialUrl": "https://www.klett-sprachen.de/downloads/23661/netzwerk-neu-a2-transkript-audios-kursbuch-kapitel-1-6/pdf",
+        "evidence": "official Kursbuch transcript index places disc 1 track 8 in Kapitel 2 only",
+        "localIdentity": "SHA-256, byte size, and MPEG technical metadata from NETZWERK_NEU_A2_AUDIO_ASSET_INDEX.json",
+        "evidenceScope": "component, disc, track, Kapitel only; page and exercise unresolved"
+      },
+      "rightsClassification": {
+        "metadata": "RIGHTS_SAFE_SOURCE_ASSET_METADATA",
+        "publisherAudioPayload": "CLEARLY_RESTRICTED",
+        "importPolicy": "register source-only metadata; do not bundle, copy, serve, or create a playable asset"
+      },
+      "verificationStatus": "PARTIALLY_PROVEN",
+      "fieldsAllowedForImport": {
+        "uuid": "2b67724d-a10c-5e95-90b6-5c158d25887b",
+        "slug": "netzwerk-neu-a2-kursbuch-1-008",
+        "availability": "source-only",
+        "localPath": "",
+        "sourcePath": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-008.mp3",
+        "mimeType": "audio/mpeg",
+        "byteSize": 1730461,
+        "durationMs": 49293,
+        "checksum": "sha256:a6d6ad634d6c93e9039a86ed2f47e65b043f50ea0b62deb18001b47857e76e67",
+        "contentStatus": "imported",
+        "contentVersion": 1,
+        "sourceReference": "https://www.klett-sprachen.de/downloads/23661/netzwerk-neu-a2-transkript-audios-kursbuch-kapitel-1-6/pdf | kursbuch disc 1 track 8 | Kapitel 2 | page/exercise unresolved",
+        "sourceType": "audio",
+        "revision": 1,
+        "deleted": 0
+      },
+      "fieldsMustRemainNullOrUnset": [
+        "remoteUrl",
+        "page",
+        "exercise",
+        "listeningItemUuid",
+        "lessonItemUuid",
+        "verifiedAt",
+        "verifiedBy"
+      ],
+      "fieldsSuppliedAtRuntime": [
+        "createdAt",
+        "updatedAt"
+      ],
+      "structureEvidenceSourceIds": [
+        "source-audio-transcript-kb-1-6"
+      ],
+      "sourceEditionIds": [
+        "combined-a2-1"
+      ]
+    },
+    {
+      "externalId": "netzwerk-neu-a2:kursbuch:disc-1:track-009",
+      "canonicalTargetEntity": "audioAsset",
+      "sourceRecordIds": [
+        "k2-kb-audio-transcript"
+      ],
+      "sourceAssetId": "netzwerk-neu-a2:kursbuch:disc-1:track-009",
+      "sourceRecord": {
+        "kind": "local-source-audio-asset",
+        "relativePath": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-009.mp3",
+        "filename": "NWn_A2_KB_Audio_1-009.mp3",
+        "component": "kursbuch",
+        "disc": 1,
+        "track": 9,
+        "chapter": 2,
+        "page": null,
+        "exercise": null,
+        "sha256": "a767f0a37d8d140ea1d7c31d03c6ff8e62535b6c3721955e39498d9379d27130",
+        "fileSizeBytes": 1897461,
+        "technicalMetadata": {
+          "durationMs": 54518,
+          "codec": "mp3",
+          "bitrateKbps": 256,
+          "sampleRateHz": 44100,
+          "channels": 2
+        }
+      },
+      "provenance": {
+        "officialUrl": "https://www.klett-sprachen.de/downloads/23661/netzwerk-neu-a2-transkript-audios-kursbuch-kapitel-1-6/pdf",
+        "evidence": "official Kursbuch transcript index places disc 1 track 9 in Kapitel 2 only",
+        "localIdentity": "SHA-256, byte size, and MPEG technical metadata from NETZWERK_NEU_A2_AUDIO_ASSET_INDEX.json",
+        "evidenceScope": "component, disc, track, Kapitel only; page and exercise unresolved"
+      },
+      "rightsClassification": {
+        "metadata": "RIGHTS_SAFE_SOURCE_ASSET_METADATA",
+        "publisherAudioPayload": "CLEARLY_RESTRICTED",
+        "importPolicy": "register source-only metadata; do not bundle, copy, serve, or create a playable asset"
+      },
+      "verificationStatus": "PARTIALLY_PROVEN",
+      "fieldsAllowedForImport": {
+        "uuid": "d51c9def-e018-59b0-ba9d-f392c532cb73",
+        "slug": "netzwerk-neu-a2-kursbuch-1-009",
+        "availability": "source-only",
+        "localPath": "",
+        "sourcePath": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-009.mp3",
+        "mimeType": "audio/mpeg",
+        "byteSize": 1897461,
+        "durationMs": 54518,
+        "checksum": "sha256:a767f0a37d8d140ea1d7c31d03c6ff8e62535b6c3721955e39498d9379d27130",
+        "contentStatus": "imported",
+        "contentVersion": 1,
+        "sourceReference": "https://www.klett-sprachen.de/downloads/23661/netzwerk-neu-a2-transkript-audios-kursbuch-kapitel-1-6/pdf | kursbuch disc 1 track 9 | Kapitel 2 | page/exercise unresolved",
+        "sourceType": "audio",
+        "revision": 1,
+        "deleted": 0
+      },
+      "fieldsMustRemainNullOrUnset": [
+        "remoteUrl",
+        "page",
+        "exercise",
+        "listeningItemUuid",
+        "lessonItemUuid",
+        "verifiedAt",
+        "verifiedBy"
+      ],
+      "fieldsSuppliedAtRuntime": [
+        "createdAt",
+        "updatedAt"
+      ],
+      "structureEvidenceSourceIds": [
+        "source-audio-transcript-kb-1-6"
+      ],
+      "sourceEditionIds": [
+        "combined-a2-1"
+      ]
+    },
+    {
+      "externalId": "netzwerk-neu-a2:kursbuch:disc-1:track-010",
+      "canonicalTargetEntity": "audioAsset",
+      "sourceRecordIds": [
+        "k2-kb-audio-transcript"
+      ],
+      "sourceAssetId": "netzwerk-neu-a2:kursbuch:disc-1:track-010",
+      "sourceRecord": {
+        "kind": "local-source-audio-asset",
+        "relativePath": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-010.mp3",
+        "filename": "NWn_A2_KB_Audio_1-010.mp3",
+        "component": "kursbuch",
+        "disc": 1,
+        "track": 10,
+        "chapter": 2,
+        "page": null,
+        "exercise": null,
+        "sha256": "ccc185a238ab7890c87a0b7fa588b91ec80598aafad207e3234c12e424753922",
+        "fileSizeBytes": 1381431,
+        "technicalMetadata": {
+          "durationMs": 38374,
+          "codec": "mp3",
+          "bitrateKbps": 256,
+          "sampleRateHz": 44100,
+          "channels": 2
+        }
+      },
+      "provenance": {
+        "officialUrl": "https://www.klett-sprachen.de/downloads/23661/netzwerk-neu-a2-transkript-audios-kursbuch-kapitel-1-6/pdf",
+        "evidence": "official Kursbuch transcript index places disc 1 track 10 in Kapitel 2 only",
+        "localIdentity": "SHA-256, byte size, and MPEG technical metadata from NETZWERK_NEU_A2_AUDIO_ASSET_INDEX.json",
+        "evidenceScope": "component, disc, track, Kapitel only; page and exercise unresolved"
+      },
+      "rightsClassification": {
+        "metadata": "RIGHTS_SAFE_SOURCE_ASSET_METADATA",
+        "publisherAudioPayload": "CLEARLY_RESTRICTED",
+        "importPolicy": "register source-only metadata; do not bundle, copy, serve, or create a playable asset"
+      },
+      "verificationStatus": "PARTIALLY_PROVEN",
+      "fieldsAllowedForImport": {
+        "uuid": "fb4baaeb-bb64-5da6-bf08-86569b646ae7",
+        "slug": "netzwerk-neu-a2-kursbuch-1-010",
+        "availability": "source-only",
+        "localPath": "",
+        "sourcePath": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-010.mp3",
+        "mimeType": "audio/mpeg",
+        "byteSize": 1381431,
+        "durationMs": 38374,
+        "checksum": "sha256:ccc185a238ab7890c87a0b7fa588b91ec80598aafad207e3234c12e424753922",
+        "contentStatus": "imported",
+        "contentVersion": 1,
+        "sourceReference": "https://www.klett-sprachen.de/downloads/23661/netzwerk-neu-a2-transkript-audios-kursbuch-kapitel-1-6/pdf | kursbuch disc 1 track 10 | Kapitel 2 | page/exercise unresolved",
+        "sourceType": "audio",
+        "revision": 1,
+        "deleted": 0
+      },
+      "fieldsMustRemainNullOrUnset": [
+        "remoteUrl",
+        "page",
+        "exercise",
+        "listeningItemUuid",
+        "lessonItemUuid",
+        "verifiedAt",
+        "verifiedBy"
+      ],
+      "fieldsSuppliedAtRuntime": [
+        "createdAt",
+        "updatedAt"
+      ],
+      "structureEvidenceSourceIds": [
+        "source-audio-transcript-kb-1-6"
+      ],
+      "sourceEditionIds": [
+        "combined-a2-1"
+      ]
+    },
+    {
+      "externalId": "netzwerk-neu-a2:kursbuch:disc-1:track-011",
+      "canonicalTargetEntity": "audioAsset",
+      "sourceRecordIds": [
+        "k2-kb-audio-transcript"
+      ],
+      "sourceAssetId": "netzwerk-neu-a2:kursbuch:disc-1:track-011",
+      "sourceRecord": {
+        "kind": "local-source-audio-asset",
+        "relativePath": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-011.mp3",
+        "filename": "NWn_A2_KB_Audio_1-011.mp3",
+        "component": "kursbuch",
+        "disc": 1,
+        "track": 11,
+        "chapter": 2,
+        "page": null,
+        "exercise": null,
+        "sha256": "8e34c7967e95f104809c801389a536eb2a4ad3ae83cac5a26767bdaf04cb6d80",
+        "fileSizeBytes": 1295426,
+        "technicalMetadata": {
+          "durationMs": 35683,
+          "codec": "mp3",
+          "bitrateKbps": 256,
+          "sampleRateHz": 44100,
+          "channels": 2
+        }
+      },
+      "provenance": {
+        "officialUrl": "https://www.klett-sprachen.de/downloads/23661/netzwerk-neu-a2-transkript-audios-kursbuch-kapitel-1-6/pdf",
+        "evidence": "official Kursbuch transcript index places disc 1 track 11 in Kapitel 2 only",
+        "localIdentity": "SHA-256, byte size, and MPEG technical metadata from NETZWERK_NEU_A2_AUDIO_ASSET_INDEX.json",
+        "evidenceScope": "component, disc, track, Kapitel only; page and exercise unresolved"
+      },
+      "rightsClassification": {
+        "metadata": "RIGHTS_SAFE_SOURCE_ASSET_METADATA",
+        "publisherAudioPayload": "CLEARLY_RESTRICTED",
+        "importPolicy": "register source-only metadata; do not bundle, copy, serve, or create a playable asset"
+      },
+      "verificationStatus": "PARTIALLY_PROVEN",
+      "fieldsAllowedForImport": {
+        "uuid": "553a02fa-16a8-53dd-a20d-120dbd75a68d",
+        "slug": "netzwerk-neu-a2-kursbuch-1-011",
+        "availability": "source-only",
+        "localPath": "",
+        "sourcePath": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-011.mp3",
+        "mimeType": "audio/mpeg",
+        "byteSize": 1295426,
+        "durationMs": 35683,
+        "checksum": "sha256:8e34c7967e95f104809c801389a536eb2a4ad3ae83cac5a26767bdaf04cb6d80",
+        "contentStatus": "imported",
+        "contentVersion": 1,
+        "sourceReference": "https://www.klett-sprachen.de/downloads/23661/netzwerk-neu-a2-transkript-audios-kursbuch-kapitel-1-6/pdf | kursbuch disc 1 track 11 | Kapitel 2 | page/exercise unresolved",
+        "sourceType": "audio",
+        "revision": 1,
+        "deleted": 0
+      },
+      "fieldsMustRemainNullOrUnset": [
+        "remoteUrl",
+        "page",
+        "exercise",
+        "listeningItemUuid",
+        "lessonItemUuid",
+        "verifiedAt",
+        "verifiedBy"
+      ],
+      "fieldsSuppliedAtRuntime": [
+        "createdAt",
+        "updatedAt"
+      ],
+      "structureEvidenceSourceIds": [
+        "source-audio-transcript-kb-1-6"
+      ],
+      "sourceEditionIds": [
+        "combined-a2-1"
+      ]
+    },
+    {
+      "externalId": "netzwerk-neu-a2:kursbuch:disc-1:track-012",
+      "canonicalTargetEntity": "audioAsset",
+      "sourceRecordIds": [
+        "k2-kb-audio-transcript"
+      ],
+      "sourceAssetId": "netzwerk-neu-a2:kursbuch:disc-1:track-012",
+      "sourceRecord": {
+        "kind": "local-source-audio-asset",
+        "relativePath": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-012.mp3",
+        "filename": "NWn_A2_KB_Audio_1-012.mp3",
+        "component": "kursbuch",
+        "disc": 1,
+        "track": 12,
+        "chapter": 2,
+        "page": null,
+        "exercise": null,
+        "sha256": "e8937faa84d698e9baf384960b343c7fbf2f4171b7fc61dd0d0c34787d42f691",
+        "fileSizeBytes": 1788911,
+        "technicalMetadata": {
+          "durationMs": 51122,
+          "codec": "mp3",
+          "bitrateKbps": 256,
+          "sampleRateHz": 44100,
+          "channels": 2
+        }
+      },
+      "provenance": {
+        "officialUrl": "https://www.klett-sprachen.de/downloads/23661/netzwerk-neu-a2-transkript-audios-kursbuch-kapitel-1-6/pdf",
+        "evidence": "official Kursbuch transcript index places disc 1 track 12 in Kapitel 2 only",
+        "localIdentity": "SHA-256, byte size, and MPEG technical metadata from NETZWERK_NEU_A2_AUDIO_ASSET_INDEX.json",
+        "evidenceScope": "component, disc, track, Kapitel only; page and exercise unresolved"
+      },
+      "rightsClassification": {
+        "metadata": "RIGHTS_SAFE_SOURCE_ASSET_METADATA",
+        "publisherAudioPayload": "CLEARLY_RESTRICTED",
+        "importPolicy": "register source-only metadata; do not bundle, copy, serve, or create a playable asset"
+      },
+      "verificationStatus": "PARTIALLY_PROVEN",
+      "fieldsAllowedForImport": {
+        "uuid": "c4262a94-3cae-541d-94ed-3acf88886734",
+        "slug": "netzwerk-neu-a2-kursbuch-1-012",
+        "availability": "source-only",
+        "localPath": "",
+        "sourcePath": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-012.mp3",
+        "mimeType": "audio/mpeg",
+        "byteSize": 1788911,
+        "durationMs": 51122,
+        "checksum": "sha256:e8937faa84d698e9baf384960b343c7fbf2f4171b7fc61dd0d0c34787d42f691",
+        "contentStatus": "imported",
+        "contentVersion": 1,
+        "sourceReference": "https://www.klett-sprachen.de/downloads/23661/netzwerk-neu-a2-transkript-audios-kursbuch-kapitel-1-6/pdf | kursbuch disc 1 track 12 | Kapitel 2 | page/exercise unresolved",
+        "sourceType": "audio",
+        "revision": 1,
+        "deleted": 0
+      },
+      "fieldsMustRemainNullOrUnset": [
+        "remoteUrl",
+        "page",
+        "exercise",
+        "listeningItemUuid",
+        "lessonItemUuid",
+        "verifiedAt",
+        "verifiedBy"
+      ],
+      "fieldsSuppliedAtRuntime": [
+        "createdAt",
+        "updatedAt"
+      ],
+      "structureEvidenceSourceIds": [
+        "source-audio-transcript-kb-1-6"
+      ],
+      "sourceEditionIds": [
+        "combined-a2-1"
+      ]
+    },
+    {
+      "externalId": "netzwerk-neu-a2:kursbuch:disc-1:track-013",
+      "canonicalTargetEntity": "audioAsset",
+      "sourceRecordIds": [
+        "k2-kb-audio-transcript"
+      ],
+      "sourceAssetId": "netzwerk-neu-a2:kursbuch:disc-1:track-013",
+      "sourceRecord": {
+        "kind": "local-source-audio-asset",
+        "relativePath": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-013.mp3",
+        "filename": "NWn_A2_KB_Audio_1-013.mp3",
+        "component": "kursbuch",
+        "disc": 1,
+        "track": 13,
+        "chapter": 2,
+        "page": null,
+        "exercise": null,
+        "sha256": "3f43211c68e85c4acc75ddbbfac55e4358319fad93676dc9dbb2fe2748a455e2",
+        "fileSizeBytes": 1266201,
+        "technicalMetadata": {
+          "durationMs": 34769,
+          "codec": "mp3",
+          "bitrateKbps": 256,
+          "sampleRateHz": 44100,
+          "channels": 2
+        }
+      },
+      "provenance": {
+        "officialUrl": "https://www.klett-sprachen.de/downloads/23661/netzwerk-neu-a2-transkript-audios-kursbuch-kapitel-1-6/pdf",
+        "evidence": "official Kursbuch transcript index places disc 1 track 13 in Kapitel 2 only",
+        "localIdentity": "SHA-256, byte size, and MPEG technical metadata from NETZWERK_NEU_A2_AUDIO_ASSET_INDEX.json",
+        "evidenceScope": "component, disc, track, Kapitel only; page and exercise unresolved"
+      },
+      "rightsClassification": {
+        "metadata": "RIGHTS_SAFE_SOURCE_ASSET_METADATA",
+        "publisherAudioPayload": "CLEARLY_RESTRICTED",
+        "importPolicy": "register source-only metadata; do not bundle, copy, serve, or create a playable asset"
+      },
+      "verificationStatus": "PARTIALLY_PROVEN",
+      "fieldsAllowedForImport": {
+        "uuid": "2091fba8-bb86-56a5-aa8f-a7bcb8d76d10",
+        "slug": "netzwerk-neu-a2-kursbuch-1-013",
+        "availability": "source-only",
+        "localPath": "",
+        "sourcePath": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-013.mp3",
+        "mimeType": "audio/mpeg",
+        "byteSize": 1266201,
+        "durationMs": 34769,
+        "checksum": "sha256:3f43211c68e85c4acc75ddbbfac55e4358319fad93676dc9dbb2fe2748a455e2",
+        "contentStatus": "imported",
+        "contentVersion": 1,
+        "sourceReference": "https://www.klett-sprachen.de/downloads/23661/netzwerk-neu-a2-transkript-audios-kursbuch-kapitel-1-6/pdf | kursbuch disc 1 track 13 | Kapitel 2 | page/exercise unresolved",
+        "sourceType": "audio",
+        "revision": 1,
+        "deleted": 0
+      },
+      "fieldsMustRemainNullOrUnset": [
+        "remoteUrl",
+        "page",
+        "exercise",
+        "listeningItemUuid",
+        "lessonItemUuid",
+        "verifiedAt",
+        "verifiedBy"
+      ],
+      "fieldsSuppliedAtRuntime": [
+        "createdAt",
+        "updatedAt"
+      ],
+      "structureEvidenceSourceIds": [
+        "source-audio-transcript-kb-1-6"
+      ],
+      "sourceEditionIds": [
+        "combined-a2-1"
+      ]
+    },
+    {
+      "externalId": "netzwerk-neu-a2:kursbuch:disc-1:track-014",
+      "canonicalTargetEntity": "audioAsset",
+      "sourceRecordIds": [
+        "k2-kb-audio-transcript"
+      ],
+      "sourceAssetId": "netzwerk-neu-a2:kursbuch:disc-1:track-014",
+      "sourceRecord": {
+        "kind": "local-source-audio-asset",
+        "relativePath": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-014.mp3",
+        "filename": "NWn_A2_KB_Audio_1-014.mp3",
+        "component": "kursbuch",
+        "disc": 1,
+        "track": 14,
+        "chapter": 2,
+        "page": null,
+        "exercise": null,
+        "sha256": "107d0aa13e6de532153c340b0f6bbb9589a978980e125f22a5a1528d23e888e2",
+        "fileSizeBytes": 2150466,
+        "technicalMetadata": {
+          "durationMs": 62433,
+          "codec": "mp3",
+          "bitrateKbps": 256,
+          "sampleRateHz": 44100,
+          "channels": 2
+        }
+      },
+      "provenance": {
+        "officialUrl": "https://www.klett-sprachen.de/downloads/23661/netzwerk-neu-a2-transkript-audios-kursbuch-kapitel-1-6/pdf",
+        "evidence": "official Kursbuch transcript index places disc 1 track 14 in Kapitel 2 only",
+        "localIdentity": "SHA-256, byte size, and MPEG technical metadata from NETZWERK_NEU_A2_AUDIO_ASSET_INDEX.json",
+        "evidenceScope": "component, disc, track, Kapitel only; page and exercise unresolved"
+      },
+      "rightsClassification": {
+        "metadata": "RIGHTS_SAFE_SOURCE_ASSET_METADATA",
+        "publisherAudioPayload": "CLEARLY_RESTRICTED",
+        "importPolicy": "register source-only metadata; do not bundle, copy, serve, or create a playable asset"
+      },
+      "verificationStatus": "PARTIALLY_PROVEN",
+      "fieldsAllowedForImport": {
+        "uuid": "88b746ad-4cfa-59d5-b741-b6f239705084",
+        "slug": "netzwerk-neu-a2-kursbuch-1-014",
+        "availability": "source-only",
+        "localPath": "",
+        "sourcePath": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-014.mp3",
+        "mimeType": "audio/mpeg",
+        "byteSize": 2150466,
+        "durationMs": 62433,
+        "checksum": "sha256:107d0aa13e6de532153c340b0f6bbb9589a978980e125f22a5a1528d23e888e2",
+        "contentStatus": "imported",
+        "contentVersion": 1,
+        "sourceReference": "https://www.klett-sprachen.de/downloads/23661/netzwerk-neu-a2-transkript-audios-kursbuch-kapitel-1-6/pdf | kursbuch disc 1 track 14 | Kapitel 2 | page/exercise unresolved",
+        "sourceType": "audio",
+        "revision": 1,
+        "deleted": 0
+      },
+      "fieldsMustRemainNullOrUnset": [
+        "remoteUrl",
+        "page",
+        "exercise",
+        "listeningItemUuid",
+        "lessonItemUuid",
+        "verifiedAt",
+        "verifiedBy"
+      ],
+      "fieldsSuppliedAtRuntime": [
+        "createdAt",
+        "updatedAt"
+      ],
+      "structureEvidenceSourceIds": [
+        "source-audio-transcript-kb-1-6"
+      ],
+      "sourceEditionIds": [
+        "combined-a2-1"
+      ]
+    },
+    {
+      "externalId": "netzwerk-neu-a2:kursbuch:disc-1:track-015",
+      "canonicalTargetEntity": "audioAsset",
+      "sourceRecordIds": [
+        "k2-kb-audio-transcript"
+      ],
+      "sourceAssetId": "netzwerk-neu-a2:kursbuch:disc-1:track-015",
+      "sourceRecord": {
+        "kind": "local-source-audio-asset",
+        "relativePath": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-015.mp3",
+        "filename": "NWn_A2_KB_Audio_1-015.mp3",
+        "component": "kursbuch",
+        "disc": 1,
+        "track": 15,
+        "chapter": 2,
+        "page": null,
+        "exercise": null,
+        "sha256": "ed940e599b67ddc3d934af808e29d21feaf03ab6f95879619c4285146e05da7a",
+        "fileSizeBytes": 798601,
+        "technicalMetadata": {
+          "durationMs": 20140,
+          "codec": "mp3",
+          "bitrateKbps": 256,
+          "sampleRateHz": 44100,
+          "channels": 2
+        }
+      },
+      "provenance": {
+        "officialUrl": "https://www.klett-sprachen.de/downloads/23661/netzwerk-neu-a2-transkript-audios-kursbuch-kapitel-1-6/pdf",
+        "evidence": "official Kursbuch transcript index places disc 1 track 15 in Kapitel 2 only",
+        "localIdentity": "SHA-256, byte size, and MPEG technical metadata from NETZWERK_NEU_A2_AUDIO_ASSET_INDEX.json",
+        "evidenceScope": "component, disc, track, Kapitel only; page and exercise unresolved"
+      },
+      "rightsClassification": {
+        "metadata": "RIGHTS_SAFE_SOURCE_ASSET_METADATA",
+        "publisherAudioPayload": "CLEARLY_RESTRICTED",
+        "importPolicy": "register source-only metadata; do not bundle, copy, serve, or create a playable asset"
+      },
+      "verificationStatus": "PARTIALLY_PROVEN",
+      "fieldsAllowedForImport": {
+        "uuid": "73ede56b-44de-50e5-9345-b0bfa579c86d",
+        "slug": "netzwerk-neu-a2-kursbuch-1-015",
+        "availability": "source-only",
+        "localPath": "",
+        "sourcePath": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-015.mp3",
+        "mimeType": "audio/mpeg",
+        "byteSize": 798601,
+        "durationMs": 20140,
+        "checksum": "sha256:ed940e599b67ddc3d934af808e29d21feaf03ab6f95879619c4285146e05da7a",
+        "contentStatus": "imported",
+        "contentVersion": 1,
+        "sourceReference": "https://www.klett-sprachen.de/downloads/23661/netzwerk-neu-a2-transkript-audios-kursbuch-kapitel-1-6/pdf | kursbuch disc 1 track 15 | Kapitel 2 | page/exercise unresolved",
+        "sourceType": "audio",
+        "revision": 1,
+        "deleted": 0
+      },
+      "fieldsMustRemainNullOrUnset": [
+        "remoteUrl",
+        "page",
+        "exercise",
+        "listeningItemUuid",
+        "lessonItemUuid",
+        "verifiedAt",
+        "verifiedBy"
+      ],
+      "fieldsSuppliedAtRuntime": [
+        "createdAt",
+        "updatedAt"
+      ],
+      "structureEvidenceSourceIds": [
+        "source-audio-transcript-kb-1-6"
+      ],
+      "sourceEditionIds": [
+        "combined-a2-1"
+      ]
+    },
+    {
+      "externalId": "netzwerk-neu-a2:kursbuch:disc-1:track-016",
+      "canonicalTargetEntity": "audioAsset",
+      "sourceRecordIds": [
+        "k2-kb-audio-transcript"
+      ],
+      "sourceAssetId": "netzwerk-neu-a2:kursbuch:disc-1:track-016",
+      "sourceRecord": {
+        "kind": "local-source-audio-asset",
+        "relativePath": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-016.mp3",
+        "filename": "NWn_A2_KB_Audio_1-016.mp3",
+        "component": "kursbuch",
+        "disc": 1,
+        "track": 16,
+        "chapter": 2,
+        "page": null,
+        "exercise": null,
+        "sha256": "35088cbede1c5d29aa81dcd0527fd502d434729dce033e6be1c0ee62d9bc7513",
+        "fileSizeBytes": 5871226,
+        "technicalMetadata": {
+          "durationMs": 178834,
+          "codec": "mp3",
+          "bitrateKbps": 256,
+          "sampleRateHz": 44100,
+          "channels": 2
+        }
+      },
+      "provenance": {
+        "officialUrl": "https://www.klett-sprachen.de/downloads/23661/netzwerk-neu-a2-transkript-audios-kursbuch-kapitel-1-6/pdf",
+        "evidence": "official Kursbuch transcript index places disc 1 track 16 in Kapitel 2 only",
+        "localIdentity": "SHA-256, byte size, and MPEG technical metadata from NETZWERK_NEU_A2_AUDIO_ASSET_INDEX.json",
+        "evidenceScope": "component, disc, track, Kapitel only; page and exercise unresolved"
+      },
+      "rightsClassification": {
+        "metadata": "RIGHTS_SAFE_SOURCE_ASSET_METADATA",
+        "publisherAudioPayload": "CLEARLY_RESTRICTED",
+        "importPolicy": "register source-only metadata; do not bundle, copy, serve, or create a playable asset"
+      },
+      "verificationStatus": "PARTIALLY_PROVEN",
+      "fieldsAllowedForImport": {
+        "uuid": "8bde719c-3b55-583a-9e1f-d8ffec55d9f7",
+        "slug": "netzwerk-neu-a2-kursbuch-1-016",
+        "availability": "source-only",
+        "localPath": "",
+        "sourcePath": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-016.mp3",
+        "mimeType": "audio/mpeg",
+        "byteSize": 5871226,
+        "durationMs": 178834,
+        "checksum": "sha256:35088cbede1c5d29aa81dcd0527fd502d434729dce033e6be1c0ee62d9bc7513",
+        "contentStatus": "imported",
+        "contentVersion": 1,
+        "sourceReference": "https://www.klett-sprachen.de/downloads/23661/netzwerk-neu-a2-transkript-audios-kursbuch-kapitel-1-6/pdf | kursbuch disc 1 track 16 | Kapitel 2 | page/exercise unresolved",
+        "sourceType": "audio",
+        "revision": 1,
+        "deleted": 0
+      },
+      "fieldsMustRemainNullOrUnset": [
+        "remoteUrl",
+        "page",
+        "exercise",
+        "listeningItemUuid",
+        "lessonItemUuid",
+        "verifiedAt",
+        "verifiedBy"
+      ],
+      "fieldsSuppliedAtRuntime": [
+        "createdAt",
+        "updatedAt"
+      ],
+      "structureEvidenceSourceIds": [
+        "source-audio-transcript-kb-1-6"
+      ],
+      "sourceEditionIds": [
+        "combined-a2-1"
+      ]
+    },
+    {
+      "externalId": "netzwerk-neu-a2:kursbuch:disc-1:track-017",
+      "canonicalTargetEntity": "audioAsset",
+      "sourceRecordIds": [
+        "k2-kb-audio-transcript"
+      ],
+      "sourceAssetId": "netzwerk-neu-a2:kursbuch:disc-1:track-017",
+      "sourceRecord": {
+        "kind": "local-source-audio-asset",
+        "relativePath": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-017.mp3",
+        "filename": "NWn_A2_KB_Audio_1-017.mp3",
+        "component": "kursbuch",
+        "disc": 1,
+        "track": 17,
+        "chapter": 2,
+        "page": null,
+        "exercise": null,
+        "sha256": "9c64ff01e0df9dea62e9de421e9102be44b952c674951d2dd6d6ff7e3c55c8e8",
+        "fileSizeBytes": 3567461,
+        "technicalMetadata": {
+          "durationMs": 106762,
+          "codec": "mp3",
+          "bitrateKbps": 256,
+          "sampleRateHz": 44100,
+          "channels": 2
+        }
+      },
+      "provenance": {
+        "officialUrl": "https://www.klett-sprachen.de/downloads/23661/netzwerk-neu-a2-transkript-audios-kursbuch-kapitel-1-6/pdf",
+        "evidence": "official Kursbuch transcript index places disc 1 track 17 in Kapitel 2 only",
+        "localIdentity": "SHA-256, byte size, and MPEG technical metadata from NETZWERK_NEU_A2_AUDIO_ASSET_INDEX.json",
+        "evidenceScope": "component, disc, track, Kapitel only; page and exercise unresolved"
+      },
+      "rightsClassification": {
+        "metadata": "RIGHTS_SAFE_SOURCE_ASSET_METADATA",
+        "publisherAudioPayload": "CLEARLY_RESTRICTED",
+        "importPolicy": "register source-only metadata; do not bundle, copy, serve, or create a playable asset"
+      },
+      "verificationStatus": "PARTIALLY_PROVEN",
+      "fieldsAllowedForImport": {
+        "uuid": "cf095085-6fd9-5360-92fc-ad17582cefac",
+        "slug": "netzwerk-neu-a2-kursbuch-1-017",
+        "availability": "source-only",
+        "localPath": "",
+        "sourcePath": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_KB_Audio_1-017.mp3",
+        "mimeType": "audio/mpeg",
+        "byteSize": 3567461,
+        "durationMs": 106762,
+        "checksum": "sha256:9c64ff01e0df9dea62e9de421e9102be44b952c674951d2dd6d6ff7e3c55c8e8",
+        "contentStatus": "imported",
+        "contentVersion": 1,
+        "sourceReference": "https://www.klett-sprachen.de/downloads/23661/netzwerk-neu-a2-transkript-audios-kursbuch-kapitel-1-6/pdf | kursbuch disc 1 track 17 | Kapitel 2 | page/exercise unresolved",
+        "sourceType": "audio",
+        "revision": 1,
+        "deleted": 0
+      },
+      "fieldsMustRemainNullOrUnset": [
+        "remoteUrl",
+        "page",
+        "exercise",
+        "listeningItemUuid",
+        "lessonItemUuid",
+        "verifiedAt",
+        "verifiedBy"
+      ],
+      "fieldsSuppliedAtRuntime": [
+        "createdAt",
+        "updatedAt"
+      ],
+      "structureEvidenceSourceIds": [
+        "source-audio-transcript-kb-1-6"
+      ],
+      "sourceEditionIds": [
+        "combined-a2-1"
+      ]
+    },
+    {
+      "externalId": "netzwerk-neu-a2:uebungsbuch:disc-1:track-011",
+      "canonicalTargetEntity": "audioAsset",
+      "sourceRecordIds": [
+        "k2-ueb-audio-transcript"
+      ],
+      "sourceAssetId": "netzwerk-neu-a2:uebungsbuch:disc-1:track-011",
+      "sourceRecord": {
+        "kind": "local-source-audio-asset",
+        "relativePath": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-011.mp3",
+        "filename": "NWn_A2_UeB_Audio_1-011.mp3",
+        "component": "uebungsbuch",
+        "disc": 1,
+        "track": 11,
+        "chapter": 2,
+        "page": null,
+        "exercise": null,
+        "sha256": "ab33b178389ba934cd462cf4c79b2fcf59bf5589d4924ef3097467f74465a7ae",
+        "fileSizeBytes": 2459003,
+        "technicalMetadata": {
+          "durationMs": 67344,
+          "codec": "mp3",
+          "bitrateKbps": 256,
+          "sampleRateHz": 44100,
+          "channels": 2
+        }
+      },
+      "provenance": {
+        "officialUrl": "https://www.klett-sprachen.de/downloads/23662/netzwerk-neu-a2-transkript-audios-uebungsbuch-kapitel-1-6/pdf",
+        "evidence": "official Übungsbuch transcript index places disc 1 track 11 in Kapitel 2 only",
+        "localIdentity": "SHA-256, byte size, and MPEG technical metadata from NETZWERK_NEU_A2_AUDIO_ASSET_INDEX.json",
+        "evidenceScope": "component, disc, track, Kapitel only; page and exercise unresolved"
+      },
+      "rightsClassification": {
+        "metadata": "RIGHTS_SAFE_SOURCE_ASSET_METADATA",
+        "publisherAudioPayload": "CLEARLY_RESTRICTED",
+        "importPolicy": "register source-only metadata; do not bundle, copy, serve, or create a playable asset"
+      },
+      "verificationStatus": "PARTIALLY_PROVEN",
+      "fieldsAllowedForImport": {
+        "uuid": "416ef9a0-3319-594d-a04f-3fa85bd64e5d",
+        "slug": "netzwerk-neu-a2-uebungsbuch-1-011",
+        "availability": "source-only",
+        "localPath": "",
+        "sourcePath": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-011.mp3",
+        "mimeType": "audio/mpeg",
+        "byteSize": 2459003,
+        "durationMs": 67344,
+        "checksum": "sha256:ab33b178389ba934cd462cf4c79b2fcf59bf5589d4924ef3097467f74465a7ae",
+        "contentStatus": "imported",
+        "contentVersion": 1,
+        "sourceReference": "https://www.klett-sprachen.de/downloads/23662/netzwerk-neu-a2-transkript-audios-uebungsbuch-kapitel-1-6/pdf | uebungsbuch disc 1 track 11 | Kapitel 2 | page/exercise unresolved",
+        "sourceType": "audio",
+        "revision": 1,
+        "deleted": 0
+      },
+      "fieldsMustRemainNullOrUnset": [
+        "remoteUrl",
+        "page",
+        "exercise",
+        "listeningItemUuid",
+        "lessonItemUuid",
+        "verifiedAt",
+        "verifiedBy"
+      ],
+      "fieldsSuppliedAtRuntime": [
+        "createdAt",
+        "updatedAt"
+      ],
+      "structureEvidenceSourceIds": [
+        "source-audio-transcript-ueb-1-6"
+      ],
+      "sourceEditionIds": [
+        "combined-a2-1"
+      ]
+    },
+    {
+      "externalId": "netzwerk-neu-a2:uebungsbuch:disc-1:track-012",
+      "canonicalTargetEntity": "audioAsset",
+      "sourceRecordIds": [
+        "k2-ueb-audio-transcript"
+      ],
+      "sourceAssetId": "netzwerk-neu-a2:uebungsbuch:disc-1:track-012",
+      "sourceRecord": {
+        "kind": "local-source-audio-asset",
+        "relativePath": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-012.mp3",
+        "filename": "NWn_A2_UeB_Audio_1-012.mp3",
+        "component": "uebungsbuch",
+        "disc": 1,
+        "track": 12,
+        "chapter": 2,
+        "page": null,
+        "exercise": null,
+        "sha256": "f6cf187f1048d2b67c7920272bc6da24062694a27ac800622c1f7991d13a2618",
+        "fileSizeBytes": 2403893,
+        "technicalMetadata": {
+          "durationMs": 65620,
+          "codec": "mp3",
+          "bitrateKbps": 256,
+          "sampleRateHz": 44100,
+          "channels": 2
+        }
+      },
+      "provenance": {
+        "officialUrl": "https://www.klett-sprachen.de/downloads/23662/netzwerk-neu-a2-transkript-audios-uebungsbuch-kapitel-1-6/pdf",
+        "evidence": "official Übungsbuch transcript index places disc 1 track 12 in Kapitel 2 only",
+        "localIdentity": "SHA-256, byte size, and MPEG technical metadata from NETZWERK_NEU_A2_AUDIO_ASSET_INDEX.json",
+        "evidenceScope": "component, disc, track, Kapitel only; page and exercise unresolved"
+      },
+      "rightsClassification": {
+        "metadata": "RIGHTS_SAFE_SOURCE_ASSET_METADATA",
+        "publisherAudioPayload": "CLEARLY_RESTRICTED",
+        "importPolicy": "register source-only metadata; do not bundle, copy, serve, or create a playable asset"
+      },
+      "verificationStatus": "PARTIALLY_PROVEN",
+      "fieldsAllowedForImport": {
+        "uuid": "57b2119e-ac08-5b6c-a139-22879537457c",
+        "slug": "netzwerk-neu-a2-uebungsbuch-1-012",
+        "availability": "source-only",
+        "localPath": "",
+        "sourcePath": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-012.mp3",
+        "mimeType": "audio/mpeg",
+        "byteSize": 2403893,
+        "durationMs": 65620,
+        "checksum": "sha256:f6cf187f1048d2b67c7920272bc6da24062694a27ac800622c1f7991d13a2618",
+        "contentStatus": "imported",
+        "contentVersion": 1,
+        "sourceReference": "https://www.klett-sprachen.de/downloads/23662/netzwerk-neu-a2-transkript-audios-uebungsbuch-kapitel-1-6/pdf | uebungsbuch disc 1 track 12 | Kapitel 2 | page/exercise unresolved",
+        "sourceType": "audio",
+        "revision": 1,
+        "deleted": 0
+      },
+      "fieldsMustRemainNullOrUnset": [
+        "remoteUrl",
+        "page",
+        "exercise",
+        "listeningItemUuid",
+        "lessonItemUuid",
+        "verifiedAt",
+        "verifiedBy"
+      ],
+      "fieldsSuppliedAtRuntime": [
+        "createdAt",
+        "updatedAt"
+      ],
+      "structureEvidenceSourceIds": [
+        "source-audio-transcript-ueb-1-6"
+      ],
+      "sourceEditionIds": [
+        "combined-a2-1"
+      ]
+    },
+    {
+      "externalId": "netzwerk-neu-a2:uebungsbuch:disc-1:track-013",
+      "canonicalTargetEntity": "audioAsset",
+      "sourceRecordIds": [
+        "k2-ueb-audio-transcript"
+      ],
+      "sourceAssetId": "netzwerk-neu-a2:uebungsbuch:disc-1:track-013",
+      "sourceRecord": {
+        "kind": "local-source-audio-asset",
+        "relativePath": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-013.mp3",
+        "filename": "NWn_A2_UeB_Audio_1-013.mp3",
+        "component": "uebungsbuch",
+        "disc": 1,
+        "track": 13,
+        "chapter": 2,
+        "page": null,
+        "exercise": null,
+        "sha256": "693a06fbf1b5ec4238d7ec115a1f03338d69ea65b3e9ba3d3c651620c1e53239",
+        "fileSizeBytes": 2018123,
+        "technicalMetadata": {
+          "durationMs": 53551,
+          "codec": "mp3",
+          "bitrateKbps": 256,
+          "sampleRateHz": 44100,
+          "channels": 2
+        }
+      },
+      "provenance": {
+        "officialUrl": "https://www.klett-sprachen.de/downloads/23662/netzwerk-neu-a2-transkript-audios-uebungsbuch-kapitel-1-6/pdf",
+        "evidence": "official Übungsbuch transcript index places disc 1 track 13 in Kapitel 2 only",
+        "localIdentity": "SHA-256, byte size, and MPEG technical metadata from NETZWERK_NEU_A2_AUDIO_ASSET_INDEX.json",
+        "evidenceScope": "component, disc, track, Kapitel only; page and exercise unresolved"
+      },
+      "rightsClassification": {
+        "metadata": "RIGHTS_SAFE_SOURCE_ASSET_METADATA",
+        "publisherAudioPayload": "CLEARLY_RESTRICTED",
+        "importPolicy": "register source-only metadata; do not bundle, copy, serve, or create a playable asset"
+      },
+      "verificationStatus": "PARTIALLY_PROVEN",
+      "fieldsAllowedForImport": {
+        "uuid": "12d35fd4-9012-5ed2-b73b-1e3f66df272f",
+        "slug": "netzwerk-neu-a2-uebungsbuch-1-013",
+        "availability": "source-only",
+        "localPath": "",
+        "sourcePath": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-013.mp3",
+        "mimeType": "audio/mpeg",
+        "byteSize": 2018123,
+        "durationMs": 53551,
+        "checksum": "sha256:693a06fbf1b5ec4238d7ec115a1f03338d69ea65b3e9ba3d3c651620c1e53239",
+        "contentStatus": "imported",
+        "contentVersion": 1,
+        "sourceReference": "https://www.klett-sprachen.de/downloads/23662/netzwerk-neu-a2-transkript-audios-uebungsbuch-kapitel-1-6/pdf | uebungsbuch disc 1 track 13 | Kapitel 2 | page/exercise unresolved",
+        "sourceType": "audio",
+        "revision": 1,
+        "deleted": 0
+      },
+      "fieldsMustRemainNullOrUnset": [
+        "remoteUrl",
+        "page",
+        "exercise",
+        "listeningItemUuid",
+        "lessonItemUuid",
+        "verifiedAt",
+        "verifiedBy"
+      ],
+      "fieldsSuppliedAtRuntime": [
+        "createdAt",
+        "updatedAt"
+      ],
+      "structureEvidenceSourceIds": [
+        "source-audio-transcript-ueb-1-6"
+      ],
+      "sourceEditionIds": [
+        "combined-a2-1"
+      ]
+    },
+    {
+      "externalId": "netzwerk-neu-a2:uebungsbuch:disc-1:track-014",
+      "canonicalTargetEntity": "audioAsset",
+      "sourceRecordIds": [
+        "k2-ueb-audio-transcript"
+      ],
+      "sourceAssetId": "netzwerk-neu-a2:uebungsbuch:disc-1:track-014",
+      "sourceRecord": {
+        "kind": "local-source-audio-asset",
+        "relativePath": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-014.mp3",
+        "filename": "NWn_A2_UeB_Audio_1-014.mp3",
+        "component": "uebungsbuch",
+        "disc": 1,
+        "track": 14,
+        "chapter": 2,
+        "page": null,
+        "exercise": null,
+        "sha256": "eaf45ddda940fd4bc7dbff5748340fdd3299b5040c0f104fb91a20ce368a5a53",
+        "fileSizeBytes": 2554193,
+        "technicalMetadata": {
+          "durationMs": 70322,
+          "codec": "mp3",
+          "bitrateKbps": 256,
+          "sampleRateHz": 44100,
+          "channels": 2
+        }
+      },
+      "provenance": {
+        "officialUrl": "https://www.klett-sprachen.de/downloads/23662/netzwerk-neu-a2-transkript-audios-uebungsbuch-kapitel-1-6/pdf",
+        "evidence": "official Übungsbuch transcript index places disc 1 track 14 in Kapitel 2 only",
+        "localIdentity": "SHA-256, byte size, and MPEG technical metadata from NETZWERK_NEU_A2_AUDIO_ASSET_INDEX.json",
+        "evidenceScope": "component, disc, track, Kapitel only; page and exercise unresolved"
+      },
+      "rightsClassification": {
+        "metadata": "RIGHTS_SAFE_SOURCE_ASSET_METADATA",
+        "publisherAudioPayload": "CLEARLY_RESTRICTED",
+        "importPolicy": "register source-only metadata; do not bundle, copy, serve, or create a playable asset"
+      },
+      "verificationStatus": "PARTIALLY_PROVEN",
+      "fieldsAllowedForImport": {
+        "uuid": "dda3a6d1-4042-5b98-9b0b-2be94dd5f7c9",
+        "slug": "netzwerk-neu-a2-uebungsbuch-1-014",
+        "availability": "source-only",
+        "localPath": "",
+        "sourcePath": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-014.mp3",
+        "mimeType": "audio/mpeg",
+        "byteSize": 2554193,
+        "durationMs": 70322,
+        "checksum": "sha256:eaf45ddda940fd4bc7dbff5748340fdd3299b5040c0f104fb91a20ce368a5a53",
+        "contentStatus": "imported",
+        "contentVersion": 1,
+        "sourceReference": "https://www.klett-sprachen.de/downloads/23662/netzwerk-neu-a2-transkript-audios-uebungsbuch-kapitel-1-6/pdf | uebungsbuch disc 1 track 14 | Kapitel 2 | page/exercise unresolved",
+        "sourceType": "audio",
+        "revision": 1,
+        "deleted": 0
+      },
+      "fieldsMustRemainNullOrUnset": [
+        "remoteUrl",
+        "page",
+        "exercise",
+        "listeningItemUuid",
+        "lessonItemUuid",
+        "verifiedAt",
+        "verifiedBy"
+      ],
+      "fieldsSuppliedAtRuntime": [
+        "createdAt",
+        "updatedAt"
+      ],
+      "structureEvidenceSourceIds": [
+        "source-audio-transcript-ueb-1-6"
+      ],
+      "sourceEditionIds": [
+        "combined-a2-1"
+      ]
+    },
+    {
+      "externalId": "netzwerk-neu-a2:uebungsbuch:disc-1:track-015",
+      "canonicalTargetEntity": "audioAsset",
+      "sourceRecordIds": [
+        "k2-ueb-audio-transcript"
+      ],
+      "sourceAssetId": "netzwerk-neu-a2:uebungsbuch:disc-1:track-015",
+      "sourceRecord": {
+        "kind": "local-source-audio-asset",
+        "relativePath": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-015.mp3",
+        "filename": "NWn_A2_UeB_Audio_1-015.mp3",
+        "component": "uebungsbuch",
+        "disc": 1,
+        "track": 15,
+        "chapter": 2,
+        "page": null,
+        "exercise": null,
+        "sha256": "461875450cc45ae00f5470ef7506becda77aa7c922793bb50baf20fb8671988a",
+        "fileSizeBytes": 4830403,
+        "technicalMetadata": {
+          "durationMs": 141531,
+          "codec": "mp3",
+          "bitrateKbps": 256,
+          "sampleRateHz": 44100,
+          "channels": 2
+        }
+      },
+      "provenance": {
+        "officialUrl": "https://www.klett-sprachen.de/downloads/23662/netzwerk-neu-a2-transkript-audios-uebungsbuch-kapitel-1-6/pdf",
+        "evidence": "official Übungsbuch transcript index places disc 1 track 15 in Kapitel 2 only",
+        "localIdentity": "SHA-256, byte size, and MPEG technical metadata from NETZWERK_NEU_A2_AUDIO_ASSET_INDEX.json",
+        "evidenceScope": "component, disc, track, Kapitel only; page and exercise unresolved"
+      },
+      "rightsClassification": {
+        "metadata": "RIGHTS_SAFE_SOURCE_ASSET_METADATA",
+        "publisherAudioPayload": "CLEARLY_RESTRICTED",
+        "importPolicy": "register source-only metadata; do not bundle, copy, serve, or create a playable asset"
+      },
+      "verificationStatus": "PARTIALLY_PROVEN",
+      "fieldsAllowedForImport": {
+        "uuid": "ae0d24c9-e1bc-51d9-957c-380588243fcc",
+        "slug": "netzwerk-neu-a2-uebungsbuch-1-015",
+        "availability": "source-only",
+        "localPath": "",
+        "sourcePath": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-015.mp3",
+        "mimeType": "audio/mpeg",
+        "byteSize": 4830403,
+        "durationMs": 141531,
+        "checksum": "sha256:461875450cc45ae00f5470ef7506becda77aa7c922793bb50baf20fb8671988a",
+        "contentStatus": "imported",
+        "contentVersion": 1,
+        "sourceReference": "https://www.klett-sprachen.de/downloads/23662/netzwerk-neu-a2-transkript-audios-uebungsbuch-kapitel-1-6/pdf | uebungsbuch disc 1 track 15 | Kapitel 2 | page/exercise unresolved",
+        "sourceType": "audio",
+        "revision": 1,
+        "deleted": 0
+      },
+      "fieldsMustRemainNullOrUnset": [
+        "remoteUrl",
+        "page",
+        "exercise",
+        "listeningItemUuid",
+        "lessonItemUuid",
+        "verifiedAt",
+        "verifiedBy"
+      ],
+      "fieldsSuppliedAtRuntime": [
+        "createdAt",
+        "updatedAt"
+      ],
+      "structureEvidenceSourceIds": [
+        "source-audio-transcript-ueb-1-6"
+      ],
+      "sourceEditionIds": [
+        "combined-a2-1"
+      ]
+    },
+    {
+      "externalId": "netzwerk-neu-a2:uebungsbuch:disc-1:track-016",
+      "canonicalTargetEntity": "audioAsset",
+      "sourceRecordIds": [
+        "k2-ueb-audio-transcript"
+      ],
+      "sourceAssetId": "netzwerk-neu-a2:uebungsbuch:disc-1:track-016",
+      "sourceRecord": {
+        "kind": "local-source-audio-asset",
+        "relativePath": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-016.mp3",
+        "filename": "NWn_A2_UeB_Audio_1-016.mp3",
+        "component": "uebungsbuch",
+        "disc": 1,
+        "track": 16,
+        "chapter": 2,
+        "page": null,
+        "exercise": null,
+        "sha256": "3d468f5cb4b2da50528a0c8791af4b6957b23087076eac0c59198e79583f6184",
+        "fileSizeBytes": 3415078,
+        "technicalMetadata": {
+          "durationMs": 97254,
+          "codec": "mp3",
+          "bitrateKbps": 256,
+          "sampleRateHz": 44100,
+          "channels": 2
+        }
+      },
+      "provenance": {
+        "officialUrl": "https://www.klett-sprachen.de/downloads/23662/netzwerk-neu-a2-transkript-audios-uebungsbuch-kapitel-1-6/pdf",
+        "evidence": "official Übungsbuch transcript index places disc 1 track 16 in Kapitel 2 only",
+        "localIdentity": "SHA-256, byte size, and MPEG technical metadata from NETZWERK_NEU_A2_AUDIO_ASSET_INDEX.json",
+        "evidenceScope": "component, disc, track, Kapitel only; page and exercise unresolved"
+      },
+      "rightsClassification": {
+        "metadata": "RIGHTS_SAFE_SOURCE_ASSET_METADATA",
+        "publisherAudioPayload": "CLEARLY_RESTRICTED",
+        "importPolicy": "register source-only metadata; do not bundle, copy, serve, or create a playable asset"
+      },
+      "verificationStatus": "PARTIALLY_PROVEN",
+      "fieldsAllowedForImport": {
+        "uuid": "30d7d1fb-dd3e-5e3c-bfae-253d9fa5b590",
+        "slug": "netzwerk-neu-a2-uebungsbuch-1-016",
+        "availability": "source-only",
+        "localPath": "",
+        "sourcePath": "03_COURSE_CONTENT/NETZWERK_NEU_A2/AUDIO/NWn_A2_UeB_Audio_1-016.mp3",
+        "mimeType": "audio/mpeg",
+        "byteSize": 3415078,
+        "durationMs": 97254,
+        "checksum": "sha256:3d468f5cb4b2da50528a0c8791af4b6957b23087076eac0c59198e79583f6184",
+        "contentStatus": "imported",
+        "contentVersion": 1,
+        "sourceReference": "https://www.klett-sprachen.de/downloads/23662/netzwerk-neu-a2-transkript-audios-uebungsbuch-kapitel-1-6/pdf | uebungsbuch disc 1 track 16 | Kapitel 2 | page/exercise unresolved",
+        "sourceType": "audio",
+        "revision": 1,
+        "deleted": 0
+      },
+      "fieldsMustRemainNullOrUnset": [
+        "remoteUrl",
+        "page",
+        "exercise",
+        "listeningItemUuid",
+        "lessonItemUuid",
+        "verifiedAt",
+        "verifiedBy"
+      ],
+      "fieldsSuppliedAtRuntime": [
+        "createdAt",
+        "updatedAt"
+      ],
+      "structureEvidenceSourceIds": [
+        "source-audio-transcript-ueb-1-6"
+      ],
+      "sourceEditionIds": [
+        "combined-a2-1"
+      ]
+    }
+  ],
+  "excludedCanonicalEntityTypes": [
+    "vocabularyItem",
+    "vocabularyMeaning",
+    "acceptedAnswer",
+    "sentence",
+    "grammarTopic",
+    "grammarRule",
+    "exercise",
+    "exerciseOption",
+    "exerciseAnswer",
+    "listeningItem",
+    "listeningText",
+    "listeningSpeaker",
+    "listeningSegment",
+    "listeningLink",
+    "lessonSection",
+    "lessonItem"
+  ]
+}

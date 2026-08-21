@@ -10,6 +10,9 @@ Evidence and input:
 2. `00_PROJECT_CONTROL/NETZWERK_NEU_A2_IMPLEMENTATION_INPUT.md`
 3. `00_PROJECT_CONTROL/NETZWERK_NEU_A2_OFFICIAL_SOURCE_AUDIT.md`
 4. `tools/intake/artifacts/netzwerk-inventory.json`
+5. `00_PROJECT_CONTROL/NETZWERK_NEU_A2_AUDIO_ASSET_INDEX.json`
+6. `00_PROJECT_CONTROL/NETZWERK_NEU_A2_STRUCTURE_INDEX.json`
+7. `00_PROJECT_CONTROL/NETZWERK_NEU_A2_KAPITEL_02_SAFE_SLICE.json`
 
 Existing intake implementation:
 
@@ -141,7 +144,7 @@ Stable keys/namespaces:
 | exercise/task | MUST-NOT-GUESS | Use only explicit source refs (KB 7d; online 2/3c/4a/7d; KB 6a; templates A2/A7d). |
 | audio disc/track | REQUIRED for audio | Asset source reference; KB 1.8–1.17, ÜB 1.11–1.16. |
 | audio filename/path/SHA-256/byte size | SOURCE-ONLY | `audioAssets.sourcePath`, checksum, byteSize; availability remains `source-only`, `localPath = ""`. |
-| audio duration | MUST-NOT-GUESS | Keep `durationMs = 0`. |
+| audio duration | REQUIRED FROM LOCAL ASSET INDEX | Use the exact measured `durationMs` from `NETZWERK_NEU_A2_AUDIO_ASSET_INDEX.json`; never derive it from byte size, nominal bitrate, or track order. |
 | audio page/exercise | MUST-NOT-GUESS | Must remain `null` for all 16 records. |
 | publisher audio payload | SOURCE-ONLY | Never copy/bundle/serve; asset remains unplayable. |
 | transcript/solution/exercise/glossary wording | SOURCE-ONLY | No `sentences`, `listeningTexts`, `exercises`, vocabulary, meanings, translations, or accepted answers in this slice. |
@@ -221,7 +224,23 @@ Add assertions for:
 14. review cards/events counts and a supplied legacy card object remain unchanged
 15. full regression suite remains green
 
-## 7. Known blockers only
+## 7. Materialized-fixture acceptance assertions
+
+| Assertion | Expected result | Test coverage |
+|---|---|---|
+| Fixture counts | Audio index: 189 assets. Structure index: 4 editions, 26 official resources, 12 chapters, 24 audio-range relations. Safe slice: exactly 22 rows = 1 course + 1 level + 1 unit + 1 lesson + 2 title texts + 16 audio assets. | Add fixture-integrity assertions to `tests/unit/netzwerk-adapter.test.js`. |
+| Kapitel 2 relationships | KB CD1 tracks 8–17 and ÜB CD1 tracks 11–16 reference Kapitel 2 and their corresponding official transcript-index records. | Extend `tests/integration/netzwerk-intake.test.js`; reuse its inventory/SHA checks. |
+| Null/absent fields | All 189 index assets and all 16 safe-slice assets have null page and exercise. Safe-slice audio also leaves `remoteUrl`, listening links, lesson-item links, and verifier fields null/unset; course-family edition/ISBN remain null. | Add unit fixture checks; reuse mapping no-invention patterns from `intake-pipeline.test.js`. |
+| Stable identity | Every external ID and canonical UUID is unique. UUIDs reproduce from the documented namespace/key or existing path-based audio convention and do not change with `now`. | Reuse deterministic-ID coverage from `intake-pipeline.test.js`; add Netzwerk fixture UUID assertions. |
+| Source-only audio | All 16 assets remain `availability: source-only`, `localPath: ""`, and unplayable; measured duration, SHA-256, byte size, codec, bitrate, sample rate, and channels match the audio index exactly. | Extend existing source-only/readback assertions in `netzwerk-intake.test.js`. |
+| No educational payload | Safe slice emits zero vocabulary, meanings, translations, accepted answers, sentences, grammar, exercises, listening entities, sections, and lesson items; no transcript, task-body, vocabulary-list, grammar-explanation, translation, or audio payload is copied. | Add unit shape assertion and integration row-count assertion. |
+| Idempotency | Empty-store preview plans 22 creates and writes nothing; first apply writes 22 rows; second apply creates/updates nothing and retains all UUIDs. | Reuse preview/apply/no-op patterns from `intake-import.test.js`. |
+| Existing-data preservation | Existing Nicos rows remain byte-identical; review-card/event counts and supplied legacy SRS records remain field-identical. | Reuse preservation fixtures/assertions from `intake-import.test.js`, `intake-batch.test.js`, and `netzwerk-intake.test.js`. |
+| Zero guessed mappings | Any implementation that emits a non-null audio page/exercise or creates a listening/lesson link from these source records must fail validation. | Add one Netzwerk-specific rejection test. |
+
+Only two new test locations are required: `tests/unit/netzwerk-adapter.test.js` for manifest/index/fixture and pure mapper assertions, and the existing `tests/integration/netzwerk-intake.test.js` for preview/apply/readback/idempotency/preservation.
+
+## 8. Known blockers only
 
 - Exact page/exercise mapping is unproven for all 16 Kapitel 2 tracks. Do not create listening activities or lesson links.
 - Klett text/audio redistribution is not licensed by the audited standard notices. Do not embed publisher wording or audio payloads.

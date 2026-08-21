@@ -34,6 +34,8 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
 *   Added `NETZWERK_NEU_A2_CLAUDE_IMPLEMENTATION_BRIEF.md` with exact reusable exports, the minimal manifest-backed adapter contract, likely code touch points, canonical field rules, and required tests.
 *   Smallest safe first slice is 22 canonical rows in an empty test store: course, level, A2.1 unit, Kapitel 2 lesson, two German title texts, and 16 unplayable source-only audio assets. It creates no vocabulary, translations, grammar, exercises, listening activities, lesson items, learner data, or SRS data.
 *   Publisher wording/audio payload remains blocked by rights; exact audio page/task links remain blocked by official evidence. Neither blocks the metadata/source-asset slice.
+*   Added the implementation-preparation indexes: all 189 local MP3s are readable, byte-identified by unique SHA-256, and measured by a complete MPEG frame scan; 189 chapter-level relationships are partially proven and all page/exercise mappings remain null. The rights-safe structure index contains 4 editions, 26 official resources, 12 chapters, and 24 component/chapter audio ranges while preserving the Kapitel 1 title anomaly.
+*   Materialized the exact 22-row Kapitel 2 fixture with deterministic canonical UUIDs, explicit importable/null fields, provenance, and rights gates. This is documentation/data preparation only; runtime registration still remains unchanged until Claude implements and tests the adapter.
 
 ## Gate 4 — Lit Proof of Architecture (PASSED)
 *   Lit **3.3.3**, vendored as a single ESM bundle at `01_APPLICATION/CURRENT_APP/vendor/lit.js` (`npm run build:vendor`), so the app remains a no-bundler static site that Capacitor can serve directly.
