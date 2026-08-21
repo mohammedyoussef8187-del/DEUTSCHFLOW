@@ -31,13 +31,19 @@
  * rules so a sentence belongs to neither exclusively. Context/domain tags are normalized
  * rows rather than a JSON blob, so they can be queried and curated.
  *
+ * Version 5 adds authored exercises: an exercise entity with a type, multilingual
+ * instructions, options (choices/distractors), and targets linking it to the vocabulary,
+ * sentence or grammar rule it practises. Options carry `scoreable` for the same reason
+ * accepted answers do — Arabic options may be shown and explained but can never be the
+ * thing that decides correctness.
+ *
  * Version 1 was never activated for learners (nativeStorageEnabled stayed false through
  * Gate 5), so no deployed v1 database exists and v2 is the first version any learner
  * database will see. A forward migration step becomes necessary only once a learner
  * database has actually been written.
  */
 
-export const SCHEMA_VERSION = 4;
+export const SCHEMA_VERSION = 5;
 
 export const SCHEMA_STATEMENTS = [
   `CREATE TABLE IF NOT EXISTS learner_profiles (
@@ -350,6 +356,84 @@ export const SCHEMA_STATEMENTS = [
     FOREIGN KEY (sentence_uuid) REFERENCES sentences(uuid) ON DELETE CASCADE
   )`,
 
+  `CREATE TABLE IF NOT EXISTS exercises (
+    uuid TEXT PRIMARY KEY,
+    slug TEXT NOT NULL UNIQUE,
+    exercise_type TEXT NOT NULL,
+    level TEXT NOT NULL DEFAULT '',
+    ordering INTEGER NOT NULL DEFAULT 0,
+    answer_language TEXT NOT NULL DEFAULT 'de',
+    content_status TEXT NOT NULL DEFAULT 'draft',
+    content_version INTEGER NOT NULL DEFAULT 1,
+    source_reference TEXT,
+    source_type TEXT,
+    verified_at INTEGER,
+    verified_by TEXT,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    revision INTEGER NOT NULL DEFAULT 1,
+    deleted INTEGER NOT NULL DEFAULT 0
+  )`,
+
+  `CREATE INDEX IF NOT EXISTS idx_exercises_level ON exercises (level, ordering)`,
+
+  /* Instructions and hints, one row per (exercise, language, kind). Teaching text only. */
+  `CREATE TABLE IF NOT EXISTS exercise_texts (
+    uuid TEXT PRIMARY KEY,
+    exercise_uuid TEXT NOT NULL,
+    language TEXT NOT NULL,
+    kind TEXT NOT NULL,
+    text TEXT NOT NULL,
+    content_status TEXT NOT NULL DEFAULT 'draft',
+    content_version INTEGER NOT NULL DEFAULT 1,
+    source_reference TEXT,
+    source_type TEXT,
+    verified_at INTEGER,
+    verified_by TEXT,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    revision INTEGER NOT NULL DEFAULT 1,
+    deleted INTEGER NOT NULL DEFAULT 0,
+    UNIQUE(exercise_uuid, language, kind),
+    FOREIGN KEY (exercise_uuid) REFERENCES exercises(uuid) ON DELETE CASCADE
+  )`,
+
+  /*
+   * Options: expected answers and distractors. `scoreable` records whether an option may
+   * decide correctness, mirroring accepted_answers, so an Arabic option can be displayed
+   * and explained without ever grading.
+   */
+  `CREATE TABLE IF NOT EXISTS exercise_options (
+    uuid TEXT PRIMARY KEY,
+    exercise_uuid TEXT NOT NULL,
+    text TEXT NOT NULL,
+    language TEXT NOT NULL,
+    is_expected INTEGER NOT NULL DEFAULT 0,
+    scoreable INTEGER NOT NULL DEFAULT 0,
+    ordering INTEGER NOT NULL DEFAULT 0,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    revision INTEGER NOT NULL DEFAULT 1,
+    deleted INTEGER NOT NULL DEFAULT 0,
+    FOREIGN KEY (exercise_uuid) REFERENCES exercises(uuid) ON DELETE CASCADE
+  )`,
+
+  `CREATE INDEX IF NOT EXISTS idx_exercise_options_exercise ON exercise_options (exercise_uuid, ordering)`,
+
+  /* What the exercise practises: a vocabulary item, a sentence, or a grammar rule. */
+  `CREATE TABLE IF NOT EXISTS exercise_targets (
+    uuid TEXT PRIMARY KEY,
+    exercise_uuid TEXT NOT NULL,
+    target_type TEXT NOT NULL,
+    target_uuid TEXT NOT NULL,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    revision INTEGER NOT NULL DEFAULT 1,
+    deleted INTEGER NOT NULL DEFAULT 0,
+    UNIQUE(exercise_uuid, target_type, target_uuid),
+    FOREIGN KEY (exercise_uuid) REFERENCES exercises(uuid) ON DELETE CASCADE
+  )`,
+
   `CREATE TABLE IF NOT EXISTS review_cards (
     uuid TEXT PRIMARY KEY,
     legacy_key TEXT,
@@ -621,6 +705,53 @@ export const TABLE_SPECS = [
     table: "sentence_tags",
     columns: [
       ["uuid", "uuid"], ["sentence_uuid", "sentenceUuid"], ["tag", "tag"],
+      ["created_at", "createdAt"], ["updated_at", "updatedAt"],
+      ["revision", "revision"], ["deleted", "deleted"]
+    ]
+  },
+  {
+    entity: "exercises",
+    table: "exercises",
+    columns: [
+      ["uuid", "uuid"], ["slug", "slug"], ["exercise_type", "exerciseType"],
+      ["level", "level"], ["ordering", "ordering"], ["answer_language", "answerLanguage"],
+      ["content_status", "contentStatus"], ["content_version", "contentVersion"],
+      ["source_reference", "sourceReference"], ["source_type", "sourceType"],
+      ["verified_at", "verifiedAt"], ["verified_by", "verifiedBy"],
+      ["created_at", "createdAt"], ["updated_at", "updatedAt"],
+      ["revision", "revision"], ["deleted", "deleted"]
+    ]
+  },
+  {
+    entity: "exerciseTexts",
+    table: "exercise_texts",
+    columns: [
+      ["uuid", "uuid"], ["exercise_uuid", "exerciseUuid"], ["language", "language"],
+      ["kind", "kind"], ["text", "text"],
+      ["content_status", "contentStatus"], ["content_version", "contentVersion"],
+      ["source_reference", "sourceReference"], ["source_type", "sourceType"],
+      ["verified_at", "verifiedAt"], ["verified_by", "verifiedBy"],
+      ["created_at", "createdAt"], ["updated_at", "updatedAt"],
+      ["revision", "revision"], ["deleted", "deleted"]
+    ]
+  },
+  {
+    entity: "exerciseOptions",
+    table: "exercise_options",
+    columns: [
+      ["uuid", "uuid"], ["exercise_uuid", "exerciseUuid"], ["text", "text"],
+      ["language", "language"], ["is_expected", "isExpected"], ["scoreable", "scoreable"],
+      ["ordering", "ordering"],
+      ["created_at", "createdAt"], ["updated_at", "updatedAt"],
+      ["revision", "revision"], ["deleted", "deleted"]
+    ]
+  },
+  {
+    entity: "exerciseTargets",
+    table: "exercise_targets",
+    columns: [
+      ["uuid", "uuid"], ["exercise_uuid", "exerciseUuid"], ["target_type", "targetType"],
+      ["target_uuid", "targetUuid"],
       ["created_at", "createdAt"], ["updated_at", "updatedAt"],
       ["revision", "revision"], ["deleted", "deleted"]
     ]

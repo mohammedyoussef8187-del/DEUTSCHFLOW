@@ -19,7 +19,7 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
 *   **UI migration complete Git commit:** `60f2526` (feat: migrate the multiple-choice answers to Lit)
 *   **option (c) work Git commit:** `e872810` (fix: make the PWA actually work offline)
 *   **Gate 5 simulator PASSED commit:** `16807f9` (validated in Codemagic)
-*   **Last Update Timestamp:** 2026-08-21T14:05:00+03:00
+*   **Last Update Timestamp:** 2026-08-21T15:10:00+03:00
 
 ## Current Context
 *   **Current Phase:** PHASE 4 — MIGRATION MAPPING + SQLITE PARITY VALIDATION
@@ -57,6 +57,15 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
 *   **German/English scoring unchanged.** `validateArabicAnswer` survives as a pure matcher for non-scoring uses but is no longer in the submit path. `strictArabicAnswers` kept for settings compatibility; it now only tunes advisory wording.
 *   **No history touched:** no attempt, card, due date, ease, lapse, mastery or streak modified or recomputed. A test migrates a recognition card built up under the old Arabic-scored rules and asserts all 14 SRS fields survive field-for-field, including through SQLite.
 *   **Verification limit:** the in-app recognition flow was not reachable in a browser from a fresh seeded profile, because recognition cards unlock with future due dates. Covered by tests of the runtime wiring, the advisory evaluator, and the feedback component instead of a live session.
+
+## Feature D — Exercises (IMPLEMENTED)
+*   **Canonical schema v5**: `exercises` (slug, type, level, ordering, `answer_language`, lifecycle), `exercise_texts` (instruction/prompt/hint per language), `exercise_options` (choices and distractors with `is_expected` + `scoreable`), `exercise_targets` (links to vocabulary, sentence, or grammar rule).
+*   **The service assembles specs; it never grades.** Deterministic scoring stays in the existing evaluator. `expectedAnswers` is what a grader may compare against.
+*   **Arabic can never grade an exercise.** An option's stored `scoreable` flag is re-checked against the language policy during assembly, so an Arabic option authored as expected+scoreable is still excluded from `expectedAnswers` — while remaining visible as a choice. `expectedAnswersFor()` re-filters on the way out, so a caller that mutates the spec cannot bypass it.
+*   **`gradeable`** is explicit: an exercise whose answer language cannot score, or which has no scoreable expected answer, is reported as ungradeable with a reason rather than silently grading nothing.
+*   **Deterministic ordering.** Options follow authored order by default; shuffling requires an explicit seed (xorshift32). A test replaces `Math.random` with a thrower to prove it is never used, so a session can be reproduced and resumed.
+*   Migration leaves all exercise tables empty; the legacy model has no exercises and none are invented.
+*   Learner data, SRS scheduler and scoring semantics untouched.
 
 ## Feature C — Sentences / Context (IMPLEMENTED)
 *   **Canonical schema v4**: `sentences` (German form, normalized form, CEFR level, register, ordering, full content lifecycle) plus `sentence_texts`, `sentence_vocabulary`, `sentence_grammar`, `sentence_tags`.

@@ -119,6 +119,11 @@ export function migrateToCanonical(snapshot = {}, options = {}) {
     sentenceVocabulary: [],
     sentenceGrammar: [],
     sentenceTags: [],
+    /* Exercises are authored content; the legacy model has none. */
+    exercises: [],
+    exerciseTexts: [],
+    exerciseOptions: [],
+    exerciseTargets: [],
     reviewCards: [],
     reviewEvents: [],
     quarantine: []
