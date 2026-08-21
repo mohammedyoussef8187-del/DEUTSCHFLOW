@@ -211,3 +211,4 @@ body,button,select,textarea,.question-ar,.question-label,.intro-meaning,.feedbac
 /* Modal height should track the visible viewport on iOS, like the page layouts. */
 .modal{max-height:88vh;max-height:88dvh}
 .token-empty{color:var(--muted)}
+.result-count{color:var(--muted);font-size:13px;margin-block-end:9px}
