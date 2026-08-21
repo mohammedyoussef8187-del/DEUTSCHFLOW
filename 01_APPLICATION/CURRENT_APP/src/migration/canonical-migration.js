@@ -151,6 +151,20 @@ export function migrateToCanonical(snapshot = {}, options = {}) {
     errorEvents: [],
     errorEventCategories: [],
     errorPatterns: [],
+    /*
+     * Listening is authored: a recording, a transcript of it, and translations of
+     * that transcript. The legacy model held none of the three, and inventing any of
+     * them would be fabrication rather than migration, so all listening tables stay
+     * empty. Audio files that exist in the authoring repository are registered by an
+     * explicit authoring step, not by migrating a learner's database.
+     */
+    audioAssets: [],
+    listeningItems: [],
+    listeningTexts: [],
+    listeningSpeakers: [],
+    listeningSegments: [],
+    listeningSegmentTexts: [],
+    listeningLinks: [],
     reviewCards: [],
     reviewEvents: [],
     quarantine: []

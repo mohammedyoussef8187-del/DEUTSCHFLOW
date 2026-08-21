@@ -65,13 +65,36 @@
  * Nothing in this group writes to review_cards. Error learning suggests what to
  * practise; it never reschedules a card.
  *
+ * Version 8 adds listening. The audio FILE and the listening ACTIVITY are separate
+ * entities, because one recording is often used by several activities and because a
+ * file's availability changes independently of the teaching built on it.
+ *
+ * Offline-first is expressed in the schema, not left to convention:
+ * audio_assets.availability records where the file actually IS ('bundled',
+ * 'downloaded', 'source-only', 'remote'), separately from remote_url, which is
+ * optional source metadata. Study is designed around a locally available file; a
+ * remote URL is a way to GET one, never a requirement to study.
+ *
+ * Listening does not grade. Listening comprehension is checked by ordinary exercises
+ * linked through listening_links, so the deterministic evaluator stays the single
+ * grader. There is no listening-specific scoring column anywhere below.
+ *
+ * Transcripts and per-segment support follow the same language-as-a-ROW shape as
+ * grammar, sentences and curriculum: German transcript, English support and Arabic
+ * support are rows in the same table, so no language is the default the others hang
+ * off, and a language can be added without a schema change.
+ *
+ * Lesson membership needs nothing new: lesson_items already references content as
+ * (content_type, content_uuid), so a listening activity joins a lesson as
+ * content_type = 'listening'.
+ *
  * Version 1 was never activated for learners (nativeStorageEnabled stayed false through
  * Gate 5), so no deployed v1 database exists and v2 is the first version any learner
  * database will see. A forward migration step becomes necessary only once a learner
  * database has actually been written.
  */
 
-export const SCHEMA_VERSION = 7;
+export const SCHEMA_VERSION = 8;
 
 export const SCHEMA_STATEMENTS = [
   `CREATE TABLE IF NOT EXISTS learner_profiles (
@@ -821,6 +844,159 @@ export const SCHEMA_STATEMENTS = [
 
   `CREATE INDEX IF NOT EXISTS idx_error_patterns_profile ON error_patterns (profile_uuid, status)`,
 
+  /* ----------------------------------------------------- listening --------
+   * The audio file, independent of any teaching built on it.
+   *
+   * `availability` is the offline-first fact: 'bundled' ships with the app,
+   * 'downloaded' was fetched to the device, 'source-only' exists in the authoring
+   * repository but not on the device, 'remote' is known only as a URL. Only the
+   * first two are playable with no network. `remote_url` is never required.
+   */
+
+  `CREATE TABLE IF NOT EXISTS audio_assets (
+    uuid TEXT PRIMARY KEY,
+    slug TEXT NOT NULL UNIQUE,
+    availability TEXT NOT NULL DEFAULT 'source-only',
+    local_path TEXT NOT NULL DEFAULT '',
+    source_path TEXT NOT NULL DEFAULT '',
+    remote_url TEXT,
+    mime_type TEXT NOT NULL DEFAULT 'audio/mpeg',
+    byte_size INTEGER NOT NULL DEFAULT 0,
+    duration_ms INTEGER NOT NULL DEFAULT 0,
+    checksum TEXT,
+    content_status TEXT NOT NULL DEFAULT 'draft',
+    content_version INTEGER NOT NULL DEFAULT 1,
+    source_reference TEXT,
+    source_type TEXT,
+    verified_at INTEGER,
+    verified_by TEXT,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    revision INTEGER NOT NULL DEFAULT 1,
+    deleted INTEGER NOT NULL DEFAULT 0
+  )`,
+
+  `CREATE INDEX IF NOT EXISTS idx_audio_assets_availability ON audio_assets (availability)`,
+
+  /* The teaching activity. It carries no scoring column: comprehension is checked by
+   * ordinary exercises linked through listening_links. */
+  `CREATE TABLE IF NOT EXISTS listening_items (
+    uuid TEXT PRIMARY KEY,
+    slug TEXT NOT NULL UNIQUE,
+    audio_uuid TEXT,
+    activity_type TEXT NOT NULL DEFAULT 'gist',
+    level TEXT NOT NULL DEFAULT '',
+    ordering INTEGER NOT NULL DEFAULT 0,
+    content_status TEXT NOT NULL DEFAULT 'draft',
+    content_version INTEGER NOT NULL DEFAULT 1,
+    source_reference TEXT,
+    source_type TEXT,
+    verified_at INTEGER,
+    verified_by TEXT,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    revision INTEGER NOT NULL DEFAULT 1,
+    deleted INTEGER NOT NULL DEFAULT 0,
+    FOREIGN KEY (audio_uuid) REFERENCES audio_assets(uuid) ON DELETE SET NULL
+  )`,
+
+  `CREATE INDEX IF NOT EXISTS idx_listening_items_level ON listening_items (level, ordering)`,
+
+  /* Title, German transcript, English and Arabic support: one row per
+   * (item, language, kind). Language is a ROW, so the three are structural peers. */
+  `CREATE TABLE IF NOT EXISTS listening_texts (
+    uuid TEXT PRIMARY KEY,
+    item_uuid TEXT NOT NULL,
+    language TEXT NOT NULL,
+    kind TEXT NOT NULL,
+    text TEXT NOT NULL,
+    content_status TEXT NOT NULL DEFAULT 'draft',
+    content_version INTEGER NOT NULL DEFAULT 1,
+    source_reference TEXT,
+    source_type TEXT,
+    verified_at INTEGER,
+    verified_by TEXT,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    revision INTEGER NOT NULL DEFAULT 1,
+    deleted INTEGER NOT NULL DEFAULT 0,
+    UNIQUE(item_uuid, language, kind),
+    FOREIGN KEY (item_uuid) REFERENCES listening_items(uuid) ON DELETE CASCADE
+  )`,
+
+  /* Optional speaker metadata. A recording with one unnamed voice needs no row here. */
+  `CREATE TABLE IF NOT EXISTS listening_speakers (
+    uuid TEXT PRIMARY KEY,
+    item_uuid TEXT NOT NULL,
+    label TEXT NOT NULL DEFAULT '',
+    role TEXT NOT NULL DEFAULT '',
+    variety TEXT NOT NULL DEFAULT '',
+    ordering INTEGER NOT NULL DEFAULT 0,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    revision INTEGER NOT NULL DEFAULT 1,
+    deleted INTEGER NOT NULL DEFAULT 0,
+    FOREIGN KEY (item_uuid) REFERENCES listening_items(uuid) ON DELETE CASCADE
+  )`,
+
+  /* Optional segmentation with timecodes. `ordering` is authoritative for order;
+   * start_ms only breaks a tie, so a mis-typed timecode cannot silently reorder a
+   * dialogue. */
+  `CREATE TABLE IF NOT EXISTS listening_segments (
+    uuid TEXT PRIMARY KEY,
+    item_uuid TEXT NOT NULL,
+    speaker_uuid TEXT,
+    ordering INTEGER NOT NULL DEFAULT 0,
+    start_ms INTEGER NOT NULL DEFAULT 0,
+    end_ms INTEGER NOT NULL DEFAULT 0,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    revision INTEGER NOT NULL DEFAULT 1,
+    deleted INTEGER NOT NULL DEFAULT 0,
+    UNIQUE(item_uuid, ordering),
+    FOREIGN KEY (item_uuid) REFERENCES listening_items(uuid) ON DELETE CASCADE,
+    FOREIGN KEY (speaker_uuid) REFERENCES listening_speakers(uuid) ON DELETE SET NULL
+  )`,
+
+  `CREATE TABLE IF NOT EXISTS listening_segment_texts (
+    uuid TEXT PRIMARY KEY,
+    segment_uuid TEXT NOT NULL,
+    language TEXT NOT NULL,
+    kind TEXT NOT NULL,
+    text TEXT NOT NULL,
+    content_status TEXT NOT NULL DEFAULT 'draft',
+    content_version INTEGER NOT NULL DEFAULT 1,
+    source_reference TEXT,
+    source_type TEXT,
+    verified_at INTEGER,
+    verified_by TEXT,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    revision INTEGER NOT NULL DEFAULT 1,
+    deleted INTEGER NOT NULL DEFAULT 0,
+    UNIQUE(segment_uuid, language, kind),
+    FOREIGN KEY (segment_uuid) REFERENCES listening_segments(uuid) ON DELETE CASCADE
+  )`,
+
+  /* Links to what the recording teaches or practises, typed the same way lesson_items
+   * and error_remediations are: (target_type, target_uuid). An exercise link is how a
+   * listening activity is scored, through the existing evaluator. */
+  `CREATE TABLE IF NOT EXISTS listening_links (
+    uuid TEXT PRIMARY KEY,
+    item_uuid TEXT NOT NULL,
+    target_type TEXT NOT NULL,
+    target_uuid TEXT NOT NULL,
+    ordering INTEGER NOT NULL DEFAULT 0,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    revision INTEGER NOT NULL DEFAULT 1,
+    deleted INTEGER NOT NULL DEFAULT 0,
+    UNIQUE(item_uuid, target_type, target_uuid),
+    FOREIGN KEY (item_uuid) REFERENCES listening_items(uuid) ON DELETE CASCADE
+  )`,
+
+  `CREATE INDEX IF NOT EXISTS idx_listening_links_target ON listening_links (target_type, target_uuid)`,
+
   `CREATE TABLE IF NOT EXISTS review_cards (
     uuid TEXT PRIMARY KEY,
     legacy_key TEXT,
@@ -1349,6 +1525,90 @@ export const TABLE_SPECS = [
       ["content_type", "contentType"], ["content_uuid", "contentUuid"],
       ["occurrences", "occurrences"], ["first_seen_at", "firstSeenAt"],
       ["last_seen_at", "lastSeenAt"], ["resolved_at", "resolvedAt"], ["status", "status"],
+      ["created_at", "createdAt"], ["updated_at", "updatedAt"],
+      ["revision", "revision"], ["deleted", "deleted"]
+    ]
+  },
+  {
+    entity: "audioAssets",
+    table: "audio_assets",
+    columns: [
+      ["uuid", "uuid"], ["slug", "slug"], ["availability", "availability"],
+      ["local_path", "localPath"], ["source_path", "sourcePath"], ["remote_url", "remoteUrl"],
+      ["mime_type", "mimeType"], ["byte_size", "byteSize"], ["duration_ms", "durationMs"],
+      ["checksum", "checksum"],
+      ["content_status", "contentStatus"], ["content_version", "contentVersion"],
+      ["source_reference", "sourceReference"], ["source_type", "sourceType"],
+      ["verified_at", "verifiedAt"], ["verified_by", "verifiedBy"],
+      ["created_at", "createdAt"], ["updated_at", "updatedAt"],
+      ["revision", "revision"], ["deleted", "deleted"]
+    ]
+  },
+  {
+    entity: "listeningItems",
+    table: "listening_items",
+    columns: [
+      ["uuid", "uuid"], ["slug", "slug"], ["audio_uuid", "audioUuid"],
+      ["activity_type", "activityType"], ["level", "level"], ["ordering", "ordering"],
+      ["content_status", "contentStatus"], ["content_version", "contentVersion"],
+      ["source_reference", "sourceReference"], ["source_type", "sourceType"],
+      ["verified_at", "verifiedAt"], ["verified_by", "verifiedBy"],
+      ["created_at", "createdAt"], ["updated_at", "updatedAt"],
+      ["revision", "revision"], ["deleted", "deleted"]
+    ]
+  },
+  {
+    entity: "listeningTexts",
+    table: "listening_texts",
+    columns: [
+      ["uuid", "uuid"], ["item_uuid", "itemUuid"], ["language", "language"],
+      ["kind", "kind"], ["text", "text"],
+      ["content_status", "contentStatus"], ["content_version", "contentVersion"],
+      ["source_reference", "sourceReference"], ["source_type", "sourceType"],
+      ["verified_at", "verifiedAt"], ["verified_by", "verifiedBy"],
+      ["created_at", "createdAt"], ["updated_at", "updatedAt"],
+      ["revision", "revision"], ["deleted", "deleted"]
+    ]
+  },
+  {
+    entity: "listeningSpeakers",
+    table: "listening_speakers",
+    columns: [
+      ["uuid", "uuid"], ["item_uuid", "itemUuid"], ["label", "label"],
+      ["role", "role"], ["variety", "variety"], ["ordering", "ordering"],
+      ["created_at", "createdAt"], ["updated_at", "updatedAt"],
+      ["revision", "revision"], ["deleted", "deleted"]
+    ]
+  },
+  {
+    entity: "listeningSegments",
+    table: "listening_segments",
+    columns: [
+      ["uuid", "uuid"], ["item_uuid", "itemUuid"], ["speaker_uuid", "speakerUuid"],
+      ["ordering", "ordering"], ["start_ms", "startMs"], ["end_ms", "endMs"],
+      ["created_at", "createdAt"], ["updated_at", "updatedAt"],
+      ["revision", "revision"], ["deleted", "deleted"]
+    ]
+  },
+  {
+    entity: "listeningSegmentTexts",
+    table: "listening_segment_texts",
+    columns: [
+      ["uuid", "uuid"], ["segment_uuid", "segmentUuid"], ["language", "language"],
+      ["kind", "kind"], ["text", "text"],
+      ["content_status", "contentStatus"], ["content_version", "contentVersion"],
+      ["source_reference", "sourceReference"], ["source_type", "sourceType"],
+      ["verified_at", "verifiedAt"], ["verified_by", "verifiedBy"],
+      ["created_at", "createdAt"], ["updated_at", "updatedAt"],
+      ["revision", "revision"], ["deleted", "deleted"]
+    ]
+  },
+  {
+    entity: "listeningLinks",
+    table: "listening_links",
+    columns: [
+      ["uuid", "uuid"], ["item_uuid", "itemUuid"],
+      ["target_type", "targetType"], ["target_uuid", "targetUuid"], ["ordering", "ordering"],
       ["created_at", "createdAt"], ["updated_at", "updatedAt"],
       ["revision", "revision"], ["deleted", "deleted"]
     ]

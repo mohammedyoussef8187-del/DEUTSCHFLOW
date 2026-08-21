@@ -59,6 +59,13 @@ export function createCanonicalRepositories(adapter) {
     errorEvents: readOnly("errorEvents"),
     errorEventCategories: readOnly("errorEventCategories"),
     errorPatterns: readOnly("errorPatterns"),
+    audioAssets: readOnly("audioAssets"),
+    listeningItems: readOnly("listeningItems"),
+    listeningTexts: readOnly("listeningTexts"),
+    listeningSpeakers: readOnly("listeningSpeakers"),
+    listeningSegments: readOnly("listeningSegments"),
+    listeningSegmentTexts: readOnly("listeningSegmentTexts"),
+    listeningLinks: readOnly("listeningLinks"),
     cards: readOnly("reviewCards"),
     events: readOnly("reviewEvents")
   });

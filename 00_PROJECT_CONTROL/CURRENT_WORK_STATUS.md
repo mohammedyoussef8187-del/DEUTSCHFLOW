@@ -19,7 +19,7 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
 *   **UI migration complete Git commit:** `60f2526` (feat: migrate the multiple-choice answers to Lit)
 *   **option (c) work Git commit:** `e872810` (fix: make the PWA actually work offline)
 *   **Gate 5 simulator PASSED commit:** `16807f9` (validated in Codemagic)
-*   **Last Update Timestamp:** 2026-08-21T16:45:00+03:00
+*   **Last Update Timestamp:** 2026-08-21T17:05:00+03:00
 
 ## Current Context
 *   **Current Phase:** PHASE 4 — MIGRATION MAPPING + SQLITE PARITY VALIDATION
@@ -58,6 +58,18 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
 *   **No history touched:** no attempt, card, due date, ease, lapse, mastery or streak modified or recomputed. A test migrates a recognition card built up under the old Arabic-scored rules and asserts all 14 SRS fields survive field-for-field, including through SQLite.
 *   **Verification limit:** the in-app recognition flow was not reachable in a browser from a fresh seeded profile, because recognition cards unlock with future due dates. Covered by tests of the runtime wiring, the advisory evaluator, and the feedback component instead of a live session.
 
+## Feature G — Listening (IMPLEMENTED)
+*   **Canonical schema v8**, 48 tables. The audio FILE and the listening ACTIVITY are separate entities: `audio_assets` (availability, local_path, source_path, remote_url, mime, bytes, duration, checksum, provenance) and `listening_items` (slug, audio, activity type, level, ordering, lifecycle), plus `listening_texts`, `listening_speakers`, `listening_segments`, `listening_segment_texts`, `listening_links`.
+*   **Offline-first is in the schema, not in convention.** `availability` records where the file actually IS — `bundled`, `downloaded`, `source-only`, `remote` — separately from `remote_url`, which is optional source metadata. `playableOffline` is true only for a file on the device, and an activity whose audio is remote is reported `studyable: false` with a named reason rather than quietly requiring a network. The transcript and translations still render when the file is missing: losing the file must not lose the teaching.
+*   **Listening does not grade.** There is no listening-specific scoring column anywhere. Comprehension is checked by ordinary exercises linked through `listening_links`, and `expectedAnswersForListening()` delegates to the exercise layer's own `expectedAnswersFor`. A test greps the module to prove it implements no matching, normalisation or verdict of its own — **no second grading engine**.
+*   **Arabic still cannot score.** An option authored as expected AND scoreable in Arabic is still excluded when it is reached through a listening activity, because listening applies no rule of its own and the policy filter is the only route to answers.
+*   **Segment order is authored, never inferred.** `ordering` decides; `start_ms` only breaks a tie and uuid breaks that, so a mistyped timecode cannot silently rearrange a dialogue. Timecode problems (`ends-before-it-starts`, `past-end-of-audio`, `overlaps-previous`) are **reported to authors, not thrown at learners**.
+*   **Lesson and course membership needed no new table**: `lesson_items` already references `(content_type, content_uuid)`, so an activity joins a lesson as `content_type = 'listening'` — the reserved type from Feature E, now in use.
+*   **Error-learning integration** goes through `listeningErrorContext()`, which carries no verdict of its own. A German listening mistake becomes a deterministic error event with `content_type: 'listening'`; an Arabic one stays advisory and forms no pattern. Nothing touches SRS scheduling.
+*   **Real audio, no fabrication.** `tools/listening/register-audio-assets.mjs` registers files that already exist in this repository (189 Netzwerk neu A2 MP3s, 410 MiB, tracked in git) as deterministic `audio_assets` rows. It creates **no transcript, translation, duration or level** — duration stays 0 until something measures it. Everything it emits is `source-only`: the files are in the authoring repository, **not in the app bundle**. Bundling 410 MiB of publisher audio is a deliberate packaging and licensing decision, left to the user.
+*   **Migration invents no listening content.** All seven tables migrate empty; SRS fields, course progress and error history are untouched, and quarantine behaviour is unchanged.
+*   **Minimum UI:** `<df-listening-player>` — audio presentation, transcript and both support languages as peers, segment navigation with timecodes and speakers, and the offline state made visible. It renders **no `<audio>` element and no URL at all** when the file is not on the device.
+*   **Suite 509 → 578.**
 ## Feature F — Error Learning (IMPLEMENTED)
 *   **Canonical schema v7**, split the same way as Feature E. **Authored taxonomy:** `error_categories` (slug, scope: orthography/morphology/syntax/lexis/usage), `error_category_texts` (name/explanation/advice per language), `error_remediations` (what to study, as `(content_type, content_uuid)`). **Recorded mistakes:** `error_events`, `error_event_categories`, `error_patterns`. 41 tables total.
 *   **The service never decides correctness.** It reads the deterministic evaluator's verdict and classifies it. Re-deriving correctness here would create a second grader that could disagree with the first.
