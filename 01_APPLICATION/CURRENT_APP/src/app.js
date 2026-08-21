@@ -9,6 +9,7 @@ import "./ui/components/df-review-summary.js";
 import "./ui/components/df-stat-tile.js";
 import "./ui/components/df-study-progress.js";
 import "./ui/components/df-word-panel.js";
+import "./ui/components/df-answer-input.js";
 
 (function(){
   "use strict";
@@ -734,7 +735,7 @@ function renderQuestion(state,q){
     else if(q.skill==="order")body=renderOrder(state,q,result);
     else{
       const arabic=q.answerLang==="ar",lang=arabic?'ar':'de',placeholder=arabic?'اكتب المعنى بالعربية…':'اكتب الإجابة بالألمانية…';
-      body=`<textarea id="answer-input" class="answer-input ${arabic?'arabic-answer':''}" lang="${lang}" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${placeholder}" ${result?'disabled':''}></textarea><div class="answer-actions"><button class="ghost-btn" data-action="hint" ${result||q.usedHint?'disabled':''}>تلميح محدود</button><button class="primary-btn" data-action="submit-writing" ${result?'disabled':''}>تحقق</button></div>${result?'':'<button class="reveal-btn" data-action="reveal-answer">لا أعرفها — أظهر الإجابة</button>'}`;
+      body=`<df-answer-input lang="${lang}" placeholder="${placeholder}" ${arabic?"arabic":""} ${result?"disabled":""}></df-answer-input><div class="answer-actions"><button class="ghost-btn" data-action="hint" ${result||q.usedHint?'disabled':''}>تلميح محدود</button><button class="primary-btn" data-action="submit-writing" ${result?'disabled':''}>تحقق</button></div>${result?'':'<button class="reveal-btn" data-action="reveal-answer">لا أعرفها — أظهر الإجابة</button>'}`;
     }
     return prompt+body+(result?renderFeedback(state,q,result):"");
   }
