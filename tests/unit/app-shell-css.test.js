@@ -53,7 +53,9 @@ describe("iPad-first app shell foundation", () => {
     // viewports keep the original bottom navigation untouched.
     const beforeTablet = CSS.slice(0, CSS.indexOf("@media (min-width:900px)"));
     expect(beforeTablet).toContain(".bottom-nav{position:fixed");
-    expect(beforeTablet).toContain("grid-template-columns:repeat(5,1fr)");
+    // Columns are auto, not a fixed count: adding a route must not need a CSS edit,
+    // and every item still shares the width evenly on a phone.
+    expect(beforeTablet).toContain("grid-auto-flow:column;grid-auto-columns:minmax(0,1fr)");
   });
 });
 

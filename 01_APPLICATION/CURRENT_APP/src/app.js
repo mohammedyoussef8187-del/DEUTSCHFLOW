@@ -20,6 +20,9 @@ import "./ui/components/df-order-builder.js";
 import "./ui/components/df-setting-row.js";
 import "./ui/components/df-skill-bar.js";
 import "./ui/components/df-activity-chart.js";
+/* المنهج: يُبنى فوق مخزن المحتوى الأساسي، ومعزول تماماً عن تخزين المتعلّم القديم. */
+import { bootstrapCanonicalRuntime } from "./runtime/composition-root.js";
+import { createLearnController, isLearnRoute, LEARN_ROUTES } from "./runtime/learn-controller.js";
 
 (function(){
   "use strict";
@@ -605,6 +608,7 @@ async function submitAnswer(state,payload){
     words:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16M4 12h16M4 19h16"/><path d="M8 3v4M8 10v4M8 17v4"/></svg>',
     study:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg>',
     stats:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>',
+    learn:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 7v14"/><path d="M3 5.5A2.5 2.5 0 0 1 5.5 3H10a2 2 0 0 1 2 2v16a1.5 1.5 0 0 0-1.5-1.5H5.5A2.5 2.5 0 0 1 3 17Z"/><path d="M21 5.5A2.5 2.5 0 0 0 18.5 3H14a2 2 0 0 0-2 2v16a1.5 1.5 0 0 1 1.5-1.5h5A2.5 2.5 0 0 0 21 17Z"/></svg>',
     settings:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6 1.7 1.7 0 0 0-.4 1.1V21h-4v-.09A1.7 1.7 0 0 0 8.6 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-.6-1 1.7 1.7 0 0 0-1.1-.4H3v-4h.09A1.7 1.7 0 0 0 4.6 8.6a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.83-2.83.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-.6 1.7 1.7 0 0 0 .4-1.1V3h4v.09A1.7 1.7 0 0 0 15.4 4.6a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.83 2.83-.06.06A1.7 1.7 0 0 0 19.4 9c.16.37.38.7.65.98.3.3.7.44 1.12.42H21v4h-.09A1.7 1.7 0 0 0 19.4 15Z"/></svg>',
     sun:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>',
     plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>'
@@ -650,7 +654,7 @@ async function submitAnswer(state,payload){
   }
   function statusLabel(s){return({new:"جديدة",learning:"قيد التعلم",due:"مستحقة",overdue:"متأخرة",weak:"ضعيفة",mastered:"متقنة",ignored:"مستبعدة"})[s]||s;}
   function statusPill(s){const cls=s==="overdue"?"weak":s;return `<span class="pill ${cls}">${statusLabel(s)}</span>`;}
-  function routeLabel(route){return({home:"الرئيسية",words:"الكلمات",study:"تعلّم",stats:"الإحصائيات",settings:"الإعدادات"})[route]||route;}
+  function routeLabel(route){const learn=LEARN_ROUTES.find(r=>r.id===route);if(learn)return learn.label;return({home:"الرئيسية",words:"الكلمات",study:"تعلّم",stats:"الإحصائيات",settings:"الإعدادات"})[route]||route;}
   function modeLabel(mode){return({daily:"جلسة اليوم",new:"كلمات جديدة",due:"المراجعات المستحقة",weak:"الكلمات الضعيفة",mistakes:"مراجعة الأخطاء",article:"اختبار الأدوات",writing:"اختبار الكتابة",quick:"اختبار سريع"})[mode]||"جلسة تعلم";}
 
   function applyTheme(settings){const dark=settings.theme==="dark"||(settings.theme==="auto"&&matchMedia("(prefers-color-scheme:dark)").matches);document.documentElement.dataset.theme=dark?"dark":"light";document.querySelector('meta[name="theme-color"]')?.setAttribute("content",dark?"#08101f":"#0f766e");}
@@ -681,8 +685,8 @@ async function submitAnswer(state,payload){
     if(focus.start!=null){try{el.setSelectionRange(focus.start,focus.end);}catch{}}
   }
   function renderTopbar(state){return `<header class="topbar"><div class="brand"><span class="logo">DF</span><div>DeutschFlow<small>تعلّم الألمانية بذكاء</small></div></div><div class="top-actions"><button class="icon-btn" data-action="cycle-theme" title="تغيير المظهر">${ICONS.sun}</button>${state.installPrompt?'<button class="ghost-btn hide-mobile" data-action="install-app">تثبيت التطبيق</button>':''}</div></header>`;}
-  function renderNav(state){const routes=[["home",ICONS.home,"الرئيسية"],["words",ICONS.words,"الكلمات"],["study",ICONS.study,"تعلّم"],["stats",ICONS.stats,"الإحصائيات"],["settings",ICONS.settings,"الإعدادات"]];return `<nav class="bottom-nav">${routes.map(([r,i,l])=>`<button class="nav-btn ${state.route===r?'active':''}" data-action="nav" data-route="${r}">${i}<span>${l}</span></button>`).join("")}</nav>`;}
-  function renderPage(state){if(state.route==="words")return renderWords(state);if(state.route==="stats")return renderStats(state);if(state.route==="settings")return renderSettings(state);return renderHome(state);}
+  function renderNav(state){const active=isLearnRoute(state.route)?"learn":state.route;const routes=[["home",ICONS.home,"الرئيسية"],["words",ICONS.words,"الكلمات"],["study",ICONS.study,"تعلّم"],["learn",ICONS.learn,"المنهج"],["stats",ICONS.stats,"الإحصائيات"],["settings",ICONS.settings,"الإعدادات"]];return `<nav class="bottom-nav">${routes.map(([r,i,l])=>`<button class="nav-btn ${active===r?'active':''}" data-action="nav" data-route="${r}">${i}<span>${l}</span></button>`).join("")}</nav>`;}
+  function renderPage(state){if(isLearnRoute(state.route))return DF.Learn?DF.Learn.render(state.route):"";if(state.route==="words")return renderWords(state);if(state.route==="stats")return renderStats(state);if(state.route==="settings")return renderSettings(state);return renderHome(state);}
 
   /* حساب حالات الكلمات صار في خدمة التطبيق (review-summary-service) ويستخدمه
      مكوّن df-review-summary وصفحة الإحصائيات معاً. */
@@ -828,6 +832,7 @@ function renderFeedback(state,q,r){const a=r.answer,lang=q.skill==="recognition"
 function afterRender(state){
     if(state.route==="study"&&state.session?.current?.kind==="test"&&!state.session.result&&!state.session.current.choices&&state.session.current.skill!=="order")setTimeout(()=>document.getElementById("answer-input")?.focus(),10);
     hydrateReviewSummary(state);
+    if(isLearnRoute(state.route))DF.Learn?.hydrate(state.route);
   }
   /* Hand the Lit component derived data from the application service. The component
      never reads state, storage, or SRS internals itself. */
@@ -922,7 +927,7 @@ function afterRender(state){
     const btn=e.target.closest("[data-action]");if(!btn)return;const action=btn.dataset.action;
     if(action==="modal-backdrop"&&e.target===btn)return DF.UI.closeModal();
     if(action==="modal-close")return DF.UI.closeModal();
-    if(action==="nav")return withBusy(async()=>{const route=btn.dataset.route;if(route==="study"){if(state.session&&!state.session.done)await resumeSession();else await startSession("daily");}else{state.route=route;} });
+    if(action==="nav")return withBusy(async()=>{const route=btn.dataset.route;if(route==="study"){if(state.session&&!state.session.done)await resumeSession();else await startSession("daily");}else if(isLearnRoute(route))await goLearn(route);else{state.route=route;} });
     if(action==="start-session")return withBusy(()=>startSession(btn.dataset.mode));
     if(action==="resume-session")return withBusy(resumeSession);
     if(action==="exit-study")return withBusy(async()=>{await DF.Learning.abandonSession(state);state.route="home";});
@@ -932,7 +937,7 @@ function afterRender(state){
     if(action==="hint")return withBusy(()=>DF.Learning.useHint(state));
     if(action==="reveal-answer")return withBusy(()=>DF.Learning.revealAnswer(state));
     if(action==="submit-writing")return withBusy(async()=>{const input=document.getElementById("answer-input");if(!input?.value.trim())throw new Error("اكتب إجابة أولاً.");await DF.Learning.submitAnswer(state,{text:input.value.trim()});});
-    if(action==="choose-answer")return withBusy(async()=>{state.lastChoice=btn.dataset.choice;await DF.Learning.submitAnswer(state,{choiceId:btn.dataset.choice});});
+    if(action==="choose-answer")return withBusy(async()=>{if(isLearnRoute(state.route)){if(DF.Learn)await applyLearnResult(await DF.Learn.handleAction("learn-submit-exercise",{choice:btn.dataset.choice}));return;}state.lastChoice=btn.dataset.choice;await DF.Learning.submitAnswer(state,{choiceId:btn.dataset.choice});});
     if(action==="flag-current-word")return withBusy(async()=>{
       const w=state.session?.current?.word;if(!w)return;
       w.userFlagged=true;w.ignored=true;w.qualityIssues=DF.qualityIssues(w);w.qualityStatus="review";w.updatedAt=Date.now();
@@ -983,7 +988,19 @@ function afterRender(state){
     if(action==="toggle-setting")return withBusy(async()=>{const k=btn.dataset.setting;state.settings[k]=!state.settings[k];await saveSettings();});
     if(action==="reset-app")return DF.UI.confirmModal("إعادة ضبط التطبيق","سيتم حذف التقدم والكلمات المضافة وإعادة تحميل قاعدة الكلمات الأصلية. لا يمكن التراجع دون نسخة احتياطية.","reset-app-confirmed","إعادة الضبط");
     if(action==="reset-app-confirmed")return withBusy(resetApp);
+    if(action.startsWith("learn-"))return withBusy(async()=>{
+      if(!DF.Learn)return;
+      await applyLearnResult(await DF.Learn.handleAction(action,btn.dataset));
+    });
   });
+
+  /* أحداث مكوّنات Lit في شاشات المنهج. المكوّن يطلب، والتطبيق يقرّر. */
+  for(const type of ["lesson-select","practice-select","segment-select","self-rate","reminder-change","permission-request"]){
+    document.addEventListener(type,e=>{
+      if(!DF.Learn||!isLearnRoute(state.route))return;
+      withBusy(async()=>{await applyLearnResult(await DF.Learn.handleEvent(type,e.detail||{}));});
+    });
+  }
 
   document.addEventListener("submit",e=>{if(e.target.id==="word-form"){e.preventDefault();withBusy(()=>saveWord(e.target));}});
   document.addEventListener("input",DF.debounce(e=>{if(e.target.id==="word-search"){state.wordView.query=e.target.value;state.wordView.limit=200;render();}},160));
@@ -1002,9 +1019,41 @@ function afterRender(state){
   matchMedia("(prefers-color-scheme:dark)").addEventListener?.("change",()=>{if(state.settings.theme==="auto")DF.UI.applyTheme(state.settings);});
   window.addEventListener("unhandledrejection",e=>{console.error(e.reason);DF.UI.toast(e.reason?.message||"حدث خطأ في التطبيق.","error");});
 
+  /*
+   * يُبنى مخزن المحتوى وخدماته مرة واحدة. لا يمس تخزين المتعلّم القديم:
+   * عدد المستحقات يُقرأ من الحالة الحالية ويُمرَّر كرقم فقط.
+   */
+  async function bootLearn(){
+    try{
+      const runtime=await bootstrapCanonicalRuntime({
+        readDueCount:async()=>state.cards.filter(c=>!c.suspended&&c.dueAt<=Date.now()).length,
+        readLastStudiedAt:async()=>state.profile?.lastStudyDate??null
+      });
+      DF.Learn=createLearnController(runtime,{
+        profileUuid:"local",
+        toast:(message,kind)=>DF.UI.toast(message,kind)
+      });
+    }catch(e){console.error(e);DF.Learn=null;}
+  }
+
+  async function goLearn(route){
+    state.route=route;
+    if(DF.Learn)await DF.Learn.load(route);
+  }
+
+  /* نتيجة إجراء أو حدث قادم من شاشات المنهج. */
+  async function applyLearnResult(result){
+    if(!result)return false;
+    if(result.route)await goLearn(result.route);
+    else if(result.reload&&DF.Learn)await DF.Learn.load(state.route);
+    return true;
+  }
+
   async function boot(){
     try{
       await loadState();DF.UI.applyTheme(state.settings);render();
+      /* المنهج يُقلع بعد الدراسة وبشكل مستقل: فشله لا يمنع المذاكرة إطلاقاً. */
+      await bootLearn();render();
       
     }catch(e){console.error(e);document.getElementById("app").innerHTML=`<main class="boot-screen"><div class="brand-mark">!</div><h1>تعذر تشغيل التطبيق</h1><p>${DF.esc(e?.message||e)}</p><button class="primary-btn" onclick="location.reload()">إعادة المحاولة</button></main>`;}
   }

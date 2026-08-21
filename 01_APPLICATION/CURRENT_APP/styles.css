@@ -48,7 +48,7 @@ a{color:inherit}
 .stat-card{display:flex;align-items:center;gap:13px}.stat-icon{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:var(--surface-2);font-size:20px}.stat-card strong{font-size:24px;line-height:1}.stat-card span{display:block;color:var(--muted);font-size:13px;margin-top:5px}
 .metric-green .stat-icon{background:var(--success-soft);color:var(--success)}.metric-red .stat-icon{background:var(--danger-soft);color:var(--danger)}.metric-amber .stat-icon{background:var(--warning-soft);color:var(--warning)}.metric-blue .stat-icon{background:var(--info-soft);color:var(--info)}
 .training-card{display:flex;align-items:center;gap:14px}.training-card .training-icon{width:48px;height:48px;border-radius:15px;background:var(--primary-soft);color:var(--primary);display:grid;place-items:center;font-size:22px;flex:none}.training-card h3{margin:0 0 4px;font-size:16px}.training-card p{margin:0;color:var(--muted);font-size:13px}
-.bottom-nav{position:fixed;z-index:50;bottom:max(10px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);width:min(calc(100% - 24px),720px);height:var(--nav-h);display:grid;grid-template-columns:repeat(5,1fr);background:color-mix(in srgb,var(--surface) 92%,transparent);border:1px solid var(--border);border-radius:24px;box-shadow:var(--shadow);backdrop-filter:blur(16px);padding:7px}
+.bottom-nav{position:fixed;z-index:50;bottom:max(10px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);width:min(calc(100% - 24px),720px);height:var(--nav-h);display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);background:color-mix(in srgb,var(--surface) 92%,transparent);border:1px solid var(--border);border-radius:24px;box-shadow:var(--shadow);backdrop-filter:blur(16px);padding:7px}
 .nav-btn{border:0;background:transparent;color:var(--muted);border-radius:17px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:11px;font-weight:700}.nav-btn svg{width:21px;height:21px}.nav-btn.active{background:var(--primary-soft);color:var(--primary)}
 
 /* Study */
@@ -142,6 +142,7 @@ body,button,select,textarea,.question-ar,.question-label,.intro-meaning,.feedbac
     transform:translateY(-50%);
     width:76px;
     height:auto;
+    grid-auto-flow:row;
     grid-template-columns:1fr;
     grid-auto-rows:64px;
     gap:4px;
