@@ -42,7 +42,10 @@ export function createCapacitorSqliteExecutor(db) {
     },
 
     async run(sql, params = []) {
-      await db.run(sql, params, false);
+      const result = await db.run(sql, params, false);
+      // capSQLiteChanges -> { changes: { changes: n } }. Flattened to the executor
+      // contract's { changes: n } so the adapter never learns the plugin's shape.
+      return { changes: Number(result?.changes?.changes ?? 0) };
     },
 
     async all(sql, params = []) {

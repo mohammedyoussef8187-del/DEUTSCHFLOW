@@ -19,7 +19,10 @@ export function createNodeSqliteExecutor(location = ":memory:") {
       db.exec(sql);
     },
     async run(sql, params = []) {
-      db.prepare(sql).run(...params);
+      // Returns the change count so the adapter can tell "updated nothing" from
+      // "updated a row", which is what optimistic concurrency turns on.
+      const result = db.prepare(sql).run(...params);
+      return { changes: Number(result?.changes ?? 0) };
     },
     async all(sql, params = []) {
       return db.prepare(sql).all(...params);
