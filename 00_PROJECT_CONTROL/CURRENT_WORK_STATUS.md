@@ -19,7 +19,7 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
 *   **UI migration complete Git commit:** `60f2526` (feat: migrate the multiple-choice answers to Lit)
 *   **option (c) work Git commit:** `e872810` (fix: make the PWA actually work offline)
 *   **Gate 5 simulator PASSED commit:** `16807f9` (validated in Codemagic)
-*   **Last Update Timestamp:** 2026-08-21T17:25:00+03:00
+*   **Last Update Timestamp:** 2026-08-21T21:10:00+03:00
 
 ## Current Context
 *   **Current Phase:** PHASE 4 — MIGRATION MAPPING + SQLITE PARITY VALIDATION
@@ -58,6 +58,20 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
 *   **No history touched:** no attempt, card, due date, ease, lapse, mastery or streak modified or recomputed. A test migrates a recognition card built up under the old Arabic-scored rules and asserts all 14 SRS fields survive field-for-field, including through SQLite.
 *   **Verification limit:** the in-app recognition flow was not reachable in a browser from a fresh seeded profile, because recognition cards unlock with future due dates. Covered by tests of the runtime wiring, the advisory evaluator, and the feedback component instead of a live session.
 
+## Feature I — Reminders / Notifications (IMPLEMENTED)
+*   **Canonical schema v10**, 57 tables: `reminder_settings` (what the learner asked for) and `reminder_schedule` (what was scheduled, delivered or cancelled). Neither stores a due date, a card, a count of work or any progress — deleting every row changes nothing a learner earned.
+*   **A reminder time is wall-clock, not an instant.** `19:30` means half past seven in the learner's own evening, which is a different absolute instant after a flight or a clock change, so only `HH:MM` is stored and the instant is derived at planning time.
+*   **DST is handled by deriving the offset twice** — at `now` to find the candidate, then at the candidate itself, because the offset that applies to a future instant is the future one — with a guard so a forward jump never fires the reminder immediately. Tests cover spring-forward, fall-back, a half-hour zone (UTC+4:30) and a negative offset, all with **injected** offsets so nothing depends on the machine's timezone.
+*   **Scheduling is pure and device-free.** `planReminders()` takes settings plus plain numbers (`dueCount`, `lastStudiedAt`, `lastDelivered`) and returns a plan. Nothing in `reminder-schedule.js` or `reminder-service.js` can reach a card, an ease, an interval or a progress row — a test greps both modules for those identifiers.
+*   **Silence is a feature, and every skip states its reason:** `reminders-disabled`, `permission-<state>`, `kind-disabled`, `already-studied-today`, `below-due-minimum`, `too-soon-after-last`, `invalid-time`. The settings UI shows those reasons, so a quiet reminder reads as a decision rather than a bug.
+*   **Rescheduling is a diff**, so a changed time reschedules only that reminder, an unchanged one is left alone (no visible flicker of a pending iOS notification), a switched-off kind is cancelled, and a leftover notification the plan does not recognise is cancelled as stale. Disabling cancels everything pending in one call.
+*   **One stable notification id per kind**, so re-syncing replaces rather than piling up duplicates.
+*   **No cloud push, no account.** The adapter imports **nothing at all** — it reads the plugin off the global Capacitor bridge exactly as `detectNativePlatform` does — so the PWA build stays dependency-free. A test asserts the module contains no `fcm`/`apns`/`firebase`/`token`/`login`/`http` reference in code.
+*   **Gated like native storage was.** `NATIVE_NOTIFICATION_STATUS.learnerSwitchEnabled = false`; `selectNotificationBackend()` returns the no-op adapter on web, when the gate is off, and when the bridge is missing. **Physical-device notification validation stays a deferred RELEASE gate** — a simulator cannot stand in for Focus modes, Scheduled Summary or system rate limiting.
+*   **A failing notification call can never break study**: every adapter call degrades to a reported non-result instead of throwing.
+*   **Migration creates no reminders** — migrating a learner must not switch on a notification they never asked for. Reminders are opt-in (`enabled: false` by default).
+*   **Minimum settings UI:** `<df-reminder-settings>` — enable/disable, per-kind toggles, time fields, due-review minimum, the real permission state (with the prompt offered only while it is still askable), and the plan preview with its reasons. Every control dispatches an event; the component applies nothing itself.
+*   **Suite 647 → 729.**
 ## Feature H — Pronunciation (IMPLEMENTED)
 *   **Canonical schema v9**, 55 tables: `pronunciation_features`, `pronunciation_texts` (owner_type/owner_uuid, language as a ROW), `pronunciation_items`, `pronunciation_variants` (IPA, syllables, stress index, regional variety, is_primary), `pronunciation_pairs` (minimal pairs), `pronunciation_links`, `pronunciation_attempts`.
 *   **The governing rule: producing speech is SELF-ASSESSED; discriminating sounds is SCOREABLE.** Judging how someone SAID a word needs acoustic recognition, and a wrong verdict there would lapse a card for an accent. Deciding which of two words you HEARD is an ordinary German multiple-choice question and scores through the existing evaluator.

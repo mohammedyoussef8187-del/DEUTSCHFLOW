@@ -73,6 +73,8 @@ export function createCanonicalRepositories(adapter) {
     pronunciationPairs: readOnly("pronunciationPairs"),
     pronunciationLinks: readOnly("pronunciationLinks"),
     pronunciationAttempts: readOnly("pronunciationAttempts"),
+    reminderSettings: readOnly("reminderSettings"),
+    reminderSchedule: readOnly("reminderSchedule"),
     cards: readOnly("reviewCards"),
     events: readOnly("reviewEvents")
   });

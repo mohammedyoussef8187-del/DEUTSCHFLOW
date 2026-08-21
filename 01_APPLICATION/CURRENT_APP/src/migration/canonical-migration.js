@@ -178,6 +178,13 @@ export function migrateToCanonical(snapshot = {}, options = {}) {
     pronunciationPairs: [],
     pronunciationLinks: [],
     pronunciationAttempts: [],
+    /*
+     * Reminders are opt-in and permission-gated. Migrating a learner must not turn
+     * on a notification they never asked for, so no settings row is created and no
+     * schedule is claimed; the app asks the first time they open the setting.
+     */
+    reminderSettings: [],
+    reminderSchedule: [],
     reviewCards: [],
     reviewEvents: [],
     quarantine: []

@@ -107,13 +107,25 @@
  * Model audio reuses audio_assets from version 8 unchanged, so the offline-first
  * rules already established apply to pronunciation with no new mechanism.
  *
+ * Version 10 adds reminders, and keeps them at arm's length from everything they
+ * remind about. reminder_settings holds what the learner asked for; reminder_schedule
+ * is a log of what was scheduled, delivered or cancelled.
+ *
+ * Neither table stores a due date, a card, a count of work, or any learner progress.
+ * A reminder READS due state at the moment it plans; it never caches it and never
+ * writes it back. Deleting every row here changes nothing a learner has earned.
+ *
+ * `local_time` is stored as 'HH:MM' wall-clock, not as an instant, because the
+ * learner means 'seven in the evening where I am' - which is a different instant
+ * after a flight or a DST change. The absolute time is derived at planning time.
+ *
  * Version 1 was never activated for learners (nativeStorageEnabled stayed false through
  * Gate 5), so no deployed v1 database exists and v2 is the first version any learner
  * database will see. A forward migration step becomes necessary only once a learner
  * database has actually been written.
  */
 
-export const SCHEMA_VERSION = 9;
+export const SCHEMA_VERSION = 10;
 
 export const SCHEMA_STATEMENTS = [
   `CREATE TABLE IF NOT EXISTS learner_profiles (
@@ -1191,6 +1203,54 @@ export const SCHEMA_STATEMENTS = [
 
   `CREATE INDEX IF NOT EXISTS idx_pronunciation_attempts_profile ON pronunciation_attempts (profile_uuid, occurred_at)`,
 
+  /* ----------------------------------------------------- reminders --------
+   * What the learner asked for. Times are wall-clock 'HH:MM' in their own day.
+   * `permission_state` mirrors what the OS last told us; it is a cache of an
+   * external fact, so it is always re-read before anything is scheduled.
+   */
+
+  `CREATE TABLE IF NOT EXISTS reminder_settings (
+    uuid TEXT PRIMARY KEY,
+    profile_uuid TEXT NOT NULL,
+    enabled INTEGER NOT NULL DEFAULT 0,
+    daily_enabled INTEGER NOT NULL DEFAULT 0,
+    daily_time TEXT NOT NULL DEFAULT '19:30',
+    due_review_enabled INTEGER NOT NULL DEFAULT 0,
+    due_review_time TEXT NOT NULL DEFAULT '09:00',
+    due_review_minimum INTEGER NOT NULL DEFAULT 5,
+    min_gap_hours INTEGER NOT NULL DEFAULT 6,
+    skip_if_studied_today INTEGER NOT NULL DEFAULT 1,
+    time_zone TEXT NOT NULL DEFAULT '',
+    permission_state TEXT NOT NULL DEFAULT 'unknown',
+    permission_checked_at INTEGER,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    revision INTEGER NOT NULL DEFAULT 1,
+    deleted INTEGER NOT NULL DEFAULT 0,
+    UNIQUE(profile_uuid)
+  )`,
+
+  /* One row per notification the app asked the OS for. `status` is the app's own
+   * record; the OS remains the authority on what is actually pending. */
+  `CREATE TABLE IF NOT EXISTS reminder_schedule (
+    uuid TEXT PRIMARY KEY,
+    profile_uuid TEXT NOT NULL,
+    kind TEXT NOT NULL,
+    notification_id INTEGER NOT NULL DEFAULT 0,
+    scheduled_for INTEGER NOT NULL,
+    scheduled_at INTEGER NOT NULL,
+    delivered_at INTEGER,
+    cancelled_at INTEGER,
+    status TEXT NOT NULL DEFAULT 'scheduled',
+    reason TEXT NOT NULL DEFAULT '',
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    revision INTEGER NOT NULL DEFAULT 1,
+    deleted INTEGER NOT NULL DEFAULT 0
+  )`,
+
+  `CREATE INDEX IF NOT EXISTS idx_reminder_schedule_profile ON reminder_schedule (profile_uuid, kind, scheduled_for)`,
+
   `CREATE TABLE IF NOT EXISTS review_cards (
     uuid TEXT PRIMARY KEY,
     legacy_key TEXT,
@@ -1896,6 +1956,32 @@ export const TABLE_SPECS = [
       ["self_rating", "selfRating"], ["advisory_score", "advisoryScore"],
       ["advisory_source", "advisorySource"], ["recording_audio_uuid", "recordingAudioUuid"],
       ["note", "note"],
+      ["created_at", "createdAt"], ["updated_at", "updatedAt"],
+      ["revision", "revision"], ["deleted", "deleted"]
+    ]
+  },
+  {
+    entity: "reminderSettings",
+    table: "reminder_settings",
+    columns: [
+      ["uuid", "uuid"], ["profile_uuid", "profileUuid"], ["enabled", "enabled"],
+      ["daily_enabled", "dailyEnabled"], ["daily_time", "dailyTime"],
+      ["due_review_enabled", "dueReviewEnabled"], ["due_review_time", "dueReviewTime"],
+      ["due_review_minimum", "dueReviewMinimum"], ["min_gap_hours", "minGapHours"],
+      ["skip_if_studied_today", "skipIfStudiedToday"], ["time_zone", "timeZone"],
+      ["permission_state", "permissionState"], ["permission_checked_at", "permissionCheckedAt"],
+      ["created_at", "createdAt"], ["updated_at", "updatedAt"],
+      ["revision", "revision"], ["deleted", "deleted"]
+    ]
+  },
+  {
+    entity: "reminderSchedule",
+    table: "reminder_schedule",
+    columns: [
+      ["uuid", "uuid"], ["profile_uuid", "profileUuid"], ["kind", "kind"],
+      ["notification_id", "notificationId"], ["scheduled_for", "scheduledFor"],
+      ["scheduled_at", "scheduledAt"], ["delivered_at", "deliveredAt"],
+      ["cancelled_at", "cancelledAt"], ["status", "status"], ["reason", "reason"],
       ["created_at", "createdAt"], ["updated_at", "updatedAt"],
       ["revision", "revision"], ["deleted", "deleted"]
     ]
