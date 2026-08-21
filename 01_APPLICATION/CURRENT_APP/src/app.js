@@ -603,8 +603,43 @@ async function submitAnswer(state,payload){
   };
 
   function toast(message,type=""){const root=document.getElementById("toast-root"),el=document.createElement("div");el.className=`toast ${type}`;el.textContent=message;root.appendChild(el);setTimeout(()=>el.remove(),2600);}
-  function modal(html){document.getElementById("modal-root").innerHTML=`<div class="modal-backdrop" data-action="modal-backdrop"><section class="modal" role="dialog" aria-modal="true">${html}</section></div>`;}
-  function closeModal(){document.getElementById("modal-root").innerHTML="";}
+  /* الحوارات: نقل التركيز إلى الحوار عند فتحه، وحصره داخله، وإعادته إلى العنصر
+     السابق عند الإغلاق. بدون ذلك يبقى التركيز خلف الحوار ويستحيل استخدامه بلوحة مفاتيح. */
+  let modalReturnFocus=null;
+  const MODAL_FOCUSABLE='a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
+  function modalFocusable(){
+    const root=document.querySelector(".modal");
+    return root?[...root.querySelectorAll(MODAL_FOCUSABLE)].filter(el=>el.offsetParent!==null||el===document.activeElement):[];
+  }
+  function modal(html){
+    const active=document.activeElement;
+    modalReturnFocus=active&&active!==document.body?active:null;
+    document.getElementById("modal-root").innerHTML=`<div class="modal-backdrop" data-action="modal-backdrop"><section class="modal" role="dialog" aria-modal="true" tabindex="-1" aria-label="حوار">${html}</section></div>`;
+    const heading=document.querySelector(".modal h2");
+    if(heading){
+      if(!heading.id)heading.id="modal-title";
+      const dialog=document.querySelector(".modal");
+      dialog.setAttribute("aria-labelledby",heading.id);
+      dialog.removeAttribute("aria-label");
+    }
+    /* أول حقل إدخال إن وُجد، وإلا الحوار نفسه؛ لا نبدأ بزر الإغلاق. */
+    const focusables=modalFocusable();
+    const firstField=focusables.find(el=>/^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName));
+    (firstField||document.querySelector(".modal"))?.focus({preventScroll:true});
+  }
+  function closeModal(){
+    document.getElementById("modal-root").innerHTML="";
+    const target=modalReturnFocus;modalReturnFocus=null;
+    if(target&&document.contains(target))target.focus({preventScroll:true});
+  }
+  function trapModalTab(e){
+    if(e.key!=="Tab"||!document.querySelector(".modal"))return;
+    const items=modalFocusable();
+    if(!items.length)return;
+    const first=items[0],last=items[items.length-1],active=document.activeElement;
+    if(e.shiftKey&&(active===first||active===document.querySelector(".modal"))){e.preventDefault();last.focus();}
+    else if(!e.shiftKey&&active===last){e.preventDefault();first.focus();}
+  }
   function statusLabel(s){return({new:"جديدة",learning:"قيد التعلم",due:"مستحقة",overdue:"متأخرة",weak:"ضعيفة",mastered:"متقنة",ignored:"مستبعدة"})[s]||s;}
   function statusPill(s){const cls=s==="overdue"?"weak":s;return `<span class="pill ${cls}">${statusLabel(s)}</span>`;}
   function routeLabel(route){return({home:"الرئيسية",words:"الكلمات",study:"تعلّم",stats:"الإحصائيات",settings:"الإعدادات"})[route]||route;}
@@ -804,7 +839,7 @@ function afterRender(state){
   function openQualityModal(state){const flagged=state.words.filter(w=>w.qualityStatus==="review").slice(0,100);modal(`<div class="modal-head"><h2>مراجعة جودة البيانات</h2><button class="modal-close" data-action="modal-close">×</button></div><p style="color:var(--muted)">هذه إشارات آلية إلى تعارض هيكلي محتمل، وليست حكماً لغوياً نهائياً.</p><div class="quality-list">${flagged.map(w=>`<button class="quality-item card interactive" data-action="quality-edit" data-id="${w.id}" style="text-align:start"><strong lang="de">${DF.esc(w.german)}</strong><small>${DF.esc(w.arabic)} · ${(w.qualityIssues||[]).map(DF.esc).join('، ')}</small></button>`).join("")}</div>${state.words.filter(w=>w.qualityStatus==='review').length>100?'<p style="color:var(--muted)">يُعرض أول 100 مدخل. استخدم فلتر «تحتاج مراجعة» في صفحة الكلمات لعرض الجميع.</p>':''}`);}
   function confirmModal(title,text,action,label="تأكيد",danger=true){modal(`<div class="modal-head"><h2>${DF.esc(title)}</h2><button class="modal-close" data-action="modal-close">×</button></div><p style="color:var(--muted);line-height:1.7">${DF.esc(text)}</p><div class="modal-actions"><button class="ghost-btn" data-action="modal-close">إلغاء</button><button class="${danger?'danger-btn':'primary-btn'}" data-action="${action}">${DF.esc(label)}</button></div>`);}
 
-  Object.assign(DF,{UI:{render,toast,modal,closeModal,openWordModal,openImportModal,showImportPreview,openRestoreModal,openQualityModal,confirmModal,applyTheme,modeLabel,routeLabel}});
+  Object.assign(DF,{UI:{trapModalTab,render,toast,modal,closeModal,openWordModal,openImportModal,showImportPreview,openRestoreModal,openQualityModal,confirmModal,applyTheme,modeLabel,routeLabel}});
 })();
 
 (function(){
@@ -950,6 +985,7 @@ function afterRender(state){
     if(e.target.classList.contains("setting-number")){withBusy(async()=>{const k=e.target.dataset.setting;state.settings[k]=Math.max(0,Math.min(500,parseInt(e.target.value,10)||0));await saveSettings();});}
   });
   document.addEventListener("keydown",e=>{
+    DF.UI.trapModalTab(e);
     if(e.key==="Enter"&&!e.shiftKey&&state.route==="study"&&!state.session?.result&&document.activeElement?.id==="answer-input"){e.preventDefault();document.querySelector('[data-action="submit-writing"]')?.click();}
     if(e.key==="Escape"&&document.querySelector(".modal-backdrop"))DF.UI.closeModal();
   });
