@@ -56,3 +56,26 @@ describe("iPad-first app shell foundation", () => {
     expect(beforeTablet).toContain("grid-template-columns:repeat(5,1fr)");
   });
 });
+
+describe("iPad/iPhone viewport and touch refinements", () => {
+  it("uses dvh for full-height layouts, with a vh fallback first", () => {
+    // 100vh measures the viewport without iOS dynamic chrome, so the page overflows.
+    for (const selector of [".layout{min-height:100vh;min-height:100dvh}", ".study-layout{min-height:100vh;min-height:100dvh}"]) {
+      expect(CSS).toContain(selector);
+    }
+  });
+
+  it("meets the 44pt minimum hit area for icon controls", () => {
+    expect(CSS).toContain("min-inline-size:44px");
+    expect(CSS).toContain("min-block-size:44px");
+  });
+
+  it("keeps the answer field clear of the on-screen keyboard", () => {
+    expect(CSS).toContain(".answer-input{scroll-margin-block-end:120px}");
+    expect(CSS).toContain(".answer-actions{scroll-margin-block-end:24px}");
+  });
+
+  it("tightens study padding on very short viewports", () => {
+    expect(CSS).toContain("@media (max-height:520px)");
+  });
+});

@@ -173,3 +173,25 @@ body,button,select,textarea,.question-ar,.question-label,.intro-meaning,.feedbac
 .rating-btn.suggested{outline:2px solid var(--primary);outline-offset:1px}
 .feedback-flag{margin-block-start:12px}
 .feedback-hint{font-size:12px;color:var(--muted);margin-block-start:12px}
+
+/* ===== iPad/iPhone viewport and touch refinements ===== */
+
+/* 100vh is wrong on iOS: it measures the viewport without the dynamic browser chrome,
+   so the page overflows behind it. dvh tracks the actually-visible height. The vh line
+   stays first as the fallback for engines without dvh. */
+.layout{min-height:100vh;min-height:100dvh}
+.study-layout{min-height:100vh;min-height:100dvh}
+
+/* Apple HIG asks for a 44x44pt minimum hit area. */
+.icon-btn{min-inline-size:44px;min-block-size:44px}
+
+/* When the on-screen keyboard scrolls the answer field into view, leave room beneath it
+   so the field is not flush against the keyboard, and keep the action row reachable. */
+.answer-input{scroll-margin-block-end:120px}
+.answer-actions{scroll-margin-block-end:24px}
+
+/* Let the study area scroll independently of the fixed page chrome on short landscape
+   viewports, e.g. iPhone landscape while the keyboard is open. */
+@media (max-height:520px){
+  .study-layout{padding-block-start:max(8px,env(safe-area-inset-top));padding-block-end:max(12px,env(safe-area-inset-bottom))}
+}
