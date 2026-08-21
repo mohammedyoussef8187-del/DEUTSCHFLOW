@@ -1,5 +1,5 @@
 {
-  "generatedAt": 1787353756726,
+  "generatedAt": 1787354931184,
   "applied": true,
   "filesDiscovered": 193,
   "documents": [
@@ -81,12 +81,13 @@
     "chapter": 2,
     "validationOk": true,
     "errors": [],
-    "warnings": 16,
+    "warnings": 8,
     "summary": {
-      "chapter": 2,
-      "safeRows": 22,
-      "sourceAssets": 16,
+      "chapters": 12,
+      "units": 2,
       "indexedAssets": 189,
+      "titleAnomalies": 1,
+      "partialAudioRanges": 7,
       "exactAudioPageExerciseMappings": 0
     },
     "applied": false,
@@ -94,7 +95,7 @@
     "rows": {
       "create": 0,
       "update": 0,
-      "unchanged": 22,
+      "unchanged": 30,
       "conflicts": 0
     },
     "verification": null

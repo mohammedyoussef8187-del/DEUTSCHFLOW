@@ -24,7 +24,7 @@ import { audioMappingReport, buildNetzwerkAudioAssets } from "./netzwerk-audio.j
 import { createSqliteAdapter } from "../../01_APPLICATION/CURRENT_APP/src/platform/sqlite/adapter.js";
 import { createCanonicalRepositories } from "../../01_APPLICATION/CURRENT_APP/src/data/canonical-repositories.js";
 import { createServices } from "../../01_APPLICATION/CURRENT_APP/src/runtime/composition-root.js";
-import { buildNetzwerkChapter } from "./map-netzwerk.js";
+import { buildNetzwerkChapter, buildNetzwerkCourse } from "./map-netzwerk.js";
 import { applyImport, planImport, verifyImport } from "./import.js";
 
 export const AUDIT_PATH = "tools/intake/artifacts/netzwerk-audit.json";
@@ -98,6 +98,15 @@ export async function runNetzwerkChapter(repositories, built, options = {}) {
     }
     return { applied: true, reason: null, validation: built.validation, plan, written, verification };
   });
+}
+
+/**
+ * The whole 12-chapter structure, through the same preview/apply/verify path.
+ * `runNetzwerkChapter` is already generic over a built batch, so the ordering, the
+ * conflict refusal, the no-op skip and the single transaction all apply unchanged.
+ */
+export async function runNetzwerkCourse(repositories, built, options = {}) {
+  return runNetzwerkChapter(repositories, built, options);
 }
 
 /**
@@ -228,8 +237,19 @@ async function main() {
    * two paths write the same 16 audio uuids, and registering first would turn the
    * required 22-create plan into 6 creates plus 16 updates.
    */
-  const built = buildNetzwerkChapter({ ...loadChapterArtifacts(), chapter: 2 });
-  console.log("── Kapitel 2 slice ──");
+  const artifacts = loadChapterArtifacts();
+  const built = buildNetzwerkCourse({ ...artifacts });
+  console.log("── Netzwerk neu A2 structure ──");
+  if (built.mapped) {
+    console.log(`  ${built.mapped.stats.courseUnits} unit(s), ` +
+      `${built.mapped.stats.lessons} chapter(s), ${built.mapped.stats.curriculumTexts} title text(s)`);
+    for (const lesson of built.mapped.course.lessons) {
+      console.log(`    ${String(lesson.ordering).padStart(2)}  ${lesson.slug}`);
+    }
+    const reuse = built.mapped.audioReuse;
+    console.log(`  audio: ${reuse.indexed} indexed, ${reuse.referencedByAChapter} referenced by a ` +
+      `chapter range, ${reuse.created} created, ${reuse.linksCreated} link(s)`);
+  }
   console.log(`  validation ${built.validation.ok ? "ok" : "FAILED"}: ` +
     `${built.validation.errors.length} error(s), ${built.validation.warnings.length} warning(s)`);
   for (const entry of built.validation.errors.slice(0, 10)) {

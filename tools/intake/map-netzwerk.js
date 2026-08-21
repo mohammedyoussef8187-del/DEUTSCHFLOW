@@ -506,3 +506,374 @@ export function buildNetzwerkChapter(input = {}) {
 export function entityForTarget(target) {
   return TARGET_ENTITY[target] ?? null;
 }
+
+/* ============================================================ whole course */
+/*
+ * The 12-chapter structure.
+ *
+ * The reviewed Kapitel 2 slice stays the authority for everything it covers — its rows
+ * are reused verbatim, so the course, the CEFR level, the A2.1 unit and the Kapitel 2
+ * lesson keep the identity and the provenance a person signed off on. The remaining
+ * chapters are derived from the official structure index, which prints a title, an
+ * edition, a page range and an audio range for each one.
+ *
+ * Still no educational content. A chapter here is a title and an ordering; it is not a
+ * lesson with anything inside it, and this deliberately creates no section, no item and
+ * no listening activity, because none of that is evidenced.
+ */
+
+/** Which combined half-edition a chapter belongs to, taken from the structure index. */
+export const EDITION_UNITS = Object.freeze({
+  "A2.1": { slug: "a2-1", ordering: 1, editionId: "edition-a2-1-combined" },
+  "A2.2": { slug: "a2-2", ordering: 2, editionId: "edition-a2-2-combined" }
+});
+
+/**
+ * The transcript heading Kapitel 1 carries in the official audio transcript, which is
+ * NOT the printed chapter title. Both are real, and neither is normalized into the
+ * other: the printed title is canonical, and the anomaly is recorded as its own text so
+ * the disagreement stays visible instead of being quietly resolved.
+ */
+export const TRANSCRIPT_ANOMALY_KIND = "transcript-heading";
+
+const resourceUrls = (structureIndex, ids) =>
+  (ids ?? [])
+    .map(id => (structureIndex?.officialResources ?? []).find(entry => entry.id === id))
+    .filter(Boolean)
+    .flatMap(entry => entry.officialUrls ?? []);
+
+/**
+ * Select the evidence for the whole course: every chapter, its edition, and the audio
+ * ranges the transcript indexes place in it.
+ */
+export function selectNetzwerkCourse(input) {
+  const { structureIndex, audioAssetIndex, safeSlice, manifest } = input ?? {};
+  const reviewed = selectNetzwerkChapter(input, 2);
+
+  const chapters = [...(structureIndex?.chapters ?? [])].sort((a, b) => a.chapter - b.chapter);
+  const indexedAssets = audioAssetIndex?.assets ?? [];
+
+  return {
+    manifest,
+    structureIndex,
+    audioAssetIndex,
+    safeSlice,
+    reviewed,
+    chapters: chapters.map(chapter => ({
+      chapter,
+      unit: EDITION_UNITS[chapter.edition] ?? null,
+      titleEvidence: resourceUrls(structureIndex, [`source-teacher-board-k${chapter.chapter}`]),
+      /*
+       * The assets each audio range covers, resolved against the technical index. This
+       * only CHECKS that an evidenced range names files that exist; it creates no link,
+       * because a chapter range is not a task association.
+       */
+      audio: (chapter.audioRanges ?? []).map(range => ({
+        range,
+        assets: indexedAssets.filter(asset =>
+          asset.component === range.component &&
+          asset.disc === range.disc &&
+          asset.track >= range.firstTrack &&
+          asset.track <= range.lastTrack)
+      }))
+    })),
+    editions: Object.entries(EDITION_UNITS).map(([edition, unit]) => ({
+      edition,
+      ...unit,
+      record: (structureIndex?.editions ?? []).find(entry => entry.id === unit.editionId) ?? null
+    })),
+    counts: {
+      chapters: chapters.length,
+      indexedAssets: indexedAssets.length
+    }
+  };
+}
+
+/** Validate the whole-course evidence. Reports; never repairs. */
+export function validateNetzwerkCourse(evidence) {
+  const issues = [];
+  const { chapters, structureIndex, audioAssetIndex } = evidence ?? {};
+
+  if (structureIndex?.indexVersion !== SUPPORTED_VERSIONS.structureIndex) {
+    issues.push(error("unsupported-structure-version", `version ${structureIndex?.indexVersion}`));
+  }
+  if (audioAssetIndex?.indexVersion !== SUPPORTED_VERSIONS.audioAssetIndex) {
+    issues.push(error("unsupported-audio-index-version", `version ${audioAssetIndex?.indexVersion}`));
+  }
+
+  const numbers = (chapters ?? []).map(entry => entry.chapter.chapter);
+  if (numbers.length !== 12) {
+    issues.push(error("chapter-count-mismatch", `expected 12 chapters, found ${numbers.length}`));
+  }
+  if (numbers.some((value, index) => value !== index + 1)) {
+    issues.push(error("chapter-ordering-gap", `chapters are ${numbers.join(", ")}`));
+  }
+
+  const seenTitles = new Map();
+  for (const entry of chapters ?? []) {
+    const { chapter, unit, titleEvidence } = entry;
+    const where = `Kapitel ${chapter.chapter}`;
+
+    if (!chapter.printedChapterTitle) {
+      issues.push(error("chapter-title-missing", "no printed chapter title", where));
+    }
+    if (!unit) {
+      issues.push(error("unknown-edition", `edition ${chapter.edition} has no unit`, where));
+    }
+    if (!titleEvidence.length) {
+      issues.push(error("chapter-title-unevidenced", "no official source proves this title", where));
+    }
+    for (const url of titleEvidence) {
+      const host = hostOf(url);
+      if (!OFFICIAL_HOSTS.includes(host)) {
+        issues.push(error("non-official-host", `${host ?? url}`, where));
+      }
+    }
+
+    /* Two chapters printing the same title would make the slug ambiguous. */
+    const title = chapter.printedChapterTitle;
+    if (title && seenTitles.has(title)) {
+      issues.push(error("duplicate-chapter-title",
+        `also Kapitel ${seenTitles.get(title)}`, where));
+    } else if (title) seenTitles.set(title, chapter.chapter);
+
+    /*
+     * A transcript heading that disagrees with the printed title is an official-source
+     * anomaly, not an error — but it must be recorded rather than reconciled away.
+     */
+    if (chapter.transcriptHeading && chapter.transcriptHeading !== title) {
+      issues.push(warn("chapter-title-anomaly",
+        `printed "${title}", transcript heading "${chapter.transcriptHeading}"; both preserved`,
+        where));
+    }
+
+    /* Every evidenced audio range must name files that actually exist. */
+    for (const { range, assets } of entry.audio) {
+      const expected = range.lastTrack - range.firstTrack + 1;
+      if (assets.length !== expected) {
+        /*
+         * A warning, not an error: the range is what the official transcript index
+         * prints, and a file simply not being in this repository says nothing about the
+         * chapter's title or ordering. The Übungsbuch disc 2 recordings are absent
+         * entirely, so chapters 7-12 resolve none of theirs. Absence is recorded and
+         * imported around; it is not ambiguity, and it is never filled in.
+         */
+        issues.push(warn("audio-range-partially-present",
+          `${range.component} disc ${range.disc} tracks ${range.firstTrack}-${range.lastTrack}: ` +
+          `${assets.length} of ${expected} files present locally`, where));
+      }
+      for (const asset of assets) {
+        if (asset.page != null || asset.exercise != null) {
+          issues.push(error("guessed-audio-mapping",
+            "an indexed asset claims a page or exercise", asset.sourceAssetId));
+        }
+      }
+      if (range.page != null || range.exercise != null) {
+        issues.push(error("guessed-audio-mapping",
+          "a chapter audio range claims a page or exercise", where));
+      }
+    }
+  }
+
+  const errors = issues.filter(entry => entry.severity === SEVERITY.ERROR);
+  return mergeValidation({
+    issues,
+    ok: errors.length === 0,
+    summary: {
+      chapters: numbers.length,
+      units: (evidence?.editions ?? []).length,
+      indexedAssets: evidence?.counts?.indexedAssets ?? 0,
+      titleAnomalies: issues.filter(entry => entry.code === "chapter-title-anomaly").length,
+      partialAudioRanges: issues.filter(entry => entry.code === "audio-range-partially-present").length,
+      exactAudioPageExerciseMappings: 0
+    }
+  });
+}
+
+/**
+ * Map the whole course.
+ *
+ * Rows the reviewed slice already covers are taken FROM it, so Kapitel 2 and the course
+ * frame keep byte-identical identity and provenance; everything else is derived from the
+ * structure index under the same key conventions.
+ */
+export function mapNetzwerkCourse(evidence, options = {}) {
+  const now = options.now ?? Date.now();
+  const reviewedRows = evidence?.reviewed?.rows ?? [];
+  const reviewedBy = target => reviewedRows.filter(row => row.canonicalTargetEntity === target);
+
+  const stamp = row => ({
+    ...row.fieldsAllowedForImport,
+    ...Object.fromEntries((row.fieldsMustRemainNullOrUnset ?? [])
+      .filter(field => CANONICAL_NULLABLE.has(field))
+      .map(field => [field, null])),
+    createdAt: now,
+    updatedAt: now
+  });
+
+  const courseRow = stamp(reviewedBy("course")[0]);
+  const levelRow = stripContentLifecycle(stamp(reviewedBy("courseLevel")[0]));
+  const reviewedUnit = stamp(reviewedBy("courseUnit")[0]);
+  const reviewedLesson = stamp(reviewedBy("lesson")[0]);
+  const reviewedTexts = reviewedBy("curriculumText").map(stamp);
+
+  const provenance = (reference, sourceType = "official-structure-metadata") => ({
+    contentStatus: IMPORTED_STATUS,
+    contentVersion: 1,
+    sourceReference: reference,
+    sourceType,
+    verifiedAt: null,
+    verifiedBy: null,
+    createdAt: now,
+    updatedAt: now,
+    revision: 1,
+    deleted: 0
+  });
+
+  /* ---- units: one per combined half-edition ---- */
+  const units = evidence.editions.map(entry => {
+    if (entry.slug === reviewedUnit.slug) return reviewedUnit;   // the reviewed A2.1 unit
+    const urls = resourceUrls(evidence.structureIndex, entry.record?.officialEvidence);
+    return {
+      uuid: expectedUuid("unit", `${courseRow.slug}:${entry.slug}`),
+      courseUuid: courseRow.uuid,
+      courseLevelUuid: levelRow.uuid,
+      slug: entry.slug,
+      ordering: entry.ordering,
+      ...provenance(urls.join(" | "))
+    };
+  });
+  const unitBySlug = new Map(units.map(unit => [unit.slug, unit]));
+
+  /* ---- lessons and their titles ---- */
+  const lessons = [];
+  const texts = [...reviewedTexts];
+
+  for (const entry of evidence.chapters) {
+    const { chapter, unit, titleEvidence } = entry;
+    const reference = titleEvidence.join(" | ");
+
+    const lesson = chapter.chapter === 2 ? reviewedLesson : {
+      uuid: expectedUuid("lesson", `${courseRow.slug}:chapter:${chapter.chapter}`),
+      unitUuid: unitBySlug.get(unit.slug).uuid,
+      slug: slugifyTitle(chapter.printedChapterTitle),
+      cefrLevel: courseRow.cefrLevel,
+      ordering: chapter.chapter,
+      ...provenance(reference)
+    };
+    lessons.push(lesson);
+
+    if (chapter.chapter !== 2) {
+      texts.push(curriculumText({
+        ownerType: "lesson", ownerUuid: lesson.uuid, language: "de", kind: "title",
+        text: chapter.printedChapterTitle, provenance: provenance(reference)
+      }));
+    }
+
+    /*
+     * The anomaly, recorded as its own text rather than replacing the printed title.
+     * `curriculum-service` reads only `title` and `description`, so this is stored,
+     * citable, and invisible to a learner screen — which is exactly right for a
+     * bibliographic disagreement.
+     */
+    if (chapter.transcriptHeading && chapter.transcriptHeading !== chapter.printedChapterTitle) {
+      texts.push(curriculumText({
+        ownerType: "lesson", ownerUuid: lesson.uuid, language: "de",
+        kind: TRANSCRIPT_ANOMALY_KIND, text: chapter.transcriptHeading,
+        provenance: provenance(
+          `${reference} | ${chapter.titleReconciliation}`)
+      }));
+    }
+  }
+
+  return {
+    keys: {
+      courseSlug: courseRow.slug,
+      courseUuid: courseRow.uuid,
+      levelUuid: levelRow.uuid,
+      unitUuids: units.map(unit => unit.uuid),
+      lessonUuids: lessons.map(lesson => lesson.uuid)
+    },
+    course: {
+      course: courseRow,
+      levels: [levelRow],
+      units,
+      lessons,
+      // No section, item or prerequisite: a chapter title is not a lesson plan, and an
+      // empty section would put a blank screen in front of a learner.
+      sections: [],
+      items: [],
+      prerequisites: [],
+      texts
+    },
+    // The 189 assets are already registered; this import reuses them and writes none.
+    audioAssets: [],
+    vocabulary: [],
+    sentences: [],
+    exercises: [],
+    listening: null,
+    audioReuse: audioReuseReport(evidence),
+    stats: {
+      courses: 1,
+      courseLevels: 1,
+      courseUnits: units.length,
+      lessons: lessons.length,
+      curriculumTexts: texts.length,
+      audioAssets: 0,
+      totalRows: 1 + 1 + units.length + lessons.length + texts.length
+    }
+  };
+}
+
+/** Which already-registered assets each chapter's evidenced ranges cover. Creates none. */
+export function audioReuseReport(evidence) {
+  const perChapter = (evidence?.chapters ?? []).map(entry => ({
+    chapter: entry.chapter.chapter,
+    ranges: entry.audio.map(({ range, assets }) => ({
+      component: range.component, disc: range.disc,
+      firstTrack: range.firstTrack, lastTrack: range.lastTrack,
+      resolved: assets.length,
+      // Recorded as unresolved because it is: the range proves the Kapitel, not the page.
+      page: null, exercise: null,
+      verificationStatus: range.verificationStatus ?? null
+    })),
+    assets: entry.audio.flatMap(({ assets }) => assets.map(asset => asset.canonicalAudioAssetUuid))
+  }));
+
+  const referenced = new Set(perChapter.flatMap(entry => entry.assets));
+  return {
+    indexed: evidence?.counts?.indexedAssets ?? 0,
+    referencedByAChapter: referenced.size,
+    created: 0,
+    perChapter,
+    // No canonical link is written: an audio_assets row has no chapter column, and a
+    // lesson item would assert a task association nothing proves.
+    linksCreated: 0
+  };
+}
+
+function curriculumText({ ownerType, ownerUuid, language, kind, text, provenance }) {
+  return {
+    uuid: expectedUuid("text", `${ownerType}:${ownerUuid}:${language}:${kind}`),
+    ownerType, ownerUuid, language, kind, text,
+    ...provenance
+  };
+}
+
+/** Slug from a printed chapter title. Identity only; the title itself is stored verbatim. */
+export function slugifyTitle(title) {
+  return String(title ?? "")
+    .toLowerCase()
+    .replace(/ä/g, "ae").replace(/ö/g, "oe").replace(/ü/g, "ue").replace(/ß/g, "ss")
+    .normalize("NFKD")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+/** Select, validate and map the whole 12-chapter structure. */
+export function buildNetzwerkCourse(input = {}) {
+  const evidence = selectNetzwerkCourse(input);
+  const validation = validateNetzwerkCourse(evidence);
+  const mapped = validation.ok ? mapNetzwerkCourse(evidence, { now: input.now }) : null;
+  return { evidence, validation, mapped };
+}

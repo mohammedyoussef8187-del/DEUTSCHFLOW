@@ -258,9 +258,17 @@ async function writeBatch(repositories, mapped, now) {
 export async function verifyImport(services, mapped, profileUuid = "local", options = {}) {
   const courses = await services.curriculum.courses();
   const course = courses.find(candidate => candidate.uuid === mapped.keys.courseUuid) ?? null;
-  const lesson = course
-    ? course.units.flatMap(unit => unit.lessons).find(l => l.uuid === mapped.keys.lessonUuid) ?? null
-    : null;
+  /*
+   * A batch may claim one lesson or a whole course of them, so both key shapes are
+   * honoured and every claimed lesson has to be readable back.
+   */
+  const claimedLessons = mapped.keys.lessonUuids ??
+    (mapped.keys.lessonUuid ? [mapped.keys.lessonUuid] : []);
+  const assembledLessons = course ? course.units.flatMap(unit => unit.lessons) : [];
+  const foundLessons = claimedLessons
+    .map(uuid => assembledLessons.find(entry => entry.uuid === uuid) ?? null);
+  const missingLessons = claimedLessons.filter((uuid, index) => !foundLessons[index]);
+  const lesson = foundLessons.find(Boolean) ?? null;
 
   /* Listening is verified only when the batch claimed one. */
   const activity = mapped.listening
@@ -300,7 +308,9 @@ export async function verifyImport(services, mapped, profileUuid = "local", opti
 
   return {
     course: course ? { slug: course.slug, cefrLevel: course.cefrLevel, title: course.title } : null,
-    lessons: course ? course.units.flatMap(unit => unit.lessons).length : 0,
+    lessons: assembledLessons.length,
+    claimedLessons: claimedLessons.length,
+    missingLessons,
     lesson: lesson ? { slug: lesson.slug, sections: lesson.sections.length,
       items: lesson.sections.reduce((sum, section) => sum + section.items.length, 0) } : null,
     listening: activity ? {
@@ -325,7 +335,7 @@ export async function verifyImport(services, mapped, profileUuid = "local", opti
      * One verdict the caller can commit on. Everything the batch claimed must be
      * readable back; listening is required only when the batch actually claimed one.
      */
-    ok: Boolean(course) && Boolean(lesson) &&
+    ok: Boolean(course) && Boolean(lesson) && missingLessons.length === 0 &&
       audioReport.missingUuids.length === 0 &&
       audioReport.mismatchedUuids.length === 0 &&
       audioReport.playable === 0 &&

@@ -14,8 +14,9 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   ALLOWED_TARGETS, NS, OFFICIAL_HOSTS, SUPPORTED_VERSIONS,
-  buildNetzwerkChapter, entityForTarget, expectedUuid, mapNetzwerkChapter,
-  selectNetzwerkChapter, validateNetzwerkChapter
+  TRANSCRIPT_ANOMALY_KIND,
+  buildNetzwerkChapter, buildNetzwerkCourse, entityForTarget, expectedUuid,
+  mapNetzwerkChapter, selectNetzwerkChapter, validateNetzwerkChapter
 } from "../../tools/intake/map-netzwerk.js";
 import { flattenRows } from "../../tools/intake/import.js";
 import { IMPORTED_STATUS } from "../../tools/intake/map-canonical.js";
@@ -509,5 +510,277 @@ describe("selection and validation are pure", () => {
   it("uses the namespaces the fixture uuids were derived from", () => {
     expect(NS.course).toBe("deutschflow/intake/course");
     expect(NS.audio).toBe("deutschflow/intake/audio_asset");
+  });
+});
+
+/* ====================================================================== */
+/* The whole 12-chapter structure.                                        */
+/* ====================================================================== */
+
+describe("the 12-chapter course", () => {
+  const course = (now = NOW) => buildNetzwerkCourse({ ...artifacts(), now });
+
+  const PRINTED_TITLES = [
+    "Und was machst du?", "Nach der Schulzeit", "Immer online?",
+    "Große und kleine Gefühle", "Leben in der Stadt", "Arbeitswelten",
+    "Ganz schön mobil", "Gelernt ist gelernt!", "Sportlich, sportlich",
+    "Zusammen leben", "Wie die Zeit vergeht!", "Gute Unterhaltung!"
+  ];
+
+  it("accepts the structure index and reports what is partial", () => {
+    const { validation } = course();
+    expect(validation.errors).toEqual([]);
+    expect(validation.ok).toBe(true);
+    expect(validation.summary).toMatchObject({
+      chapters: 12, units: 2, indexedAssets: 189,
+      titleAnomalies: 1,
+      exactAudioPageExerciseMappings: 0
+    });
+  });
+
+  it("maps exactly 30 rows: 1 course, 1 level, 2 units, 12 chapters, 14 titles", () => {
+    const { mapped } = course();
+    expect(mapped.stats).toEqual({
+      courses: 1, courseLevels: 1, courseUnits: 2, lessons: 12,
+      curriculumTexts: 14, audioAssets: 0, totalRows: 30
+    });
+
+    const counts = {};
+    for (const { entity } of flattenRows(mapped)) counts[entity] = (counts[entity] ?? 0) + 1;
+    expect(counts).toEqual({
+      courses: 1, courseLevels: 1, courseUnits: 2, lessons: 12, curriculumTexts: 14
+    });
+  });
+
+  it("preserves every printed chapter title exactly, in printed order", () => {
+    const { mapped } = course();
+    expect(mapped.course.lessons.map(lesson => lesson.ordering))
+      .toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+
+    const titles = mapped.course.lessons.map(lesson =>
+      mapped.course.texts.find(text =>
+        text.ownerUuid === lesson.uuid && text.kind === "title").text);
+    expect(titles).toEqual(PRINTED_TITLES);
+  });
+
+  it("splits the chapters across the two combined half-editions", () => {
+    const { mapped } = course();
+    const bySlug = new Map(mapped.course.units.map(unit => [unit.uuid, unit.slug]));
+
+    expect(mapped.course.units.map(unit => unit.slug)).toEqual(["a2-1", "a2-2"]);
+    const perUnit = {};
+    for (const lesson of mapped.course.lessons) {
+      (perUnit[bySlug.get(lesson.unitUuid)] ??= []).push(lesson.ordering);
+    }
+    expect(perUnit).toEqual({ "a2-1": [1, 2, 3, 4, 5, 6], "a2-2": [7, 8, 9, 10, 11, 12] });
+  });
+
+  it("keeps the Kapitel 1 anomaly instead of resolving it", () => {
+    const { mapped } = course();
+    const first = mapped.course.lessons.find(lesson => lesson.ordering === 1);
+    const texts = mapped.course.texts.filter(text => text.ownerUuid === first.uuid);
+
+    // The printed title is canonical and the transcript heading is a separate record.
+    expect(texts.find(text => text.kind === "title").text).toBe("Und was machst du?");
+    expect(texts.find(text => text.kind === TRANSCRIPT_ANOMALY_KIND).text).toBe("Das bin ich.");
+    expect(texts).toHaveLength(2);
+
+    // Neither was rewritten into the other.
+    expect(first.slug).toBe("und-was-machst-du");
+    const anomaly = texts.find(text => text.kind === TRANSCRIPT_ANOMALY_KIND);
+    expect(anomaly.sourceReference).toContain("printed title is canonical");
+  });
+
+  it("warns about the anomaly rather than hiding it", () => {
+    const warning = course().validation.warnings
+      .find(entry => entry.code === "chapter-title-anomaly");
+    expect(warning.where).toBe("Kapitel 1");
+    expect(warning.detail).toContain("Und was machst du?");
+    expect(warning.detail).toContain("Das bin ich.");
+    // Only Kapitel 1 disagrees with itself.
+    expect(course().validation.warnings
+      .filter(entry => entry.code === "chapter-title-anomaly")).toHaveLength(1);
+  });
+
+  it("records that the Übungsbuch disc 2 recordings are not in this repository", () => {
+    const partial = course().validation.warnings
+      .filter(entry => entry.code === "audio-range-partially-present");
+    // Kapitel 1 is missing ÜB track 1; chapters 7-12 have no ÜB disc 2 at all.
+    expect(partial.map(entry => entry.where))
+      .toEqual(["Kapitel 1", "Kapitel 7", "Kapitel 8", "Kapitel 9",
+        "Kapitel 10", "Kapitel 11", "Kapitel 12"]);
+    expect(partial.some(entry => entry.detail.includes("0 of 9 files present locally"))).toBe(true);
+    // A missing file is an absence, never a reason to refuse the chapter's title.
+    expect(course().validation.ok).toBe(true);
+  });
+
+  it("keeps the reviewed Kapitel 2 identity untouched", () => {
+    const chapter = build().mapped;
+    const whole = course().mapped;
+
+    expect(whole.keys.courseUuid).toBe(chapter.keys.courseUuid);
+    expect(whole.keys.levelUuid).toBe(chapter.keys.levelUuid);
+    expect(whole.course.units.find(unit => unit.slug === "a2-1").uuid).toBe(chapter.keys.unitUuid);
+
+    const second = whole.course.lessons.find(lesson => lesson.ordering === 2);
+    expect(second.uuid).toBe(chapter.keys.lessonUuid);
+    // Reused verbatim: same provenance, not a re-derivation that happens to match.
+    expect(second).toEqual(chapter.course.lessons[0]);
+    expect(whole.course.course).toEqual(chapter.course.course);
+
+    const reviewedTitle = chapter.course.texts.find(text => text.ownerUuid === second.uuid);
+    expect(whole.course.texts).toContainEqual(reviewedTitle);
+  });
+
+  it("derives identity that does not move with the clock", () => {
+    const early = course(NOW);
+    const later = course(NOW + 9_000_000);
+
+    expect(later.mapped.keys).toEqual(early.mapped.keys);
+    expect(flattenRows(later.mapped).map(entry => entry.row.uuid))
+      .toEqual(flattenRows(early.mapped).map(entry => entry.row.uuid));
+    expect(later.mapped.course.lessons[0].createdAt).toBe(NOW + 9_000_000);
+  });
+
+  it("reproduces every uuid from its documented namespace and key", () => {
+    const { mapped } = course();
+    expect(mapped.keys.courseUuid).toBe(expectedUuid("course", "netzwerk-neu-a2"));
+    for (const unit of mapped.course.units) {
+      expect(unit.uuid).toBe(expectedUuid("unit", `netzwerk-neu-a2:${unit.slug}`));
+    }
+    for (const lesson of mapped.course.lessons) {
+      expect(lesson.uuid).toBe(expectedUuid("lesson", `netzwerk-neu-a2:chapter:${lesson.ordering}`));
+    }
+    for (const text of mapped.course.texts) {
+      expect(text.uuid).toBe(
+        expectedUuid("text", `${text.ownerType}:${text.ownerUuid}:${text.language}:${text.kind}`));
+    }
+  });
+
+  it("gives every row a unique identity", () => {
+    const uuids = flattenRows(course().mapped).map(entry => entry.row.uuid);
+    expect(new Set(uuids).size).toBe(uuids.length);
+    const slugs = course().mapped.course.lessons.map(lesson => lesson.slug);
+    expect(new Set(slugs).size).toBe(12);
+  });
+
+  it("creates no audio row and no audio link", () => {
+    const { mapped } = course();
+    expect(mapped.audioAssets).toEqual([]);
+    expect(mapped.audioReuse).toMatchObject({
+      indexed: 189, referencedByAChapter: 189, created: 0, linksCreated: 0
+    });
+    // Every chapter range is reported with its page and exercise still unresolved.
+    for (const chapter of mapped.audioReuse.perChapter) {
+      for (const range of chapter.ranges) {
+        expect(range.page).toBeNull();
+        expect(range.exercise).toBeNull();
+      }
+    }
+  });
+
+  it("creates no educational entity of any kind", () => {
+    const { mapped } = course();
+    expect(mapped.vocabulary).toEqual([]);
+    expect(mapped.sentences).toEqual([]);
+    expect(mapped.exercises).toEqual([]);
+    expect(mapped.listening).toBeNull();
+    // No section and no item: a chapter title is not a lesson plan, and an empty
+    // section would put a blank screen in front of a learner.
+    expect(mapped.course.sections).toEqual([]);
+    expect(mapped.course.items).toEqual([]);
+
+    const entities = new Set(flattenRows(mapped).map(entry => entry.entity));
+    for (const forbidden of ["vocabularyItems", "vocabularyMeanings", "translations",
+      "acceptedAnswers", "sentences", "sentenceTexts", "exercises", "exerciseOptions",
+      "listeningItems", "listeningTexts", "lessonSections", "lessonItems"]) {
+      expect(entities, forbidden).not.toContain(forbidden);
+    }
+  });
+
+  it("writes only fields the canonical schema declares", () => {
+    const fieldsFor = entity => new Set(
+      TABLE_SPECS.find(spec => spec.entity === entity).columns.map(([, field]) => field));
+
+    for (const { entity, row } of flattenRows(course().mapped)) {
+      for (const field of Object.keys(row)) {
+        expect(fieldsFor(entity).has(field), `${entity}.${field}`).toBe(true);
+      }
+    }
+  });
+
+  it("cites an official source for every chapter title", () => {
+    for (const lesson of course().mapped.course.lessons) {
+      expect(lesson.sourceReference, lesson.slug).toBeTruthy();
+      for (const url of lesson.sourceReference.split(" | ")) {
+        expect(OFFICIAL_HOSTS, url).toContain(new URL(url).host);
+      }
+    }
+  });
+
+  it("marks every chapter imported, never verified", () => {
+    for (const { entity, row } of flattenRows(course().mapped)) {
+      if (row.contentStatus !== undefined) expect(row.contentStatus, entity).toBe(IMPORTED_STATUS);
+      if (row.verifiedAt !== undefined) expect(row.verifiedAt, entity).toBeNull();
+      if (row.verifiedBy !== undefined) expect(row.verifiedBy, entity).toBeNull();
+    }
+  });
+
+  it("copies no publisher wording beyond the printed titles", () => {
+    const texts = course().mapped.course.texts.map(text => text.text);
+    const allowed = new Set([...PRINTED_TITLES, "Netzwerk neu A2", "Das bin ich."]);
+    for (const text of texts) expect(allowed, text).toContain(text);
+  });
+
+  it("refuses a chapter whose title no official source proves", () => {
+    const input = artifacts();
+    input.structureIndex = structuredClone(input.structureIndex);
+    input.structureIndex.officialResources =
+      input.structureIndex.officialResources.filter(entry => entry.id !== "source-teacher-board-k5");
+
+    const built = buildNetzwerkCourse({ ...input, now: NOW });
+    expect(built.validation.ok).toBe(false);
+    expect(built.mapped).toBeNull();
+    expect(built.validation.errors.some(entry => entry.code === "chapter-title-unevidenced")).toBe(true);
+  });
+
+  it("refuses a gap in the chapter sequence", () => {
+    const input = artifacts();
+    input.structureIndex = structuredClone(input.structureIndex);
+    input.structureIndex.chapters = input.structureIndex.chapters.filter(entry => entry.chapter !== 5);
+
+    const built = buildNetzwerkCourse({ ...input, now: NOW });
+    expect(built.validation.ok).toBe(false);
+    const codes = built.validation.errors.map(entry => entry.code);
+    expect(codes).toContain("chapter-count-mismatch");
+    expect(codes).toContain("chapter-ordering-gap");
+  });
+
+  it("refuses a chapter audio range that claims a page or exercise", () => {
+    const input = artifacts();
+    input.structureIndex = structuredClone(input.structureIndex);
+    input.structureIndex.chapters.find(entry => entry.chapter === 3).audioRanges[0].page = 27;
+
+    const built = buildNetzwerkCourse({ ...input, now: NOW });
+    expect(built.validation.ok).toBe(false);
+    expect(built.validation.errors.some(entry => entry.code === "guessed-audio-mapping")).toBe(true);
+  });
+
+  it("refuses two chapters printing the same title", () => {
+    const input = artifacts();
+    input.structureIndex = structuredClone(input.structureIndex);
+    input.structureIndex.chapters.find(entry => entry.chapter === 4).printedChapterTitle =
+      "Immer online?";
+
+    const built = buildNetzwerkCourse({ ...input, now: NOW });
+    expect(built.validation.ok).toBe(false);
+    expect(built.validation.errors.some(entry => entry.code === "duplicate-chapter-title")).toBe(true);
+  });
+
+  it("does not mutate the artifacts it reads", () => {
+    const input = artifacts();
+    const before = JSON.stringify(input);
+    buildNetzwerkCourse({ ...input, now: NOW });
+    expect(JSON.stringify(input)).toBe(before);
   });
 });

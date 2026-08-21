@@ -20,9 +20,11 @@ import {
   audioMappingReport, buildNetzwerkAudioAssets
 } from "../../tools/intake/netzwerk-audio.js";
 import {
-  planNetzwerk, registerAudio, runNetzwerkChapter
+  planNetzwerk, registerAudio, runNetzwerkChapter, runNetzwerkCourse
 } from "../../tools/intake/run-netzwerk.mjs";
-import { buildNetzwerkChapter } from "../../tools/intake/map-netzwerk.js";
+import {
+  buildNetzwerkChapter, buildNetzwerkCourse
+} from "../../tools/intake/map-netzwerk.js";
 import { verifyImport } from "../../tools/intake/import.js";
 import { createServices } from "../../01_APPLICATION/CURRENT_APP/src/runtime/composition-root.js";
 import { migrateToCanonical } from "../../01_APPLICATION/CURRENT_APP/src/migration/canonical-migration.js";
@@ -575,5 +577,253 @@ describe("Kapitel 2 safe slice", () => {
 
     await runNetzwerkChapter(await freshStore(), built(), { apply: true, now: NOW });
     expect(JSON.stringify(card)).toBe(snapshot);
+  });
+});
+
+/* ====================================================================== */
+/* The whole 12-chapter structure, end to end.                            */
+/* ====================================================================== */
+
+describe("Netzwerk neu A2 course structure", () => {
+  const CONTROL = path.resolve(process.cwd(), "00_PROJECT_CONTROL");
+  const readControl = name => JSON.parse(fs.readFileSync(path.join(CONTROL, name), "utf8"));
+
+  const artifacts = () => ({
+    manifest: readControl("NETZWERK_NEU_A2_KAPITEL_02_MANIFEST.json"),
+    structureIndex: readControl("NETZWERK_NEU_A2_STRUCTURE_INDEX.json"),
+    audioAssetIndex: readControl("NETZWERK_NEU_A2_AUDIO_ASSET_INDEX.json"),
+    safeSlice: readControl("NETZWERK_NEU_A2_KAPITEL_02_SAFE_SLICE.json")
+  });
+
+  const course = (now = NOW) => buildNetzwerkCourse({ ...artifacts(), now });
+
+  const structureCounts = async repositories => ({
+    courses: await repositories.courses.count(),
+    courseLevels: await repositories.courseLevels.count(),
+    courseUnits: await repositories.courseUnits.count(),
+    lessons: await repositories.lessons.count(),
+    curriculumTexts: await repositories.curriculumTexts.count()
+  });
+
+  const contentCounts = async repositories => ({
+    vocabulary: await repositories.vocabulary.count(),
+    meanings: await repositories.meanings.count(),
+    translations: await repositories.translations.count(),
+    acceptedAnswers: await repositories.acceptedAnswers.count(),
+    sentences: await repositories.sentences.count(),
+    grammarTopics: await repositories.grammarTopics.count(),
+    grammarRules: await repositories.grammarRules.count(),
+    exercises: await repositories.exercises.count(),
+    listeningItems: await repositories.listeningItems.count(),
+    listeningTexts: await repositories.listeningTexts.count(),
+    lessonSections: await repositories.lessonSections.count(),
+    lessonItems: await repositories.lessonItems.count()
+  });
+
+  it("previews 30 creates and writes nothing", async () => {
+    const repositories = await freshStore();
+    const result = await runNetzwerkCourse(repositories, course(), { apply: false, now: NOW });
+
+    expect(result.applied).toBe(false);
+    expect(result.reason).toBe("preview-only");
+    expect(result.plan.create).toHaveLength(30);
+    expect(result.plan.conflicts).toEqual([]);
+    expect(Object.values(await structureCounts(repositories)).every(count => count === 0)).toBe(true);
+  });
+
+  it("imports all twelve chapters and verifies them through the services", async () => {
+    const repositories = await freshStore();
+    const result = await runNetzwerkCourse(repositories, course(), { apply: true, now: NOW });
+
+    expect(result.applied).toBe(true);
+    expect(result.verification.ok).toBe(true);
+    expect(result.verification.claimedLessons).toBe(12);
+    expect(result.verification.missingLessons).toEqual([]);
+    expect(result.verification.lessons).toBe(12);
+
+    expect(await structureCounts(repositories)).toEqual({
+      courses: 1, courseLevels: 1, courseUnits: 2, lessons: 12, curriculumTexts: 14
+    });
+  });
+
+  it("reads the twelve chapters back in printed order through the curriculum service", async () => {
+    const repositories = await freshStore();
+    await runNetzwerkCourse(repositories, course(), { apply: true, now: NOW });
+
+    const [assembled] = await createServices(repositories).curriculum.courses();
+    expect(assembled.slug).toBe("netzwerk-neu-a2");
+    expect(assembled.units.map(unit => unit.slug)).toEqual(["a2-1", "a2-2"]);
+
+    const lessons = assembled.units.flatMap(unit => unit.lessons);
+    expect(lessons).toHaveLength(12);
+    expect(lessons.map(lesson => lesson.title.de)).toEqual([
+      "Und was machst du?", "Nach der Schulzeit", "Immer online?",
+      "Große und kleine Gefühle", "Leben in der Stadt", "Arbeitswelten",
+      "Ganz schön mobil", "Gelernt ist gelernt!", "Sportlich, sportlich",
+      "Zusammen leben", "Wie die Zeit vergeht!", "Gute Unterhaltung!"
+    ]);
+    // No official English or Arabic title exists, so the UI shows them missing.
+    expect(lessons.every(lesson => lesson.title.en === null && lesson.title.ar === null)).toBe(true);
+  });
+
+  it("shows every chapter as empty rather than as a lesson with blank screens", async () => {
+    const repositories = await freshStore();
+    await runNetzwerkCourse(repositories, course(), { apply: true, now: NOW });
+
+    const [assembled] = await createServices(repositories).curriculum.courses();
+    for (const lesson of assembled.units.flatMap(unit => unit.lessons)) {
+      // A chapter with no eligible content has no section and therefore no item: the
+      // learner sees a chapter that is not ready, not an empty exercise screen.
+      expect(lesson.sections, lesson.slug).toEqual([]);
+    }
+  });
+
+  it("keeps the Kapitel 1 anomaly in the store, and out of the chapter title", async () => {
+    const repositories = await freshStore();
+    await runNetzwerkCourse(repositories, course(), { apply: true, now: NOW });
+
+    const first = await repositories.lessons.findOne({ ordering: 1 });
+    const texts = await repositories.curriculumTexts.find({ ownerUuid: first.uuid });
+    expect(texts.map(text => [text.kind, text.text]).sort()).toEqual([
+      ["title", "Und was machst du?"],
+      ["transcript-heading", "Das bin ich."]
+    ].sort());
+
+    // The service renders the printed title; the anomaly is stored but never shown as one.
+    const [assembled] = await createServices(repositories).curriculum.courses();
+    const lesson = assembled.units.flatMap(unit => unit.lessons).find(entry => entry.ordering === 1);
+    expect(lesson.title.de).toBe("Und was machst du?");
+  });
+
+  it("is a byte-identical no-op on the second run", async () => {
+    const repositories = await freshStore();
+    await runNetzwerkCourse(repositories, course(NOW), { apply: true, now: NOW });
+
+    const before = await structureCounts(repositories);
+    const snapshot = async () => JSON.stringify([
+      await repositories.courses.all(), await repositories.courseUnits.all(),
+      await repositories.lessons.all(), await repositories.curriculumTexts.all()
+    ]);
+    const original = await snapshot();
+
+    const second = await runNetzwerkCourse(repositories, course(NOW + 9_000_000),
+      { apply: true, now: NOW + 9_000_000 });
+
+    expect(second.applied).toBe(false);
+    expect(second.reason).toBe("no-changes");
+    expect(second.plan.unchanged).toHaveLength(30);
+    expect(await structureCounts(repositories)).toEqual(before);
+    expect(await snapshot()).toBe(original);
+  });
+
+  it("imports zero educational entities", async () => {
+    const repositories = await freshStore();
+    await runNetzwerkCourse(repositories, course(), { apply: true, now: NOW });
+
+    const counts = await contentCounts(repositories);
+    for (const [entity, count] of Object.entries(counts)) {
+      expect(count, `${entity} must stay empty`).toBe(0);
+    }
+  });
+
+  it("reuses the 189 registered assets and creates none", async () => {
+    const repositories = await freshStore();
+    // The full inventory is registered first, as it is on a real run.
+    const registered = await registerAudio(
+      repositories, buildNetzwerkAudioAssets(INVENTORY.audio.files, { now: NOW }), { now: NOW });
+    expect(registered).toEqual({ created: 189, reused: 0 });
+
+    const before = await repositories.audioAssets.all();
+    const result = await runNetzwerkCourse(repositories, course(), { apply: true, now: NOW });
+
+    expect(result.written.audioAssets).toBe(0);
+    expect(await repositories.audioAssets.count()).toBe(189);
+    // Byte-identical: uuids, provenance and measured duration all survive.
+    expect(await repositories.audioAssets.all()).toEqual(before);
+    expect(new Set(before.map(asset => asset.uuid)).size).toBe(189);
+  });
+
+  it("leaves the Kapitel 2 slice's rows untouched when the whole course is imported", async () => {
+    const repositories = await freshStore();
+    const chapter = buildNetzwerkChapter({ ...artifacts(), chapter: 2, now: NOW });
+    await runNetzwerkChapter(repositories, chapter, { apply: true, now: NOW });
+
+    const reviewed = {
+      course: await repositories.courses.get(chapter.mapped.keys.courseUuid),
+      unit: await repositories.courseUnits.get(chapter.mapped.keys.unitUuid),
+      lesson: await repositories.lessons.get(chapter.mapped.keys.lessonUuid),
+      assets: await repositories.audioAssets.all()
+    };
+
+    const result = await runNetzwerkCourse(repositories, course(), { apply: true, now: NOW });
+    expect(result.applied).toBe(true);
+    // Only the chapters the slice did not cover are new.
+    expect(result.plan.create).toHaveLength(30 - 6);
+    expect(result.plan.unchanged).toHaveLength(6);
+
+    /*
+     * Identity, provenance and content are all preserved. `revision` is excluded on
+     * purpose: re-writing an aggregate whose content is unchanged still advances the
+     * row's revision, which is why the diff treats revision as bookkeeping rather than
+     * as a change — and why these rows were planned as `unchanged`.
+     */
+    const content = row => {
+      const { revision, updatedAt, ...rest } = row;
+      return rest;
+    };
+
+    expect(content(await repositories.courses.get(reviewed.course.uuid)))
+      .toEqual(content(reviewed.course));
+    expect(content(await repositories.courseUnits.get(reviewed.unit.uuid)))
+      .toEqual(content(reviewed.unit));
+    // The reviewed Kapitel 2 lesson keeps its uuid, slug, ordering and citation.
+    expect(content(await repositories.lessons.get(reviewed.lesson.uuid)))
+      .toEqual(content(reviewed.lesson));
+    // The registered assets are never touched by a structural import.
+    expect(await repositories.audioAssets.all()).toEqual(reviewed.assets);
+  });
+
+  it("registers no audio link of any kind", async () => {
+    const repositories = await freshStore();
+    await registerAudio(repositories, buildNetzwerkAudioAssets(INVENTORY.audio.files, { now: NOW }));
+    await runNetzwerkCourse(repositories, course(), { apply: true, now: NOW });
+
+    expect(await repositories.listeningItems.count()).toBe(0);
+    expect(await repositories.listeningLinks.count()).toBe(0);
+    expect(await repositories.lessonItems.count()).toBe(0);
+    for (const asset of await repositories.audioAssets.all()) {
+      expect(isPlayableOffline(asset)).toBe(false);
+    }
+  });
+
+  it("preserves Nicos content and learner SRS rows", async () => {
+    const repositories = await freshStore();
+    const { dataset } = migrateToCanonical(MIGRATION_FIXTURE.clean, { now: NOW });
+    await repositories.lifecycle.importCanonical(dataset);
+
+    const before = {
+      cards: await repositories.cards.all(),
+      events: await repositories.events.all(),
+      profiles: await repositories.profiles.all(),
+      vocabulary: await repositories.vocabulary.all()
+    };
+    expect(before.cards.length).toBeGreaterThan(0);
+
+    await runNetzwerkCourse(repositories, course(), { apply: true, now: NOW });
+
+    expect(await repositories.cards.all()).toEqual(before.cards);
+    expect(await repositories.events.all()).toEqual(before.events);
+    expect(await repositories.profiles.all()).toEqual(before.profiles);
+    expect(await repositories.vocabulary.all()).toEqual(before.vocabulary);
+  });
+
+  it("rolls the whole course back when one chapter is invalid", async () => {
+    const repositories = await freshStore();
+    const broken = course();
+    broken.mapped.course.lessons[7].slug = null;
+
+    await expect(runNetzwerkCourse(repositories, broken, { apply: true, now: NOW }))
+      .rejects.toThrow();
+    expect(Object.values(await structureCounts(repositories)).every(count => count === 0)).toBe(true);
   });
 });
