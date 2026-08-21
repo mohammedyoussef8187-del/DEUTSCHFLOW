@@ -25,6 +25,7 @@ export function createCanonicalRepositories(adapter) {
     settings: readOnly("settings"),
     vocabulary: readOnly("vocabularyItems"),
     meanings: readOnly("vocabularyMeanings"),
+    translations: readOnly("translations"),
     acceptedAnswers: readOnly("acceptedAnswers"),
     cards: readOnly("reviewCards"),
     events: readOnly("reviewEvents")

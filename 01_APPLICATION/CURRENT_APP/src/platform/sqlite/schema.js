@@ -1,5 +1,5 @@
 /*
- * Canonical SQLite schema (Version 1) for DeutschFlow native persistence.
+ * Canonical SQLite schema (Version 2) for DeutschFlow native persistence.
  *
  * Physical realization of TARGET_DATABASE_SCHEMA.md. Two deliberate, documented
  * refinements over the design-reference DDL, both to preserve learner state exactly:
@@ -12,9 +12,19 @@
  * Educational-content lifecycle columns (content_status, content_version, the source_
  * fields, and the verified_ fields) let verified wording later supersede legacy wording
  * without touching the learner's SRS rows.
+ *
+ * Version 2 adds the multilingual content model: a `translations` table for English,
+ * alongside the existing Arabic `vocabulary_meanings`, plus `accepted_answers.scoreable`
+ * recording whether an answer may decide correctness. English and Arabic carry equal
+ * educational weight; only German and English may score. See src/content/languages.js.
+ *
+ * Version 1 was never activated for learners (nativeStorageEnabled stayed false through
+ * Gate 5), so no deployed v1 database exists and v2 is the first version any learner
+ * database will see. A forward migration step becomes necessary only once a learner
+ * database has actually been written.
  */
 
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
 
 export const SCHEMA_STATEMENTS = [
   `CREATE TABLE IF NOT EXISTS learner_profiles (
@@ -101,12 +111,36 @@ export const SCHEMA_STATEMENTS = [
     FOREIGN KEY (vocab_uuid) REFERENCES vocabulary_items(uuid) ON DELETE CASCADE
   )`,
 
+  `CREATE TABLE IF NOT EXISTS translations (
+    uuid TEXT PRIMARY KEY,
+    meaning_uuid TEXT NOT NULL,
+    english_text TEXT NOT NULL,
+    normalized_english TEXT NOT NULL,
+    explanation TEXT,
+    content_status TEXT NOT NULL DEFAULT 'legacy',
+    content_version INTEGER NOT NULL DEFAULT 1,
+    source_reference TEXT,
+    source_type TEXT,
+    verified_at INTEGER,
+    verified_by TEXT,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    revision INTEGER NOT NULL DEFAULT 1,
+    deleted INTEGER NOT NULL DEFAULT 0,
+    FOREIGN KEY (meaning_uuid) REFERENCES vocabulary_meanings(uuid) ON DELETE CASCADE
+  )`,
+
+  `CREATE INDEX IF NOT EXISTS idx_translations_meaning ON translations (meaning_uuid)`,
+
   `CREATE TABLE IF NOT EXISTS accepted_answers (
     uuid TEXT PRIMARY KEY,
     meaning_uuid TEXT,
     translation_uuid TEXT,
     text TEXT NOT NULL,
     language TEXT NOT NULL,
+    -- Whether this answer may decide correctness. Arabic answers are stored (they are
+    -- educational content) but never score. See src/content/languages.js.
+    scoreable INTEGER NOT NULL DEFAULT 0,
     created_at INTEGER NOT NULL,
     updated_at INTEGER NOT NULL,
     revision INTEGER NOT NULL DEFAULT 1,
@@ -252,12 +286,25 @@ export const TABLE_SPECS = [
     ]
   },
   {
+    entity: "translations",
+    table: "translations",
+    columns: [
+      ["uuid", "uuid"], ["meaning_uuid", "meaningUuid"], ["english_text", "englishText"],
+      ["normalized_english", "normalizedEnglish"], ["explanation", "explanation"],
+      ["content_status", "contentStatus"], ["content_version", "contentVersion"],
+      ["source_reference", "sourceReference"], ["source_type", "sourceType"],
+      ["verified_at", "verifiedAt"], ["verified_by", "verifiedBy"],
+      ["created_at", "createdAt"], ["updated_at", "updatedAt"],
+      ["revision", "revision"], ["deleted", "deleted"]
+    ]
+  },
+  {
     entity: "acceptedAnswers",
     table: "accepted_answers",
     columns: [
       ["uuid", "uuid"], ["meaning_uuid", "meaningUuid"],
       ["translation_uuid", "translationUuid"], ["text", "text"],
-      ["language", "language"], ["created_at", "createdAt"],
+      ["language", "language"], ["scoreable", "scoreable"], ["created_at", "createdAt"],
       ["updated_at", "updatedAt"], ["revision", "revision"], ["deleted", "deleted"]
     ]
   },

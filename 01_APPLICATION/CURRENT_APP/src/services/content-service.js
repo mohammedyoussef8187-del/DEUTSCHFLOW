@@ -1,0 +1,173 @@
+/*
+ * Multilingual content application service (Feature A).
+ *
+ * Assembles a vocabulary entry from the canonical model into one object the UI can
+ * render: the German target form, the Arabic meaning, the English translation, and the
+ * accepted answers — with the scoreable ones kept strictly separate from the rest.
+ *
+ * Two invariants this module exists to enforce:
+ *
+ *   1. English and Arabic are peers. Neither is nested inside the other, and a missing
+ *      English translation never degrades the Arabic meaning (or vice versa). An entry
+ *      with only one support language is complete in that language, not "half broken".
+ *
+ *   2. Only German and English answers can ever reach a grader. `scoringAnswers` is
+ *      filtered through the language policy on the way out, so an Arabic row that was
+ *      mis-stored with scoreable=1 still cannot influence correctness.
+ *
+ * Read-only: it derives views, never writes, and it does not grade anything itself.
+ */
+
+import {
+  ARABIC, ENGLISH, GERMAN, isScoreable, normalizeLanguage
+} from "../content/languages.js";
+
+/** Index rows by a foreign key so assembly does not rescan per item. */
+function indexBy(rows, key) {
+  const map = new Map();
+  for (const row of rows ?? []) {
+    const id = row[key];
+    const list = map.get(id);
+    if (list) list.push(row);
+    else map.set(id, [row]);
+  }
+  return map;
+}
+
+const notDeleted = row => !row.deleted;
+
+/**
+ * Build the multilingual view for every vocabulary item in a canonical dataset.
+ *
+ * @param {object} canonical { vocabularyItems, vocabularyMeanings, translations, acceptedAnswers }
+ * @returns {Array} one entry per vocabulary item
+ */
+export function buildContentEntries(canonical = {}) {
+  const items = (canonical.vocabularyItems ?? []).filter(notDeleted);
+  const meaningsByVocab = indexBy((canonical.vocabularyMeanings ?? []).filter(notDeleted), "vocabUuid");
+  const translationsByMeaning = indexBy((canonical.translations ?? []).filter(notDeleted), "meaningUuid");
+  const answersByMeaning = indexBy((canonical.acceptedAnswers ?? []).filter(notDeleted), "meaningUuid");
+
+  return items.map(item => {
+    const meanings = meaningsByVocab.get(item.uuid) ?? [];
+
+    const senses = meanings.map(meaning => {
+      const translations = translationsByMeaning.get(meaning.uuid) ?? [];
+      const answers = answersByMeaning.get(meaning.uuid) ?? [];
+      return {
+        uuid: meaning.uuid,
+        // English and Arabic sit side by side, deliberately at the same level.
+        arabic: meaning.arabicText || null,
+        english: translations.length ? translations[0].englishText : null,
+        englishAll: translations.map(t => t.englishText),
+        explanations: {
+          [ARABIC]: meaning.explanation ?? null,
+          [ENGLISH]: translations.length ? translations[0].explanation ?? null : null
+        },
+        pronunciation: meaning.pronunciation || null,
+        provenance: {
+          arabic: contentProvenance(meaning),
+          english: translations.length ? contentProvenance(translations[0]) : null
+        },
+        answers: partitionAnswers(answers)
+      };
+    });
+
+    return {
+      uuid: item.uuid,
+      legacyId: item.legacyId ?? null,
+      german: item.german,
+      article: item.article ?? null,
+      plural: item.plural || null,
+      itemType: item.itemType,
+      level: item.level || null,
+      ignored: Boolean(item.ignored),
+      favorite: Boolean(item.favorite),
+      senses,
+      // Convenience view of the primary sense, since most UI shows one.
+      primary: senses[0] ?? null,
+      coverage: coverageOf(senses)
+    };
+  });
+}
+
+/** Split accepted answers into what may grade and what may only teach. */
+function partitionAnswers(answers) {
+  const scoring = [];
+  const reference = [];
+  for (const answer of answers) {
+    const language = normalizeLanguage(answer.language);
+    const entry = { text: answer.text, language };
+    // Belt and braces: the stored flag AND the policy must agree before an answer can
+    // reach a grader, so a bad import cannot make Arabic scoreable.
+    if (answer.scoreable && isScoreable(language)) scoring.push(entry);
+    else reference.push(entry);
+  }
+  return { scoring, reference };
+}
+
+function contentProvenance(row) {
+  return {
+    status: row.contentStatus ?? null,
+    version: row.contentVersion ?? null,
+    sourceType: row.sourceType ?? null,
+    sourceReference: row.sourceReference ?? null,
+    verifiedAt: row.verifiedAt ?? null
+  };
+}
+
+/**
+ * Which support languages this entry actually teaches in.
+ * Reported rather than judged: an entry with Arabic but no English is not an error, it
+ * is simply not yet translated, and the content-quality phase decides what to do.
+ */
+function coverageOf(senses) {
+  const hasArabic = senses.some(s => Boolean(s.arabic));
+  const hasEnglish = senses.some(s => Boolean(s.english));
+  return {
+    [GERMAN]: true,
+    [ARABIC]: hasArabic,
+    [ENGLISH]: hasEnglish,
+    complete: hasArabic && hasEnglish
+  };
+}
+
+/**
+ * Every accepted answer that may legitimately decide correctness for an entry.
+ * This is the ONLY sanctioned way for a grader to obtain answers from the content model.
+ */
+export function scoringAnswersFor(entry) {
+  if (!entry) return [];
+  return entry.senses.flatMap(sense => sense.answers.scoring);
+}
+
+/** Repository-backed service. Reads through the canonical repositories only. */
+export function createContentService(repositories) {
+  if (!repositories) throw new TypeError("Repositories are required");
+
+  return Object.freeze({
+    async allEntries() {
+      const [vocabularyItems, vocabularyMeanings, translations, acceptedAnswers] = await Promise.all([
+        repositories.vocabulary.all(),
+        repositories.meanings.all(),
+        repositories.translations.all(),
+        repositories.acceptedAnswers.all()
+      ]);
+      return buildContentEntries({ vocabularyItems, vocabularyMeanings, translations, acceptedAnswers });
+    },
+
+    /** Coverage summary, for deciding where translation work is still needed. */
+    async coverageReport() {
+      const entries = await this.allEntries();
+      const withEnglish = entries.filter(e => e.coverage[ENGLISH]).length;
+      const withArabic = entries.filter(e => e.coverage[ARABIC]).length;
+      return {
+        total: entries.length,
+        [ENGLISH]: withEnglish,
+        [ARABIC]: withArabic,
+        missingEnglish: entries.length - withEnglish,
+        missingArabic: entries.length - withArabic
+      };
+    }
+  });
+}

@@ -20,6 +20,7 @@
  */
 
 import { deterministicUuid, NS } from "./uuid.js";
+import { ARABIC, GERMAN, isScoreable, normalizeLanguage } from "../content/languages.js";
 
 const CONTENT_STATUS_LEGACY = "legacy";
 const SOURCE_TYPE_LEGACY = "legacy";
@@ -91,6 +92,13 @@ export function migrateToCanonical(snapshot = {}, options = {}) {
     settings: [],
     vocabularyItems: [],
     vocabularyMeanings: [],
+    /*
+     * English translations. The legacy model stores no English at all, so this is
+     * empty after a legacy migration by design: no English wording is invented here.
+     * The table exists so verified English content can be added later without
+     * touching learner state.
+     */
+    translations: [],
     acceptedAnswers: [],
     reviewCards: [],
     reviewEvents: [],
@@ -240,8 +248,10 @@ export function migrateToCanonical(snapshot = {}, options = {}) {
       });
 
       // Accepted answers -> individual rows. German (de) and Arabic (ar) sets.
-      appendAcceptedAnswers(dataset, meaningUuid, word.acceptedAnswers, "de", now);
-      appendAcceptedAnswers(dataset, meaningUuid, word.acceptedArabicAnswers, "ar", now);
+      // German answers may score; Arabic answers are preserved as educational content
+      // but never decide correctness.
+      appendAcceptedAnswers(dataset, meaningUuid, word.acceptedAnswers, GERMAN, now);
+      appendAcceptedAnswers(dataset, meaningUuid, word.acceptedArabicAnswers, ARABIC, now);
     }
   }
 
@@ -345,6 +355,7 @@ export function migrateToCanonical(snapshot = {}, options = {}) {
       settings: dataset.settings.length,
       vocabularyItems: dataset.vocabularyItems.length,
       vocabularyMeanings: dataset.vocabularyMeanings.length,
+      translations: dataset.translations.length,
       acceptedAnswers: dataset.acceptedAnswers.length,
       reviewCards: dataset.reviewCards.length,
       reviewEvents: dataset.reviewEvents.length,
@@ -364,14 +375,18 @@ export function migrateToCanonical(snapshot = {}, options = {}) {
 
 function appendAcceptedAnswers(dataset, meaningUuid, list, language, now) {
   if (!Array.isArray(list)) return;
+  const code = normalizeLanguage(language);
   list.forEach((text, index) => {
     if (isBlank(text)) return;
     dataset.acceptedAnswers.push({
-      uuid: deterministicUuid(NS.acceptedAnswer, `${meaningUuid}:${language}:${index}:${text}`),
+      uuid: deterministicUuid(NS.acceptedAnswer, `${meaningUuid}:${code}:${index}:${text}`),
       meaningUuid,
       translationUuid: null,
       text,
-      language,
+      language: code,
+      // Derived from the language policy, never passed in by a caller, so no import
+      // path can smuggle in a scoreable Arabic answer.
+      scoreable: isScoreable(code) ? 1 : 0,
       ...metaFields(now)
     });
   });

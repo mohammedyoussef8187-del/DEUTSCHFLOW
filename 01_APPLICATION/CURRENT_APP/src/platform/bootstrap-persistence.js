@@ -15,9 +15,46 @@
  */
 
 import { runFirstLaunchMigration } from "../migration/first-launch-controller.js";
+
 import {
   STORAGE_INDEXEDDB, STORAGE_SQLITE, detectNativePlatform, selectPersistenceBackend
 } from "./storage-selection.js";
+
+/*
+ * Gate status for the canonical SQLite model.
+ *
+ * The iOS Simulator gate PASSED on commit 16807f9: the native SQLite executor and the
+ * real first-launch migration were exercised on a simulator, including persistence
+ * across a process termination, exact SRS preservation, quarantine of an orphan card,
+ * and a sabotaged verification correctly refusing to switch.
+ *
+ * That makes the canonical model ACTIVE FOR DEVELOPMENT: new features (multilingual
+ * content, grammar, lessons) are built against it rather than against the legacy
+ * IndexedDB shape.
+ *
+ * It does NOT switch any learner onto it. `nativeStorageEnabled` still defaults to
+ * false below, and IndexedDB remains the recovery source, until the physical
+ * iPhone/iPad gate passes. A simulator shares the SQLite implementation but not the
+ * device's storage pressure, backup/restore behaviour, or OS eviction, so it cannot
+ * stand in for the release gate.
+ */
+export const CANONICAL_MODEL_STATUS = Object.freeze({
+  simulatorGate: "passed",
+  simulatorGateCommit: "16807f9",
+  developmentActive: true,
+  learnerSwitchEnabled: false,
+  physicalDeviceGate: "deferred-release-gate"
+});
+
+/** True when features may be built against the canonical model. */
+export function isCanonicalModelActiveForDevelopment() {
+  return CANONICAL_MODEL_STATUS.developmentActive === true;
+}
+
+/** True only when real learners are served from native SQLite. Still false. */
+export function isLearnerStorageSwitched() {
+  return CANONICAL_MODEL_STATUS.learnerSwitchEnabled === true;
+}
 
 /**
  * @param {object} options

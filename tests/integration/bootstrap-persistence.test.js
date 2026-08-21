@@ -183,3 +183,34 @@ describe("automatic fallback to IndexedDB", () => {
     expect(cards.find(c => c.key === "1:recall").ease).toBe(2.5);
   });
 });
+
+describe("canonical model gate status", () => {
+  it("records the simulator gate as passed and names the commit", async () => {
+    const { CANONICAL_MODEL_STATUS } = await import(
+      "../../01_APPLICATION/CURRENT_APP/src/platform/bootstrap-persistence.js");
+    expect(CANONICAL_MODEL_STATUS.simulatorGate).toBe("passed");
+    expect(CANONICAL_MODEL_STATUS.simulatorGateCommit).toBe("16807f9");
+  });
+
+  it("activates the canonical model for development only", async () => {
+    const { isCanonicalModelActiveForDevelopment, isLearnerStorageSwitched } = await import(
+      "../../01_APPLICATION/CURRENT_APP/src/platform/bootstrap-persistence.js");
+    expect(isCanonicalModelActiveForDevelopment()).toBe(true);
+    // The learner-facing switch stays off until the physical-device gate passes.
+    expect(isLearnerStorageSwitched()).toBe(false);
+  });
+
+  it("keeps physical-device validation as a deferred release gate", async () => {
+    const { CANONICAL_MODEL_STATUS } = await import(
+      "../../01_APPLICATION/CURRENT_APP/src/platform/bootstrap-persistence.js");
+    expect(CANONICAL_MODEL_STATUS.physicalDeviceGate).toBe("deferred-release-gate");
+    expect(CANONICAL_MODEL_STATUS.learnerSwitchEnabled).toBe(false);
+  });
+
+  it("still resolves real learners to IndexedDB despite development activation", async () => {
+    const h = harness();
+    const result = await bootstrapPersistence({ environment: NATIVE, ...h, now: NOW });
+    expect(result.backend).toBe("indexeddb");
+    expect(h.state.switched).toBeNull();
+  });
+});

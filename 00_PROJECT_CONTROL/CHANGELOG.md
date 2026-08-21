@@ -5,6 +5,14 @@ All notable changes to the **DeutschFlow** project will be documented in this fi
 ## [Unreleased]
 
 ### Added
+*   Gate 5 (iOS Simulator) PASSED on commit `16807f9`; physical iPhone/iPad validation deferred as a release gate.
+*   Activated the canonical SQLite model for DEVELOPMENT only. `CANONICAL_MODEL_STATUS` records the gate state in code; `nativeStorageEnabled` still defaults to false, no learner is switched, and the IndexedDB rollback path is unchanged.
+*   Feature A — English + Arabic multilingual content model:
+    *   Canonical schema v2 adds the `translations` table for English and `accepted_answers.scoreable`.
+    *   `src/content/languages.js` separates educational weight (German, English, Arabic) from scoring eligibility (German and English only).
+    *   Arabic is preserved as first-class educational content but can never decide correctness, enforced at migration, at assembly, and by a throwing guard.
+    *   `content-service.js` assembles English and Arabic as peers and reports coverage without inventing English wording the legacy model never had.
+    *   Expanded the passing regression suite from 277 to 300 tests.
 *   Completed all work that does not depend on the native SQLite switch (option (c); no learner data modified, SRS untouched):
     *   Finished the study screen migration with the sentence-order builder; migrated settings rows and the statistics charts. 15 Lit components in total.
     *   Indexed cards by word instead of rescanning per word: 14.9ms to 1.8ms on the real 2820-word deck with identical results. Not cached across renders, since state.cards is mutated in place.

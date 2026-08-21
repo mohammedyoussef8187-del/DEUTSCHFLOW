@@ -18,7 +18,8 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
 *   **study presentation Git commit:** `c7a58ba` (feat: migrate the study teaching panel to Lit)
 *   **UI migration complete Git commit:** `60f2526` (feat: migrate the multiple-choice answers to Lit)
 *   **option (c) work Git commit:** `e872810` (fix: make the PWA actually work offline)
-*   **Last Update Timestamp:** 2026-08-21T07:10:00+03:00
+*   **Gate 5 simulator PASSED commit:** `16807f9` (validated in Codemagic)
+*   **Last Update Timestamp:** 2026-08-21T12:10:00+03:00
 
 ## Current Context
 *   **Current Phase:** PHASE 4 — MIGRATION MAPPING + SQLITE PARITY VALIDATION
@@ -47,6 +48,28 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
 *   **Remaining study migration order:** session-end summary next (read-only), then the answer input, reveal, hint, and rating controls LAST, one at a time, re-running the study interaction suite after each.
 
 
+
+## Gate 5 — iOS Simulator: PASSED (commit `16807f9`)
+*   Validated in Codemagic on an iOS Simulator, unsigned, with no Apple Developer account:
+    *   Capacitor 8 SPM project generated, `CapacitorCommunitySqlite` linked into the app target, Xcode project compiled.
+    *   Native SQLite write/read-back, exact value preservation, PRAGMA round-trip, transaction rollback leaving no partial rows.
+    *   Data survived a real process termination and relaunch, proven by a second launch re-reading it — not a same-session read-back.
+    *   Real first-launch migration ran the full BACKUP → READ → VALIDATE → TRANSFORM → WRITE → VERIFY → SWITCH sequence in order, with the source left intact, SRS fields preserved exactly, the orphan card quarantined with its lapses and ease, and a sabotaged verification correctly refusing to switch.
+    *   Database confirmed at the configured `Library/CapacitorDatabase` location; the production `deutschflowSQLite.db` was never created.
+*   **Physical iPhone/iPad validation: DEFERRED — a RELEASE gate, not a failure.** A simulator shares the SQLite implementation but not real device storage pressure, iCloud/iTunes backup-restore behaviour, or OS eviction under low storage. Those must be validated on hardware before any learner is switched.
+
+## Canonical Model: ACTIVE FOR DEVELOPMENT (learner switch still OFF)
+*   `CANONICAL_MODEL_STATUS` in `src/platform/bootstrap-persistence.js` records the gate state in code: `developmentActive: true`, `learnerSwitchEnabled: false`.
+*   New features are built against the canonical model. **No learner is served from SQLite**: `nativeStorageEnabled` still defaults to false, IndexedDB remains the recovery source, and the CI guard asserting that still runs before any native work.
+*   Rollback path preserved unchanged: any migration failure falls back to IndexedDB automatically.
+
+## Feature A — English + Arabic Multilingual Content Model (IMPLEMENTED)
+*   **Canonical schema v2**: adds the `translations` table (English, with the same content-lifecycle columns as Arabic meanings) and `accepted_answers.scoreable`. v1 was never activated for learners, so v2 is the first version any learner database will see.
+*   **`src/content/languages.js`** is the single source of truth, deliberately separating two questions that are easy to conflate: which languages *teach* (German, English, Arabic) and which may *decide correctness* (German and English only).
+*   **Arabic never scores.** Enforced in three places: the migration derives `scoreable` from the policy rather than accepting it from a caller; the content service re-checks the policy when partitioning answers, so a bad import or hand-edited row marked `scoreable=1` still cannot grade; and `assertScoreable()` throws rather than silently degrading.
+*   **English and Arabic are peers** in the assembled view — neither nested inside the other, and an entry with only one support language is reported as complete in that language rather than broken.
+*   **No English content invented.** The legacy model stores none, so `translations` is empty after a legacy migration by design; a coverage report shows where translation work is genuinely needed.
+*   Existing runtime evaluator untouched: SRS scheduler, scoring semantics, and learner data unchanged.
 
 ## Option (c) Work — Everything Not Requiring the Native SQLite Switch
 Decision recorded: build the richer canonical model ONCE, after Gate 5. The legacy IndexedDB schema is NOT extended with grammar/lessons/CEFR/English content.

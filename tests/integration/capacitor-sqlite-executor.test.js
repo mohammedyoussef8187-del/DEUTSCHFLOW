@@ -14,6 +14,7 @@ import {
   createCapacitorSqliteExecutor, openCapacitorSqlite, DATABASE_NAME
 } from "../../01_APPLICATION/CURRENT_APP/src/platform/sqlite/capacitor-executor.js";
 import { createSqliteAdapter } from "../../01_APPLICATION/CURRENT_APP/src/platform/sqlite/adapter.js";
+import { SCHEMA_VERSION } from "../../01_APPLICATION/CURRENT_APP/src/platform/sqlite/schema.js";
 import { createCanonicalRepositories } from "../../01_APPLICATION/CURRENT_APP/src/data/canonical-repositories.js";
 import { migrateToCanonical } from "../../01_APPLICATION/CURRENT_APP/src/migration/canonical-migration.js";
 import { createFakeSQLiteConnection } from "../support/fake-capacitor-sqlite.js";
@@ -108,7 +109,7 @@ describe("canonical persistence over the Capacitor executor", () => {
     const { executor } = await openFake();
     const adapter = createSqliteAdapter(executor);
     await adapter.initializeSchema();
-    expect(Number(await adapter.schemaVersion())).toBe(1);
+    expect(Number(await adapter.schemaVersion())).toBe(SCHEMA_VERSION);
 
     const { dataset } = migrateToCanonical(fixture.clean, { now: NOW });
     await adapter.importCanonical(dataset);

@@ -3,6 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { createSqliteAdapter } from "../../01_APPLICATION/CURRENT_APP/src/platform/sqlite/adapter.js";
+import { SCHEMA_VERSION } from "../../01_APPLICATION/CURRENT_APP/src/platform/sqlite/schema.js";
 import { createCanonicalRepositories } from "../../01_APPLICATION/CURRENT_APP/src/data/canonical-repositories.js";
 import { createNodeSqliteExecutor } from "../support/sqlite-node-executor.js";
 import { migrateToCanonical } from "../../01_APPLICATION/CURRENT_APP/src/migration/canonical-migration.js";
@@ -28,15 +29,15 @@ async function freshAdapter(location = ":memory:") {
 }
 
 describe("SQLite canonical persistence adapter", () => {
-  it("creates the schema and records schema version 1", async () => {
+  it("creates the schema and records the current schema version", async () => {
     const { adapter, executor } = await freshAdapter();
-    expect(await adapter.schemaVersion()).toBe(1);
+    expect(await adapter.schemaVersion()).toBe(SCHEMA_VERSION);
     const tables = await executor.all(
       "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name", []
     );
     expect(tables.map(t => t.name)).toEqual([
       "accepted_answers", "learner_profiles", "migration_quarantine", "review_cards",
-      "review_events", "settings", "vocabulary_items", "vocabulary_meanings"
+      "review_events", "settings", "translations", "vocabulary_items", "vocabulary_meanings"
     ]);
   });
 
@@ -92,7 +93,7 @@ describe("SQLite canonical persistence adapter", () => {
     const repos = createCanonicalRepositories(adapter);
     const { dataset } = migrateToCanonical(fixture.clean, { now: 1771600000000 });
     await repos.lifecycle.importCanonical(dataset);
-    expect(await repos.lifecycle.schemaVersion()).toBe(1);
+    expect(await repos.lifecycle.schemaVersion()).toBe(SCHEMA_VERSION);
     expect(await repos.cards.all()).toHaveLength(4);
     expect((await repos.vocabulary.all()).map(v => v.legacyId).sort()).toEqual(["1", "2", "3", "4"]);
   });
