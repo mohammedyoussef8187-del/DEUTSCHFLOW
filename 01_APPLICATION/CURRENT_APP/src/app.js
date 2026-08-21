@@ -16,6 +16,7 @@ import "./ui/components/df-answer-feedback.js";
 import "./ui/components/df-question-prompt.js";
 import "./ui/components/df-word-row.js";
 import "./ui/components/df-choice-list.js";
+import "./ui/components/df-order-builder.js";
 
 (function(){
   "use strict";
@@ -752,7 +753,7 @@ function renderQuestion(state,q){
   }
   function renderOrder(state,q,result){
     const o=state.orderState&&state.orderState.questionId===q.entry.id?state.orderState:{questionId:q.entry.id,selected:[],pool:q.tokens.slice()};state.orderState=o;
-    return `<div class="token-area">${o.selected.length?o.selected.map((t,i)=>`<button class="token" data-action="order-undo-at" data-index="${i}" ${result?'disabled':''}>${DF.esc(t)}</button>`).join(""):'<span style="color:var(--muted)">اختر الكلمات بالترتيب</span>'}</div><div class="token-bank">${o.pool.map((t,i)=>`<button class="token" data-action="order-pick" data-index="${i}" ${result?'disabled':''}>${DF.esc(t)}</button>`).join("")}</div><div class="answer-actions"><button class="ghost-btn" data-action="order-reset" ${result||!o.selected.length?'disabled':''}>إعادة</button><button class="primary-btn" data-action="order-submit" ${result||o.pool.length?'disabled':''}>تحقق</button></div>${result?'':'<button class="reveal-btn" data-action="reveal-answer">لا أعرفها — أظهر الإجابة</button>'}`;
+    return `<df-order-builder selected="${DF.esc(JSON.stringify(o.selected))}" pool="${DF.esc(JSON.stringify(o.pool))}" ${result?"hasresult":""}></df-order-builder>`;
   }
 function renderFeedback(state,q,r){const a=r.answer,lang=q.skill==="recognition"?"ar":"de";return `<df-answer-feedback ${a.isCorrect?"correct":""} note="${DF.esc(a.note)}" correctanswer="${DF.esc(a.correctAnswer||"")}" useranswer="${DF.esc(a.userAnswer||"")}" lang="${lang}" suggested="${r.suggestedRating||0}"></df-answer-feedback>`;}
   function renderSessionEnd(state,s){const acc=DF.Learning.sessionAccuracy(s);return `<main class="study-layout"><section class="session-end"><div class="end-icon">✓</div><h1>اكتملت الجلسة</h1><p>تم فصل الكلمات الأساسية عن المحاولات والإعادات، لذلك الأرقام أدناه لا تتداخل.</p><div class="end-grid">${metricTile(s.initialCards,"عناصر أساسية")}${metricTile(s.attempts,"إجمالي المحاولات")}${metricTile(acc.first==null?"—":acc.first+"%","دقة أول محاولة")}${metricTile(acc.attempts==null?"—":acc.attempts+"%","دقة كل المحاولات")}${metricTile(s.reveals,"عرض إجابة")}${metricTile(s.hints,"تلميحات")}${metricTile(s.retriesCompleted,"إعادات مكتملة")}${metricTile("+"+s.xp,"نقطة خبرة")}</div><div class="grid grid-2"><button class="ghost-btn large" data-action="session-home">العودة للرئيسية</button><button class="primary-btn large" data-action="start-session" data-mode="${s.mode}">جلسة أخرى</button></div></section></main>`;}
