@@ -53,6 +53,12 @@ export function createCanonicalRepositories(adapter) {
     lessonProgress: readOnly("lessonProgress"),
     sectionProgress: readOnly("sectionProgress"),
     cefrProgress: readOnly("cefrProgress"),
+    errorCategories: readOnly("errorCategories"),
+    errorCategoryTexts: readOnly("errorCategoryTexts"),
+    errorRemediations: readOnly("errorRemediations"),
+    errorEvents: readOnly("errorEvents"),
+    errorEventCategories: readOnly("errorEventCategories"),
+    errorPatterns: readOnly("errorPatterns"),
     cards: readOnly("reviewCards"),
     events: readOnly("reviewEvents")
   });

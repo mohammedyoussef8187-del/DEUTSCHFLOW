@@ -48,13 +48,30 @@
  *      column per kind. Listening and pronunciation can therefore be added later as new
  *      content_type values with no schema change.
  *
+ * Version 7 adds error learning. Two groups again, for the same reason:
+ *   - AUTHORED taxonomy (error_categories, error_category_texts, error_remediations)
+ *     is shareable content with no profile attached.
+ *   - RECORDED mistakes (error_events, error_event_categories, error_patterns) belong
+ *     to one learner and are keyed by profile_uuid.
+ *
+ * error_events RECORD what the deterministic evaluator already decided; they never
+ * re-decide it. `scored` says whether that answer counted toward SRS, so an Arabic
+ * answer is recorded with scored = 0: it can be learned from and shown back, but it
+ * cannot re-enter correctness through the back door.
+ *
+ * error_event_categories carries a `source` of 'deterministic' or 'advisory'. AI may
+ * only ever write 'advisory' rows. Nothing that drives practice reads them.
+ *
+ * Nothing in this group writes to review_cards. Error learning suggests what to
+ * practise; it never reschedules a card.
+ *
  * Version 1 was never activated for learners (nativeStorageEnabled stayed false through
  * Gate 5), so no deployed v1 database exists and v2 is the first version any learner
  * database will see. A forward migration step becomes necessary only once a learner
  * database has actually been written.
  */
 
-export const SCHEMA_VERSION = 6;
+export const SCHEMA_VERSION = 7;
 
 export const SCHEMA_STATEMENTS = [
   `CREATE TABLE IF NOT EXISTS learner_profiles (
@@ -667,6 +684,143 @@ export const SCHEMA_STATEMENTS = [
     UNIQUE(profile_uuid, cefr_level)
   )`,
 
+  /* ------------------------------------------------ error learning --------
+   * Authored taxonomy first: what kinds of mistake exist, described in every
+   * educational language. Shareable content, so no profile_uuid appears here.
+   */
+
+  `CREATE TABLE IF NOT EXISTS error_categories (
+    uuid TEXT PRIMARY KEY,
+    slug TEXT NOT NULL UNIQUE,
+    scope TEXT NOT NULL DEFAULT 'usage',
+    ordering INTEGER NOT NULL DEFAULT 0,
+    content_status TEXT NOT NULL DEFAULT 'draft',
+    content_version INTEGER NOT NULL DEFAULT 1,
+    source_reference TEXT,
+    source_type TEXT,
+    verified_at INTEGER,
+    verified_by TEXT,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    revision INTEGER NOT NULL DEFAULT 1,
+    deleted INTEGER NOT NULL DEFAULT 0
+  )`,
+
+  /* Name, explanation and advice per language. Language is a ROW, as everywhere else. */
+  `CREATE TABLE IF NOT EXISTS error_category_texts (
+    uuid TEXT PRIMARY KEY,
+    category_uuid TEXT NOT NULL,
+    language TEXT NOT NULL,
+    kind TEXT NOT NULL,
+    text TEXT NOT NULL,
+    content_status TEXT NOT NULL DEFAULT 'draft',
+    content_version INTEGER NOT NULL DEFAULT 1,
+    source_reference TEXT,
+    source_type TEXT,
+    verified_at INTEGER,
+    verified_by TEXT,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    revision INTEGER NOT NULL DEFAULT 1,
+    deleted INTEGER NOT NULL DEFAULT 0,
+    UNIQUE(category_uuid, language, kind),
+    FOREIGN KEY (category_uuid) REFERENCES error_categories(uuid) ON DELETE CASCADE
+  )`,
+
+  /*
+   * What to study to fix a category, referenced as (content_type, content_uuid) so a
+   * grammar rule, a sentence, an exercise or a whole lesson can all be remediation.
+   */
+  `CREATE TABLE IF NOT EXISTS error_remediations (
+    uuid TEXT PRIMARY KEY,
+    category_uuid TEXT NOT NULL,
+    content_type TEXT NOT NULL,
+    content_uuid TEXT NOT NULL,
+    ordering INTEGER NOT NULL DEFAULT 0,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    revision INTEGER NOT NULL DEFAULT 1,
+    deleted INTEGER NOT NULL DEFAULT 0,
+    UNIQUE(category_uuid, content_type, content_uuid),
+    FOREIGN KEY (category_uuid) REFERENCES error_categories(uuid) ON DELETE CASCADE
+  )`,
+
+  /* ------------------------------------------------ recorded mistakes ------
+   * One row per mistake the learner actually made. `evaluation_type` is copied from
+   * the deterministic evaluator's own verdict rather than recomputed, and `scored`
+   * records whether that verdict was allowed to affect the card. An unscoreable
+   * answer language is stored with scored = 0 and stays advisory forever.
+   */
+
+  `CREATE TABLE IF NOT EXISTS error_events (
+    uuid TEXT PRIMARY KEY,
+    profile_uuid TEXT NOT NULL,
+    occurred_at INTEGER NOT NULL,
+    session_uuid TEXT,
+    skill TEXT NOT NULL DEFAULT '',
+    answer_language TEXT NOT NULL DEFAULT 'de',
+    content_type TEXT NOT NULL DEFAULT 'vocabulary',
+    content_uuid TEXT NOT NULL DEFAULT '',
+    evaluation_type TEXT NOT NULL,
+    scored INTEGER NOT NULL DEFAULT 0,
+    expected_answer TEXT NOT NULL DEFAULT '',
+    user_answer TEXT NOT NULL DEFAULT '',
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    revision INTEGER NOT NULL DEFAULT 1,
+    deleted INTEGER NOT NULL DEFAULT 0
+  )`,
+
+  `CREATE INDEX IF NOT EXISTS idx_error_events_profile ON error_events (profile_uuid, occurred_at)`,
+
+  `CREATE INDEX IF NOT EXISTS idx_error_events_content ON error_events (content_type, content_uuid)`,
+
+  /*
+   * Classification of an event. `source` is 'deterministic' when it follows from the
+   * evaluator's verdict, or 'advisory' when it is a suggestion (including AI). Both
+   * are stored so the learner can see both; only deterministic rows drive practice.
+   */
+  `CREATE TABLE IF NOT EXISTS error_event_categories (
+    uuid TEXT PRIMARY KEY,
+    event_uuid TEXT NOT NULL,
+    category_uuid TEXT NOT NULL,
+    source TEXT NOT NULL DEFAULT 'deterministic',
+    confidence REAL NOT NULL DEFAULT 1.0,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    revision INTEGER NOT NULL DEFAULT 1,
+    deleted INTEGER NOT NULL DEFAULT 0,
+    UNIQUE(event_uuid, category_uuid, source),
+    FOREIGN KEY (event_uuid) REFERENCES error_events(uuid) ON DELETE CASCADE,
+    FOREIGN KEY (category_uuid) REFERENCES error_categories(uuid) ON DELETE CASCADE
+  )`,
+
+  /*
+   * A recurring mistake, aggregated per learner. Entirely derivable from the events
+   * above, and stored only so a long history does not have to be replayed on every
+   * open. `status` is the learner-visible state: active, improving or resolved.
+   */
+  `CREATE TABLE IF NOT EXISTS error_patterns (
+    uuid TEXT PRIMARY KEY,
+    profile_uuid TEXT NOT NULL,
+    category_uuid TEXT NOT NULL,
+    content_type TEXT NOT NULL DEFAULT '',
+    content_uuid TEXT NOT NULL DEFAULT '',
+    occurrences INTEGER NOT NULL DEFAULT 0,
+    first_seen_at INTEGER,
+    last_seen_at INTEGER,
+    resolved_at INTEGER,
+    status TEXT NOT NULL DEFAULT 'active',
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    revision INTEGER NOT NULL DEFAULT 1,
+    deleted INTEGER NOT NULL DEFAULT 0,
+    UNIQUE(profile_uuid, category_uuid, content_type, content_uuid),
+    FOREIGN KEY (category_uuid) REFERENCES error_categories(uuid) ON DELETE CASCADE
+  )`,
+
+  `CREATE INDEX IF NOT EXISTS idx_error_patterns_profile ON error_patterns (profile_uuid, status)`,
+
   `CREATE TABLE IF NOT EXISTS review_cards (
     uuid TEXT PRIMARY KEY,
     legacy_key TEXT,
@@ -1123,6 +1277,78 @@ export const TABLE_SPECS = [
     columns: [
       ["uuid", "uuid"], ["profile_uuid", "profileUuid"], ["cefr_level", "cefrLevel"],
       ["status", "status"], ["started_at", "startedAt"], ["completed_at", "completedAt"],
+      ["created_at", "createdAt"], ["updated_at", "updatedAt"],
+      ["revision", "revision"], ["deleted", "deleted"]
+    ]
+  },
+  {
+    entity: "errorCategories",
+    table: "error_categories",
+    columns: [
+      ["uuid", "uuid"], ["slug", "slug"], ["scope", "scope"], ["ordering", "ordering"],
+      ["content_status", "contentStatus"], ["content_version", "contentVersion"],
+      ["source_reference", "sourceReference"], ["source_type", "sourceType"],
+      ["verified_at", "verifiedAt"], ["verified_by", "verifiedBy"],
+      ["created_at", "createdAt"], ["updated_at", "updatedAt"],
+      ["revision", "revision"], ["deleted", "deleted"]
+    ]
+  },
+  {
+    entity: "errorCategoryTexts",
+    table: "error_category_texts",
+    columns: [
+      ["uuid", "uuid"], ["category_uuid", "categoryUuid"], ["language", "language"],
+      ["kind", "kind"], ["text", "text"],
+      ["content_status", "contentStatus"], ["content_version", "contentVersion"],
+      ["source_reference", "sourceReference"], ["source_type", "sourceType"],
+      ["verified_at", "verifiedAt"], ["verified_by", "verifiedBy"],
+      ["created_at", "createdAt"], ["updated_at", "updatedAt"],
+      ["revision", "revision"], ["deleted", "deleted"]
+    ]
+  },
+  {
+    entity: "errorRemediations",
+    table: "error_remediations",
+    columns: [
+      ["uuid", "uuid"], ["category_uuid", "categoryUuid"],
+      ["content_type", "contentType"], ["content_uuid", "contentUuid"],
+      ["ordering", "ordering"],
+      ["created_at", "createdAt"], ["updated_at", "updatedAt"],
+      ["revision", "revision"], ["deleted", "deleted"]
+    ]
+  },
+  {
+    entity: "errorEvents",
+    table: "error_events",
+    columns: [
+      ["uuid", "uuid"], ["profile_uuid", "profileUuid"], ["occurred_at", "occurredAt"],
+      ["session_uuid", "sessionUuid"], ["skill", "skill"],
+      ["answer_language", "answerLanguage"],
+      ["content_type", "contentType"], ["content_uuid", "contentUuid"],
+      ["evaluation_type", "evaluationType"], ["scored", "scored"],
+      ["expected_answer", "expectedAnswer"], ["user_answer", "userAnswer"],
+      ["created_at", "createdAt"], ["updated_at", "updatedAt"],
+      ["revision", "revision"], ["deleted", "deleted"]
+    ]
+  },
+  {
+    entity: "errorEventCategories",
+    table: "error_event_categories",
+    columns: [
+      ["uuid", "uuid"], ["event_uuid", "eventUuid"], ["category_uuid", "categoryUuid"],
+      ["source", "source"], ["confidence", "confidence"],
+      ["created_at", "createdAt"], ["updated_at", "updatedAt"],
+      ["revision", "revision"], ["deleted", "deleted"]
+    ]
+  },
+  {
+    entity: "errorPatterns",
+    table: "error_patterns",
+    columns: [
+      ["uuid", "uuid"], ["profile_uuid", "profileUuid"], ["category_uuid", "categoryUuid"],
+      ["content_type", "contentType"], ["content_uuid", "contentUuid"],
+      ["occurrences", "occurrences"], ["first_seen_at", "firstSeenAt"],
+      ["last_seen_at", "lastSeenAt"], ["resolved_at", "resolvedAt"], ["status", "status"],
       ["created_at", "createdAt"], ["updated_at", "updatedAt"],
       ["revision", "revision"], ["deleted", "deleted"]
     ]

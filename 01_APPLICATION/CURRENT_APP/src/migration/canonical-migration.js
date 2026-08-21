@@ -140,6 +140,17 @@ export function migrateToCanonical(snapshot = {}, options = {}) {
     lessonProgress: [],
     sectionProgress: [],
     cefrProgress: [],
+    /*
+     * The error taxonomy is authored and mistakes are recorded as they happen. The
+     * legacy model stored neither, and a past attempt cannot be reclassified after
+     * the fact without guessing, so nothing is back-filled here.
+     */
+    errorCategories: [],
+    errorCategoryTexts: [],
+    errorRemediations: [],
+    errorEvents: [],
+    errorEventCategories: [],
+    errorPatterns: [],
     reviewCards: [],
     reviewEvents: [],
     quarantine: []

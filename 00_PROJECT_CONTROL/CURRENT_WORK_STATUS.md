@@ -19,7 +19,7 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
 *   **UI migration complete Git commit:** `60f2526` (feat: migrate the multiple-choice answers to Lit)
 *   **option (c) work Git commit:** `e872810` (fix: make the PWA actually work offline)
 *   **Gate 5 simulator PASSED commit:** `16807f9` (validated in Codemagic)
-*   **Last Update Timestamp:** 2026-08-21T16:25:00+03:00
+*   **Last Update Timestamp:** 2026-08-21T16:45:00+03:00
 
 ## Current Context
 *   **Current Phase:** PHASE 4 — MIGRATION MAPPING + SQLITE PARITY VALIDATION
@@ -58,6 +58,19 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
 *   **No history touched:** no attempt, card, due date, ease, lapse, mastery or streak modified or recomputed. A test migrates a recognition card built up under the old Arabic-scored rules and asserts all 14 SRS fields survive field-for-field, including through SQLite.
 *   **Verification limit:** the in-app recognition flow was not reachable in a browser from a fresh seeded profile, because recognition cards unlock with future due dates. Covered by tests of the runtime wiring, the advisory evaluator, and the feedback component instead of a live session.
 
+## Feature F — Error Learning (IMPLEMENTED)
+*   **Canonical schema v7**, split the same way as Feature E. **Authored taxonomy:** `error_categories` (slug, scope: orthography/morphology/syntax/lexis/usage), `error_category_texts` (name/explanation/advice per language), `error_remediations` (what to study, as `(content_type, content_uuid)`). **Recorded mistakes:** `error_events`, `error_event_categories`, `error_patterns`. 41 tables total.
+*   **The service never decides correctness.** It reads the deterministic evaluator's verdict and classifies it. Re-deriving correctness here would create a second grader that could disagree with the first.
+*   **A classification is deterministic only if the language could score it.** Arabic answers are evaluated advisorily (the evaluator returns `isCorrect: null` on purpose), so an Arabic mistake is recorded and shown but classified with `source: "advisory"` and excluded from patterns, from the practice queue, and from every count that drives practice. Arabic can teach; it can never grade, and it can never decide what the learner is made to drill.
+*   **AI occupies exactly that same advisory tier.** It may add a category with a confidence (clamped to 0..1); nothing that drives practice reads advisory rows.
+*   **Error learning suggests, it does not schedule.** Nothing in the module reads or writes `review_cards`; a test greps for SRS identifiers and asserts they are absent, and another asserts a card object is unchanged across classify → record → summarize → practice. Every practice suggestion carries `affectsScheduling: false` **in the data**, not just in the docs.
+*   **Near misses are separated from mistakes.** A capitalization or punctuation difference was ACCEPTED as correct, so it is recorded as teachable (`isNearMiss`) and never counted or displayed as an error.
+*   **Event identity is deterministic** over (profile, time, content, skill, answer), so replaying a session cannot duplicate an event.
+*   **`error_patterns` is a cache, not the truth.** `aggregatePatterns()` rebuilds it from raw events, so a corrupt or missing aggregate is recoverable.
+*   **Migration records no errors.** All six tables migrate empty; a past wrong attempt is not reclassified after the fact, because that would be guessing. SRS fields still migrate intact.
+*   **Minimum UI:** `<df-error-insights>` renders patterns, counts, status, authored advice, the advisory-only count, and the suggestion list; it dispatches `practice-select` rather than starting anything.
+*   **Not yet wired into the running app, deliberately:** recording live error events needs the canonical store to be the learner store. The legacy IndexedDB schema must NOT be extended with the richer model, so the recorders stay pure builders until the native switch.
+*   **Suite 453 → 509.**
 ## Feature E — Lessons / Courses / CEFR Structure (IMPLEMENTED)
 *   **Canonical schema v6** adds two deliberately separate groups. **Content:** `courses` (slug, CEFR level, ordering, book source metadata), `course_levels`, `course_units`, `lessons`, `lesson_sections` (kind: intro/vocabulary/grammar/reading/practice/review), `lesson_items`, `lesson_prerequisites`, `curriculum_texts`. **Progress:** `course_progress`, `lesson_progress`, `section_progress`, `cefr_progress`. 35 tables total.
 *   **Content and progress never share a table.** A lesson row knows nothing about who studied it; a progress row carries a `profile_uuid` and points at content by uuid. This is what keeps a course shareable and a learner's history private and per-profile.
