@@ -43,7 +43,13 @@ const MEANINGFUL = Object.freeze([
   "german", "text", "slug", "arabicText", "englishText", "title", "cefrLevel", "level",
   "activityType", "exerciseType", "answerLanguage", "isExpected", "scoreable", "label",
   "ordering", "contentType", "contentUuid", "sectionKind", "language", "kind",
-  "sourceTitle", "sourcePublisher", "sourceReference"
+  "sourceTitle", "sourcePublisher", "sourceReference",
+  /* Structural links and source-asset identity: a changed parent, path, digest or
+     measured duration is a real content change, not bookkeeping. */
+  "courseUuid", "courseLevelUuid", "unitUuid", "ownerType", "ownerUuid",
+  "sourceEdition", "sourceIsbn", "sourceType", "contentVersion",
+  "availability", "localPath", "sourcePath", "remoteUrl", "mimeType",
+  "byteSize", "durationMs", "checksum"
 ]);
 
 export function meaningfulFields(row) {
@@ -88,24 +94,33 @@ export function flattenRows(mapped) {
   push("lessonItems", mapped.course.items);
   push("curriculumTexts", mapped.course.texts);
 
-  for (const entry of mapped.vocabulary) {
+  for (const entry of mapped.vocabulary ?? []) {
     push("vocabularyItems", [entry.item]);
     push("vocabularyMeanings", entry.meanings);
     push("translations", entry.translations);
     push("acceptedAnswers", entry.acceptedAnswers);
   }
-  for (const entry of mapped.sentences) {
+  for (const entry of mapped.sentences ?? []) {
     push("sentences", [entry.sentence]);
     push("sentenceTexts", entry.texts);
   }
-  if (mapped.listening.audio) push("audioAssets", [mapped.listening.audio]);
-  push("listeningItems", [mapped.listening.item]);
-  push("listeningTexts", mapped.listening.texts);
-  push("listeningSpeakers", mapped.listening.speakers);
-  push("listeningSegments", mapped.listening.segments);
-  push("listeningSegmentTexts", mapped.listening.segmentTexts);
+  /* Assets registered in their own right, with no activity built on them. */
+  push("audioAssets", mapped.audioAssets);
 
-  for (const entry of mapped.exercises) {
+  /*
+   * A batch may legitimately have no listening activity: source-only audio whose
+   * lesson placement is unproven is a file, not something to listen to in a lesson.
+   */
+  if (mapped.listening) {
+    if (mapped.listening.audio) push("audioAssets", [mapped.listening.audio]);
+    push("listeningItems", [mapped.listening.item]);
+    push("listeningTexts", mapped.listening.texts);
+    push("listeningSpeakers", mapped.listening.speakers);
+    push("listeningSegments", mapped.listening.segments);
+    push("listeningSegmentTexts", mapped.listening.segmentTexts);
+  }
+
+  for (const entry of mapped.exercises ?? []) {
     push("exercises", [entry.exercise]);
     push("exerciseTexts", entry.texts);
     push("exerciseOptions", entry.options);
@@ -149,9 +164,22 @@ export async function planImport(repositories, mapped) {
  */
 export async function applyImport(repositories, mapped, options = {}) {
   const now = options.now ?? Date.now();
-  const written = { courses: 0, vocabulary: 0, vocabularyReused: 0, sentences: 0, listening: 0, exercises: 0 };
-
   if (!repositories.write) throw new Error("This store is read-only; nothing was imported");
+
+  /*
+   * ONE transaction around the whole batch, not one per aggregate. Each aggregate is
+   * already atomic, but a failure in a later one used to leave earlier ones committed —
+   * a half-imported lesson that reads as a real one. Nesting runs inline (the adapter
+   * tracks depth), so the outermost call owns the single commit and rollback.
+   */
+  return repositories.lifecycle.transaction(() => writeBatch(repositories, mapped, now));
+}
+
+async function writeBatch(repositories, mapped, now) {
+  const written = {
+    courses: 0, audioAssets: 0, vocabulary: 0, vocabularyReused: 0,
+    sentences: 0, listening: 0, exercises: 0
+  };
 
   await repositories.write.content.saveCourse({
     course: mapped.course.course,
@@ -166,7 +194,17 @@ export async function applyImport(repositories, mapped, options = {}) {
   }, { now });
   written.courses = 1;
 
-  for (const entry of mapped.vocabulary) {
+  /*
+   * Source-only assets are registered in their own right. They are upserted rather than
+   * inserted so a re-run refreshes measured metadata without duplicating a file, and
+   * they are written before anything that might reference them.
+   */
+  for (const asset of mapped.audioAssets ?? []) {
+    await repositories.audioAssets.upsert(asset, { now });
+    written.audioAssets += 1;
+  }
+
+  for (const entry of mapped.vocabulary ?? []) {
     /*
      * A word already stored under this course-scoped identity is the same word with the
      * same meaning, so it is NOT rewritten: the row keeps the provenance of the page it
@@ -180,15 +218,17 @@ export async function applyImport(repositories, mapped, options = {}) {
     await repositories.write.content.saveVocabulary(entry, { now });
     written.vocabulary += 1;
   }
-  for (const entry of mapped.sentences) {
+  for (const entry of mapped.sentences ?? []) {
     await repositories.write.content.saveSentence(entry, { now });
     written.sentences += 1;
   }
 
-  await repositories.write.content.saveListening(mapped.listening, { now });
-  written.listening = 1;
+  if (mapped.listening) {
+    await repositories.write.content.saveListening(mapped.listening, { now });
+    written.listening = 1;
+  }
 
-  for (const entry of mapped.exercises) {
+  for (const entry of mapped.exercises ?? []) {
     await repositories.write.content.saveExercise({
       exercise: entry.exercise, texts: entry.texts,
       options: entry.options, targets: entry.targets
@@ -197,12 +237,16 @@ export async function applyImport(repositories, mapped, options = {}) {
   }
 
   // Now that every referenced piece of content exists, hang the lesson items on it.
-  await repositories.write.content.saveCourse({
-    course: mapped.course.course,
-    levels: [], units: [], lessons: [], sections: [],
-    items: mapped.course.items,
-    prerequisites: [], texts: []
-  }, { now });
+  // A slice with no eligible content has no items, and a second write would only
+  // bump the course revision for nothing.
+  if ((mapped.course.items ?? []).length) {
+    await repositories.write.content.saveCourse({
+      course: mapped.course.course,
+      levels: [], units: [], lessons: [], sections: [],
+      items: mapped.course.items,
+      prerequisites: [], texts: []
+    }, { now });
+  }
 
   return written;
 }
@@ -211,19 +255,48 @@ export async function applyImport(repositories, mapped, options = {}) {
  * Prove the import landed: read it back through the SERVICES, the same way a screen
  * would, rather than by counting rows in tables.
  */
-export async function verifyImport(services, mapped, profileUuid = "local") {
+export async function verifyImport(services, mapped, profileUuid = "local", options = {}) {
   const courses = await services.curriculum.courses();
   const course = courses.find(candidate => candidate.uuid === mapped.keys.courseUuid) ?? null;
   const lesson = course
     ? course.units.flatMap(unit => unit.lessons).find(l => l.uuid === mapped.keys.lessonUuid) ?? null
     : null;
 
-  const activities = await services.listening.activities();
-  const activity = activities.find(a => a.uuid === mapped.keys.listeningUuid) ?? null;
+  /* Listening is verified only when the batch claimed one. */
+  const activity = mapped.listening
+    ? (await services.listening.activities())
+        .find(a => a.uuid === mapped.keys.listeningUuid) ?? null
+    : null;
   const allExercises = await services.exercises.all();
   const exerciseUuids = new Set(mapped.exercises.map(entry => entry.exercise.uuid));
   const exercises = allExercises.filter(exercise => exerciseUuids.has(exercise.uuid));
   const progress = course ? await services.curriculum.progressForCourse(course.slug, profileUuid) : null;
+
+  /*
+   * Source-only assets are read back from the repository, not from a service: they are
+   * deliberately not part of any activity, so no service assembles them. Every field
+   * that establishes identity is compared, because a registered asset whose digest or
+   * measured duration drifted is a different file wearing the same name.
+   */
+  const expectedAssets = mapped.audioAssets ?? [];
+  const audioReport = { expected: expectedAssets.length, found: 0, sourceOnly: 0, playable: 0,
+    missingUuids: [], mismatchedUuids: [] };
+
+  if (expectedAssets.length) {
+    const repositories = options.repositories;
+    if (!repositories) throw new TypeError("Verifying audio assets needs the repositories");
+    for (const expected of expectedAssets) {
+      const stored = await repositories.audioAssets.get(expected.uuid);
+      if (!stored) { audioReport.missingUuids.push(expected.uuid); continue; }
+      audioReport.found += 1;
+      if (stored.availability === "source-only" && stored.localPath === "") audioReport.sourceOnly += 1;
+      else audioReport.playable += 1;
+
+      const differs = ["slug", "sourcePath", "checksum", "byteSize", "durationMs", "mimeType"]
+        .some(field => stored[field] !== expected[field]) || stored.remoteUrl != null;
+      if (differs) audioReport.mismatchedUuids.push(expected.uuid);
+    }
+  }
 
   return {
     course: course ? { slug: course.slug, cefrLevel: course.cefrLevel, title: course.title } : null,
@@ -244,7 +317,20 @@ export async function verifyImport(services, mapped, profileUuid = "local") {
     vocabulary: (await services.content.allEntries())
       .filter(entry => entry.uuid && mapped.vocabulary.some(v => v.item.uuid === entry.uuid)).length,
     progress: progress ? { lessonsTotal: progress.lessonsTotal, resume: progress.resume.reason } : null,
+    audioAssets: audioReport,
     // The source has no English, and the assembled content must say so rather than hide it.
-    englishMissing: course ? course.coverage.missing.includes("en") : null
+    englishMissing: course ? course.coverage.missing.includes("en") : null,
+
+    /*
+     * One verdict the caller can commit on. Everything the batch claimed must be
+     * readable back; listening is required only when the batch actually claimed one.
+     */
+    ok: Boolean(course) && Boolean(lesson) &&
+      audioReport.missingUuids.length === 0 &&
+      audioReport.mismatchedUuids.length === 0 &&
+      audioReport.playable === 0 &&
+      audioReport.found === audioReport.expected &&
+      exercises.length === (mapped.exercises ?? []).length &&
+      (!mapped.listening || Boolean(activity))
   };
 }

@@ -1,5 +1,5 @@
 {
-  "generatedAt": 1787340272546,
+  "generatedAt": 1787353756726,
   "applied": true,
   "filesDiscovered": 193,
   "documents": [
@@ -75,8 +75,30 @@
     }
   ],
   "parserStatus": "not-written-no-readable-source",
-  "lessonsDiscovered": 0,
+  "lessonsDiscovered": 1,
   "lessonsImported": 0,
+  "chapter": {
+    "chapter": 2,
+    "validationOk": true,
+    "errors": [],
+    "warnings": 16,
+    "summary": {
+      "chapter": 2,
+      "safeRows": 22,
+      "sourceAssets": 16,
+      "indexedAssets": 189,
+      "exactAudioPageExerciseMappings": 0
+    },
+    "applied": false,
+    "reason": "no-changes",
+    "rows": {
+      "create": 0,
+      "update": 0,
+      "unchanged": 22,
+      "conflicts": 0
+    },
+    "verification": null
+  },
   "lessonsQuarantined": [
     {
       "path": "03_COURSE_CONTENT/NETZWERK_A1/Netzwerk Neu A1 - Kursbuch.pdf",

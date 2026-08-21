@@ -206,18 +206,25 @@ describe("importing the sample", () => {
     expect(plan.conflicts).toEqual([]);
   });
 
-  it("rolls an aggregate back whole when part of it fails", async () => {
+  it("rolls the whole import batch back when a later aggregate fails", async () => {
     const { repositories } = await freshStore();
     const broken = mapSample();
-    // A segment pointing at a listening item that will never exist. The speakers and
-    // texts written before it must not survive either.
+    // A segment pointing at a listening item that will never exist. The listening
+    // aggregate is written well after the course, so this proves the batch is one unit:
+    // the course, vocabulary and sentences written BEFORE it must not survive either.
     broken.listening.segments[0].itemUuid = "does-not-exist";
 
     await expect(applyImport(repositories, broken, { now: NOW })).rejects.toThrow();
+
     expect(await repositories.listeningItems.count()).toBe(0);
     expect(await repositories.listeningSpeakers.count()).toBe(0);
     expect(await repositories.listeningSegments.count()).toBe(0);
     expect(await repositories.listeningTexts.count()).toBe(0);
+    // Earlier aggregates roll back with it; a half-imported lesson reads as a real one.
+    expect(await repositories.courses.count()).toBe(0);
+    expect(await repositories.lessons.count()).toBe(0);
+    expect(await repositories.vocabulary.count()).toBe(0);
+    expect(await repositories.sentences.count()).toBe(0);
   });
 
   it("refuses to import into a read-only store", async () => {

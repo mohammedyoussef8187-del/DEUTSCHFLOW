@@ -19,7 +19,13 @@ import {
 import {
   audioMappingReport, buildNetzwerkAudioAssets
 } from "../../tools/intake/netzwerk-audio.js";
-import { planNetzwerk, registerAudio } from "../../tools/intake/run-netzwerk.mjs";
+import {
+  planNetzwerk, registerAudio, runNetzwerkChapter
+} from "../../tools/intake/run-netzwerk.mjs";
+import { buildNetzwerkChapter } from "../../tools/intake/map-netzwerk.js";
+import { verifyImport } from "../../tools/intake/import.js";
+import { createServices } from "../../01_APPLICATION/CURRENT_APP/src/runtime/composition-root.js";
+import { migrateToCanonical } from "../../01_APPLICATION/CURRENT_APP/src/migration/canonical-migration.js";
 import { createSqliteAdapter } from "../../01_APPLICATION/CURRENT_APP/src/platform/sqlite/adapter.js";
 import { createCanonicalRepositories } from "../../01_APPLICATION/CURRENT_APP/src/data/canonical-repositories.js";
 import { createNodeSqliteExecutor } from "../support/sqlite-node-executor.js";
@@ -28,6 +34,8 @@ import { isPlayableOffline } from "../../01_APPLICATION/CURRENT_APP/src/services
 const NOW = 1775000000000;
 const INVENTORY = JSON.parse(fs.readFileSync(
   path.resolve(process.cwd(), "tools/intake/artifacts/netzwerk-inventory.json"), "utf8"));
+const MIGRATION_FIXTURE = JSON.parse(fs.readFileSync(
+  path.resolve(process.cwd(), "tests/fixtures/migration_snapshot.json"), "utf8"));
 
 const cleanup = [];
 afterEach(async () => { while (cleanup.length) await cleanup.pop()(); });
@@ -310,5 +318,262 @@ describe("registering the audio", () => {
     await registerAudio(repositories, buildNetzwerkAudioAssets(INVENTORY.audio.files, { now: NOW }));
     expect(await repositories.cards.count()).toBe(0);
     expect(await repositories.events.count()).toBe(0);
+  });
+});
+
+/* ====================================================================== */
+/* Kapitel 2 — the reviewed rights-safe slice, end to end.                */
+/*                                                                        */
+/* The Netzwerk books here are unreadable scans, so this imports no       */
+/* publisher wording at all: a course frame, one chapter, and the         */
+/* identity of sixteen local audio files whose lesson placement is        */
+/* deliberately left unresolved.                                          */
+/* ====================================================================== */
+
+describe("Kapitel 2 safe slice", () => {
+  const CONTROL = path.resolve(process.cwd(), "00_PROJECT_CONTROL");
+  const readControl = name => JSON.parse(fs.readFileSync(path.join(CONTROL, name), "utf8"));
+
+  const artifacts = () => ({
+    manifest: readControl("NETZWERK_NEU_A2_KAPITEL_02_MANIFEST.json"),
+    structureIndex: readControl("NETZWERK_NEU_A2_STRUCTURE_INDEX.json"),
+    audioAssetIndex: readControl("NETZWERK_NEU_A2_AUDIO_ASSET_INDEX.json"),
+    safeSlice: readControl("NETZWERK_NEU_A2_KAPITEL_02_SAFE_SLICE.json")
+  });
+
+  const built = (now = NOW) => buildNetzwerkChapter({ ...artifacts(), chapter: 2, now });
+
+  const counts = async repositories => ({
+    courses: await repositories.courses.count(),
+    courseLevels: await repositories.courseLevels.count(),
+    courseUnits: await repositories.courseUnits.count(),
+    lessons: await repositories.lessons.count(),
+    curriculumTexts: await repositories.curriculumTexts.count(),
+    audioAssets: await repositories.audioAssets.count(),
+    lessonSections: await repositories.lessonSections.count(),
+    lessonItems: await repositories.lessonItems.count(),
+    vocabulary: await repositories.vocabulary.count(),
+    sentences: await repositories.sentences.count(),
+    exercises: await repositories.exercises.count(),
+    listeningItems: await repositories.listeningItems.count()
+  });
+
+  it("previews 22 creates and writes nothing", async () => {
+    const repositories = await freshStore();
+    const result = await runNetzwerkChapter(repositories, built(), { apply: false, now: NOW });
+
+    expect(result.applied).toBe(false);
+    expect(result.reason).toBe("preview-only");
+    expect(result.plan.total).toBe(22);
+    expect(result.plan.create).toHaveLength(22);
+    expect(result.plan.update).toEqual([]);
+    expect(result.plan.conflicts).toEqual([]);
+    expect(result.plan.isNoop).toBe(false);
+
+    // Nothing at all reached the store.
+    expect(Object.values(await counts(repositories)).every(count => count === 0)).toBe(true);
+  });
+
+  it("applies and verifies exactly the 22-row slice", async () => {
+    const repositories = await freshStore();
+    const result = await runNetzwerkChapter(repositories, built(), { apply: true, now: NOW });
+
+    expect(result.applied).toBe(true);
+    expect(result.written).toMatchObject({
+      courses: 1, audioAssets: 16, vocabulary: 0, sentences: 0, listening: 0, exercises: 0
+    });
+    expect(result.verification.ok).toBe(true);
+    expect(result.verification.course).toMatchObject({ slug: "netzwerk-neu-a2", cefrLevel: "A2" });
+    expect(result.verification.lesson).toMatchObject({ slug: "nach-der-schulzeit" });
+    expect(result.verification.audioAssets).toMatchObject({
+      expected: 16, found: 16, sourceOnly: 16, playable: 0, missingUuids: [], mismatchedUuids: []
+    });
+
+    expect(await counts(repositories)).toEqual({
+      courses: 1, courseLevels: 1, courseUnits: 1, lessons: 1,
+      curriculumTexts: 2, audioAssets: 16,
+      // No educational content, and nothing to hang it on.
+      lessonSections: 0, lessonItems: 0, vocabulary: 0, sentences: 0,
+      exercises: 0, listeningItems: 0
+    });
+  });
+
+  it("keeps every imported asset source-only and unplayable", async () => {
+    const repositories = await freshStore();
+    await runNetzwerkChapter(repositories, built(), { apply: true, now: NOW });
+
+    const stored = await repositories.audioAssets.all();
+    expect(stored).toHaveLength(16);
+    for (const asset of stored) {
+      expect(asset.availability).toBe("source-only");
+      expect(asset.localPath).toBe("");
+      expect(asset.remoteUrl).toBeNull();
+      expect(asset.checksum).toMatch(/^sha256:[0-9a-f]{64}$/);
+      expect(asset.durationMs).toBeGreaterThan(0);
+      expect(asset.sourceReference).toContain("page/exercise unresolved");
+      expect(isPlayableOffline(asset)).toBe(false);
+    }
+  });
+
+  it("is a byte-identical no-op on the second run", async () => {
+    const repositories = await freshStore();
+    await runNetzwerkChapter(repositories, built(NOW), { apply: true, now: NOW });
+
+    const before = await counts(repositories);
+    const snapshot = async () => JSON.stringify([
+      await repositories.courses.all(), await repositories.lessons.all(),
+      await repositories.curriculumTexts.all(), await repositories.audioAssets.all()
+    ]);
+    const original = await snapshot();
+
+    // A different clock must not make the same evidence look like a change.
+    const second = await runNetzwerkChapter(repositories, built(NOW + 9_000_000),
+      { apply: true, now: NOW + 9_000_000 });
+
+    expect(second.applied).toBe(false);
+    expect(second.reason).toBe("no-changes");
+    expect(second.plan.unchanged).toHaveLength(22);
+    expect(second.plan.create).toEqual([]);
+    expect(second.plan.update).toEqual([]);
+    expect(second.plan.isNoop).toBe(true);
+
+    expect(await counts(repositories)).toEqual(before);
+    expect(await snapshot()).toBe(original);
+  });
+
+  it("reuses the sixteen Kapitel uuids when the full inventory is registered", async () => {
+    const repositories = await freshStore();
+    await runNetzwerkChapter(repositories, built(), { apply: true, now: NOW });
+    const chapterAssets = await repositories.audioAssets.all();
+
+    const registration = await registerAudio(
+      repositories, buildNetzwerkAudioAssets(INVENTORY.audio.files, { now: NOW }), { now: NOW });
+
+    // The reviewed rows already exist and are not written a second time.
+    expect(registration).toEqual({ created: 173, reused: 16 });
+    expect(await repositories.audioAssets.count()).toBe(189);
+    for (const asset of chapterAssets) {
+      // Measured duration and provenance survive the bulk registration untouched.
+      expect(await repositories.audioAssets.get(asset.uuid)).toEqual(asset);
+    }
+  });
+
+  it("refuses to apply when a verified row would change", async () => {
+    const repositories = await freshStore();
+    await runNetzwerkChapter(repositories, built(), { apply: true, now: NOW });
+
+    const lesson = await repositories.lessons.findOne({ slug: "nach-der-schulzeit" });
+    await repositories.lessons.update(lesson.uuid, { contentStatus: "verified" }, { now: NOW });
+
+    const changed = built();
+    changed.mapped.course.lessons[0].slug = "nach-der-schulzeit-neu";
+
+    const result = await runNetzwerkChapter(repositories, changed, { apply: true, now: NOW });
+    expect(result.applied).toBe(false);
+    expect(result.reason).toBe("source-conflict");
+    expect(result.plan.conflicts).toHaveLength(1);
+    // The reviewed row survived untouched.
+    expect((await repositories.lessons.get(lesson.uuid)).slug).toBe("nach-der-schulzeit");
+  });
+
+  it("refuses to apply a slice that failed validation", async () => {
+    const repositories = await freshStore();
+    const input = artifacts();
+    input.safeSlice = structuredClone(input.safeSlice);
+    input.safeSlice.rows.find(row => row.canonicalTargetEntity === "audioAsset")
+      .sourceRecord.page = 17;
+
+    const result = await runNetzwerkChapter(
+      repositories, buildNetzwerkChapter({ ...input, chapter: 2, now: NOW }),
+      { apply: true, now: NOW });
+
+    expect(result.applied).toBe(false);
+    expect(result.reason).toBe("validation-failed");
+    expect(result.plan).toBeNull();
+    expect(await repositories.courses.count()).toBe(0);
+  });
+
+  it("rolls the entire batch back when a later audio row is invalid", async () => {
+    const repositories = await freshStore();
+    const broken = built();
+    // A path the schema will not accept, part-way through the audio run.
+    broken.mapped.audioAssets[8].sourcePath = null;
+
+    await expect(runNetzwerkChapter(repositories, broken, { apply: true, now: NOW }))
+      .rejects.toThrow();
+
+    // Not one row survives: not the course written first, nor the earlier assets.
+    expect(Object.values(await counts(repositories)).every(count => count === 0)).toBe(true);
+  });
+
+  it("reports an asset it cannot read back rather than passing verification", async () => {
+    const repositories = await freshStore();
+    const applied = built();
+    await runNetzwerkChapter(repositories, applied, { apply: true, now: NOW });
+
+    /*
+     * Verification is what the orchestrator commits on, so it has to fail loudly when
+     * the store does not hold what the batch claimed. Here it is asked about an asset
+     * that was never written.
+     */
+    const phantom = { ...applied.mapped.audioAssets[0], uuid: "phantom-uuid", slug: "phantom" };
+    const verification = await verifyImport(
+      createServices(repositories),
+      { ...applied.mapped, audioAssets: [...applied.mapped.audioAssets, phantom] },
+      "local",
+      { repositories }
+    );
+
+    expect(verification.ok).toBe(false);
+    expect(verification.audioAssets).toMatchObject({ expected: 17, found: 16 });
+    expect(verification.audioAssets.missingUuids).toEqual(["phantom-uuid"]);
+  });
+
+  it("reports an asset whose stored identity drifted", async () => {
+    const repositories = await freshStore();
+    const applied = built();
+    await runNetzwerkChapter(repositories, applied, { apply: true, now: NOW });
+
+    // A registered asset whose digest changed is a different file wearing the same name.
+    const asset = applied.mapped.audioAssets[0];
+    await repositories.audioAssets.update(asset.uuid,
+      { checksum: `sha256:${"0".repeat(64)}` }, { now: NOW });
+
+    const verification = await verifyImport(createServices(repositories), applied.mapped,
+      "local", { repositories });
+    expect(verification.ok).toBe(false);
+    expect(verification.audioAssets.mismatchedUuids).toEqual([asset.uuid]);
+  });
+  it("preserves existing Nicos content and learner SRS rows", async () => {
+    const repositories = await freshStore();
+
+    // Real learner/SRS rows, produced by the migration from the committed snapshot.
+    const { dataset } = migrateToCanonical(MIGRATION_FIXTURE.clean, { now: NOW });
+    await repositories.lifecycle.importCanonical(dataset);
+
+    const before = {
+      cards: await repositories.cards.all(),
+      events: await repositories.events.all(),
+      vocabulary: await repositories.vocabulary.all(),
+      profiles: await repositories.profiles.all()
+    };
+    expect(before.cards.length).toBeGreaterThan(0);
+
+    await runNetzwerkChapter(repositories, built(), { apply: true, now: NOW });
+
+    expect(await repositories.cards.all()).toEqual(before.cards);
+    expect(await repositories.events.all()).toEqual(before.events);
+    expect(await repositories.profiles.all()).toEqual(before.profiles);
+    // The migrated vocabulary is untouched: this slice imports no vocabulary at all.
+    expect(await repositories.vocabulary.all()).toEqual(before.vocabulary);
+  });
+
+  it("leaves a legacy card object byte-identical", async () => {
+    const card = { key: "1:recall", wordId: 1, skill: "recall", state: "review", dueAt: NOW,
+      intervalDays: 12.5, ease: 2.36, reps: 7, lapses: 2, streak: 3, mastery: 64 };
+    const snapshot = JSON.stringify(card);
+
+    await runNetzwerkChapter(await freshStore(), built(), { apply: true, now: NOW });
+    expect(JSON.stringify(card)).toBe(snapshot);
   });
 });
