@@ -32,6 +32,11 @@ export function createCanonicalRepositories(adapter) {
     grammarExamples: readOnly("grammarExamples"),
     grammarTexts: readOnly("grammarTexts"),
     vocabularyGrammar: readOnly("vocabularyGrammar"),
+    sentences: readOnly("sentences"),
+    sentenceTexts: readOnly("sentenceTexts"),
+    sentenceVocabulary: readOnly("sentenceVocabulary"),
+    sentenceGrammar: readOnly("sentenceGrammar"),
+    sentenceTags: readOnly("sentenceTags"),
     cards: readOnly("reviewCards"),
     events: readOnly("reviewEvents")
   });

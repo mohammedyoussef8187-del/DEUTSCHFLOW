@@ -109,6 +109,16 @@ export function migrateToCanonical(snapshot = {}, options = {}) {
     grammarExamples: [],
     grammarTexts: [],
     vocabularyGrammar: [],
+    /*
+     * Sentences and contextual usage are authored content. The legacy model stores
+     * sentence-type vocabulary rows but no structured sentence entities, translations
+     * or context, so these stay empty rather than fabricating support texts.
+     */
+    sentences: [],
+    sentenceTexts: [],
+    sentenceVocabulary: [],
+    sentenceGrammar: [],
+    sentenceTags: [],
     reviewCards: [],
     reviewEvents: [],
     quarantine: []

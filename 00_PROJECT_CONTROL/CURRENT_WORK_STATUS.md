@@ -19,7 +19,7 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
 *   **UI migration complete Git commit:** `60f2526` (feat: migrate the multiple-choice answers to Lit)
 *   **option (c) work Git commit:** `e872810` (fix: make the PWA actually work offline)
 *   **Gate 5 simulator PASSED commit:** `16807f9` (validated in Codemagic)
-*   **Last Update Timestamp:** 2026-08-21T13:20:00+03:00
+*   **Last Update Timestamp:** 2026-08-21T14:05:00+03:00
 
 ## Current Context
 *   **Current Phase:** PHASE 4 — MIGRATION MAPPING + SQLITE PARITY VALIDATION
@@ -57,6 +57,16 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
 *   **German/English scoring unchanged.** `validateArabicAnswer` survives as a pure matcher for non-scoring uses but is no longer in the submit path. `strictArabicAnswers` kept for settings compatibility; it now only tunes advisory wording.
 *   **No history touched:** no attempt, card, due date, ease, lapse, mastery or streak modified or recomputed. A test migrates a recognition card built up under the old Arabic-scored rules and asserts all 14 SRS fields survive field-for-field, including through SQLite.
 *   **Verification limit:** the in-app recognition flow was not reachable in a browser from a fresh seeded profile, because recognition cards unlock with future due dates. Covered by tests of the runtime wiring, the advisory evaluator, and the feedback component instead of a live session.
+
+## Feature C — Sentences / Context (IMPLEMENTED)
+*   **Canonical schema v4**: `sentences` (German form, normalized form, CEFR level, register, ordering, full content lifecycle) plus `sentence_texts`, `sentence_vocabulary`, `sentence_grammar`, `sentence_tags`.
+*   **Support texts keyed by (sentence, language, kind)** — translation, explanation, note. Language is a ROW, matching grammar, so English and Arabic are peers and each can be verified independently.
+*   **Many-to-many in both directions**: a sentence can demonstrate several words and illustrate several grammar rules, and neither side owns the other. Links resolve to the real item and report `resolved: false` instead of silently disappearing when data is inconsistent.
+*   **Context/domain tags are rows**, not a JSON blob, so they can be queried and curated.
+*   **Scoring boundary:** `scoringFormsFor()` returns the German sentence only, and re-checks the language policy on the way out. Arabic and English support texts can never be returned as gradeable, so a future exercise engine cannot accidentally grade a translation.
+*   **Migration leaves all sentence tables empty**: the legacy model has sentence-*type* vocabulary rows but no structured sentence entities or translations, and none are invented. Legacy sentence-type words still migrate normally as vocabulary.
+*   Minimal UI proof: `<df-sentence-card>` renders an assembled sentence, showing a missing translation as "لم تُترجم بعد" rather than hiding the language.
+*   Learner data, SRS scheduler and deterministic scoring untouched.
 
 ## Feature B — Grammar as First-Class Structured Content (IMPLEMENTED)
 *   **Canonical schema v3**: `grammar_topics` → `grammar_rules` → `grammar_examples`, plus `vocabulary_grammar` linking words to the rules they demonstrate without either owning the other.

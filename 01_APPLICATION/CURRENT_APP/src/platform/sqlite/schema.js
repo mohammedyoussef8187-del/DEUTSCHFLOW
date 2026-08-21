@@ -25,13 +25,19 @@
  * "default" that others hang off. Each text row carries its own content lifecycle, so an
  * Arabic explanation can be verified independently of its English counterpart.
  *
+ * Version 4 adds sentences and contextual usage as first-class content, following the
+ * same shape grammar established: one German sentence entity, support texts keyed by
+ * language ROW in sentence_texts, and many-to-many links to both vocabulary and grammar
+ * rules so a sentence belongs to neither exclusively. Context/domain tags are normalized
+ * rows rather than a JSON blob, so they can be queried and curated.
+ *
  * Version 1 was never activated for learners (nativeStorageEnabled stayed false through
  * Gate 5), so no deployed v1 database exists and v2 is the first version any learner
  * database will see. A forward migration step becomes necessary only once a learner
  * database has actually been written.
  */
 
-export const SCHEMA_VERSION = 3;
+export const SCHEMA_VERSION = 4;
 
 export const SCHEMA_STATEMENTS = [
   `CREATE TABLE IF NOT EXISTS learner_profiles (
@@ -254,6 +260,96 @@ export const SCHEMA_STATEMENTS = [
     FOREIGN KEY (rule_uuid) REFERENCES grammar_rules(uuid) ON DELETE CASCADE
   )`,
 
+  `CREATE TABLE IF NOT EXISTS sentences (
+    uuid TEXT PRIMARY KEY,
+    german TEXT NOT NULL,
+    normalized_german TEXT NOT NULL DEFAULT '',
+    level TEXT NOT NULL DEFAULT '',
+    register TEXT,
+    ordering INTEGER NOT NULL DEFAULT 0,
+    content_status TEXT NOT NULL DEFAULT 'draft',
+    content_version INTEGER NOT NULL DEFAULT 1,
+    source_reference TEXT,
+    source_type TEXT,
+    verified_at INTEGER,
+    verified_by TEXT,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    revision INTEGER NOT NULL DEFAULT 1,
+    deleted INTEGER NOT NULL DEFAULT 0
+  )`,
+
+  `CREATE INDEX IF NOT EXISTS idx_sentences_level ON sentences (level, ordering)`,
+
+  /*
+   * Support texts for a sentence: translation, explanation, or note, one row per
+   * (sentence, language, kind). Language is a ROW here too, so English and Arabic stay
+   * peers and each can be verified on its own schedule.
+   */
+  `CREATE TABLE IF NOT EXISTS sentence_texts (
+    uuid TEXT PRIMARY KEY,
+    sentence_uuid TEXT NOT NULL,
+    language TEXT NOT NULL,
+    kind TEXT NOT NULL,
+    text TEXT NOT NULL,
+    content_status TEXT NOT NULL DEFAULT 'draft',
+    content_version INTEGER NOT NULL DEFAULT 1,
+    source_reference TEXT,
+    source_type TEXT,
+    verified_at INTEGER,
+    verified_by TEXT,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    revision INTEGER NOT NULL DEFAULT 1,
+    deleted INTEGER NOT NULL DEFAULT 0,
+    UNIQUE(sentence_uuid, language, kind),
+    FOREIGN KEY (sentence_uuid) REFERENCES sentences(uuid) ON DELETE CASCADE
+  )`,
+
+  `CREATE INDEX IF NOT EXISTS idx_sentence_texts_sentence ON sentence_texts (sentence_uuid)`,
+
+  /* A sentence demonstrates vocabulary; neither owns the other. */
+  `CREATE TABLE IF NOT EXISTS sentence_vocabulary (
+    uuid TEXT PRIMARY KEY,
+    sentence_uuid TEXT NOT NULL,
+    vocab_uuid TEXT NOT NULL,
+    role TEXT,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    revision INTEGER NOT NULL DEFAULT 1,
+    deleted INTEGER NOT NULL DEFAULT 0,
+    UNIQUE(sentence_uuid, vocab_uuid),
+    FOREIGN KEY (sentence_uuid) REFERENCES sentences(uuid) ON DELETE CASCADE,
+    FOREIGN KEY (vocab_uuid) REFERENCES vocabulary_items(uuid) ON DELETE CASCADE
+  )`,
+
+  /* A sentence illustrates grammar rules; again many-to-many. */
+  `CREATE TABLE IF NOT EXISTS sentence_grammar (
+    uuid TEXT PRIMARY KEY,
+    sentence_uuid TEXT NOT NULL,
+    rule_uuid TEXT NOT NULL,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    revision INTEGER NOT NULL DEFAULT 1,
+    deleted INTEGER NOT NULL DEFAULT 0,
+    UNIQUE(sentence_uuid, rule_uuid),
+    FOREIGN KEY (sentence_uuid) REFERENCES sentences(uuid) ON DELETE CASCADE,
+    FOREIGN KEY (rule_uuid) REFERENCES grammar_rules(uuid) ON DELETE CASCADE
+  )`,
+
+  /* Context/domain tags as rows, so they can be queried and curated. */
+  `CREATE TABLE IF NOT EXISTS sentence_tags (
+    uuid TEXT PRIMARY KEY,
+    sentence_uuid TEXT NOT NULL,
+    tag TEXT NOT NULL,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    revision INTEGER NOT NULL DEFAULT 1,
+    deleted INTEGER NOT NULL DEFAULT 0,
+    UNIQUE(sentence_uuid, tag),
+    FOREIGN KEY (sentence_uuid) REFERENCES sentences(uuid) ON DELETE CASCADE
+  )`,
+
   `CREATE TABLE IF NOT EXISTS review_cards (
     uuid TEXT PRIMARY KEY,
     legacy_key TEXT,
@@ -471,6 +567,60 @@ export const TABLE_SPECS = [
     table: "vocabulary_grammar",
     columns: [
       ["uuid", "uuid"], ["vocab_uuid", "vocabUuid"], ["rule_uuid", "ruleUuid"],
+      ["created_at", "createdAt"], ["updated_at", "updatedAt"],
+      ["revision", "revision"], ["deleted", "deleted"]
+    ]
+  },
+  {
+    entity: "sentences",
+    table: "sentences",
+    columns: [
+      ["uuid", "uuid"], ["german", "german"], ["normalized_german", "normalizedGerman"],
+      ["level", "level"], ["register", "register"], ["ordering", "ordering"],
+      ["content_status", "contentStatus"], ["content_version", "contentVersion"],
+      ["source_reference", "sourceReference"], ["source_type", "sourceType"],
+      ["verified_at", "verifiedAt"], ["verified_by", "verifiedBy"],
+      ["created_at", "createdAt"], ["updated_at", "updatedAt"],
+      ["revision", "revision"], ["deleted", "deleted"]
+    ]
+  },
+  {
+    entity: "sentenceTexts",
+    table: "sentence_texts",
+    columns: [
+      ["uuid", "uuid"], ["sentence_uuid", "sentenceUuid"], ["language", "language"],
+      ["kind", "kind"], ["text", "text"],
+      ["content_status", "contentStatus"], ["content_version", "contentVersion"],
+      ["source_reference", "sourceReference"], ["source_type", "sourceType"],
+      ["verified_at", "verifiedAt"], ["verified_by", "verifiedBy"],
+      ["created_at", "createdAt"], ["updated_at", "updatedAt"],
+      ["revision", "revision"], ["deleted", "deleted"]
+    ]
+  },
+  {
+    entity: "sentenceVocabulary",
+    table: "sentence_vocabulary",
+    columns: [
+      ["uuid", "uuid"], ["sentence_uuid", "sentenceUuid"], ["vocab_uuid", "vocabUuid"],
+      ["role", "role"],
+      ["created_at", "createdAt"], ["updated_at", "updatedAt"],
+      ["revision", "revision"], ["deleted", "deleted"]
+    ]
+  },
+  {
+    entity: "sentenceGrammar",
+    table: "sentence_grammar",
+    columns: [
+      ["uuid", "uuid"], ["sentence_uuid", "sentenceUuid"], ["rule_uuid", "ruleUuid"],
+      ["created_at", "createdAt"], ["updated_at", "updatedAt"],
+      ["revision", "revision"], ["deleted", "deleted"]
+    ]
+  },
+  {
+    entity: "sentenceTags",
+    table: "sentence_tags",
+    columns: [
+      ["uuid", "uuid"], ["sentence_uuid", "sentenceUuid"], ["tag", "tag"],
       ["created_at", "createdAt"], ["updated_at", "updatedAt"],
       ["revision", "revision"], ["deleted", "deleted"]
     ]

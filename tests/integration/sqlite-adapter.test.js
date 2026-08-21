@@ -38,8 +38,9 @@ describe("SQLite canonical persistence adapter", () => {
     expect(tables.map(t => t.name)).toEqual([
       "accepted_answers", "grammar_examples", "grammar_rules", "grammar_texts",
       "grammar_topics", "learner_profiles", "migration_quarantine", "review_cards",
-      "review_events", "settings", "translations", "vocabulary_grammar",
-      "vocabulary_items", "vocabulary_meanings"
+      "review_events", "sentence_grammar", "sentence_tags", "sentence_texts",
+      "sentence_vocabulary", "sentences", "settings", "translations",
+      "vocabulary_grammar", "vocabulary_items", "vocabulary_meanings"
     ]);
   });
 
