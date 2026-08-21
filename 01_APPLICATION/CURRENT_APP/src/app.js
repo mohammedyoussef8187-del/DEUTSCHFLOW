@@ -15,6 +15,7 @@ import "./ui/components/df-rating-row.js";
 import "./ui/components/df-answer-feedback.js";
 import "./ui/components/df-question-prompt.js";
 import "./ui/components/df-word-row.js";
+import "./ui/components/df-choice-list.js";
 
 (function(){
   "use strict";
@@ -741,7 +742,7 @@ function renderQuestion(state,q){
     const canShowPron=state.settings.showPronunciation&&q.word.pronunciation&&(q.promptLang==="de"||(q.usedHint&&state.settings.difficultyMode!=="hard"));
     const prompt=`<df-question-prompt label="${DF.esc(q.label)}" prompt="${DF.esc(q.prompt)}" promptlang="${q.promptLang==="de"?"de":"ar"}" pronunciation="${canShowPron?DF.esc(q.word.pronunciation):""}" hints="${hints.length?DF.esc(JSON.stringify(hints)):""}"></df-question-prompt>`;
     let body="";
-    if(q.choices)body=`<div class="choices">${q.choices.map(c=>{let cls="answer-btn";if(result){if(String(c.id)===String(q.correctId))cls+=" correct";else if(String(c.id)===String(state.lastChoice))cls+=" wrong";else cls+=" dim";}return `<button class="${cls}" data-action="choose-answer" data-choice="${DF.esc(c.id)}" ${result?'disabled':''}><span lang="de">${DF.esc(c.label)}</span></button>`;}).join("")}</div>`;
+    if(q.choices)body=`<df-choice-list choices="${DF.esc(JSON.stringify(q.choices.map(c=>({id:c.id,label:c.label}))))}" ${result?"revealed":""} correctid="${DF.esc(q.correctId??"")}" chosenid="${DF.esc(state.lastChoice??"")}"></df-choice-list>`;
     else if(q.skill==="order")body=renderOrder(state,q,result);
     else{
       const arabic=q.answerLang==="ar",lang=arabic?'ar':'de',placeholder=arabic?'اكتب المعنى بالعربية…':'اكتب الإجابة بالألمانية…';
