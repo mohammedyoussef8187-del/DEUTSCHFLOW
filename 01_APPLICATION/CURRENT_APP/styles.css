@@ -167,3 +167,7 @@ body,button,select,textarea,.question-ar,.question-label,.intro-meaning,.feedbac
   padding-block-start:max(18px,env(safe-area-inset-top));
   padding-block-end:max(34px,env(safe-area-inset-bottom));
 }
+
+/* Highlight for the rating the scheduler suggests. Replaces an inline style so the
+   rating row can be rendered declaratively; appearance is unchanged. */
+.rating-btn.suggested{outline:2px solid var(--primary);outline-offset:1px}
