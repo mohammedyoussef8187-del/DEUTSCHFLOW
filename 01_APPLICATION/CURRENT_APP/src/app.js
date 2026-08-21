@@ -17,6 +17,7 @@ import "./ui/components/df-question-prompt.js";
 import "./ui/components/df-word-row.js";
 import "./ui/components/df-choice-list.js";
 import "./ui/components/df-order-builder.js";
+import "./ui/components/df-setting-row.js";
 
 (function(){
   "use strict";
@@ -714,8 +715,8 @@ async function submitAnswer(state,payload){
     <div class="section-title">المظهر والبيانات</div><section class="grid grid-2"><div class="card"><div class="field"><label>المظهر</label><select id="theme-select" class="field-select"><option value="auto" ${s.theme==='auto'?'selected':''}>تلقائي حسب النظام</option><option value="light" ${s.theme==='light'?'selected':''}>فاتح</option><option value="dark" ${s.theme==='dark'?'selected':''}>داكن</option></select></div>${state.installPrompt?'<button class="ghost-btn block" data-action="install-app">تثبيت كتطبيق</button>':''}</div>
     <div class="card"><div class="grid grid-2"><button class="ghost-btn" data-action="export-backup">نسخة JSON كاملة</button><button class="ghost-btn" data-action="export-csv">تصدير CSV</button><button class="ghost-btn" data-action="restore-open">استعادة نسخة</button><button class="ghost-btn" data-action="import-open">استيراد XLSX/CSV</button></div><button class="danger-btn block" style="margin-top:10px" data-action="reset-app">إعادة ضبط التطبيق</button></div></section>
     <div class="section-title">معلومات</div><section class="card"><p style="margin:0;color:var(--muted);line-height:1.8">DeutschFlow Pro RC4 · وضع صعب · بلا اختيارات معنى عشوائية · يعمل دون إنترنت · ${state.words.length.toLocaleString("ar-EG")} مدخلاً · التخزين محلي في IndexedDB. النسخة الاحتياطية ضرورية قبل تغيير المتصفح أو الجهاز.</p></section>`;}
-  function numberSetting(title,key,value,desc){return `<div class="setting-row"><div><strong>${title}</strong><p>${desc}</p></div><input class="field-input setting-number" data-setting="${key}" type="number" min="0" max="500" value="${value}" style="width:88px"></div>`;}
-  function toggleSetting(title,key,on,desc){return `<div class="setting-row"><div><strong>${title}</strong><p>${desc}</p></div><button class="toggle ${on?'on':''}" data-action="toggle-setting" data-setting="${key}" aria-pressed="${on}"></button></div>`;}
+  function numberSetting(title,key,value,desc){return `<df-setting-row kind="number" label="${DF.esc(title)}" desc="${DF.esc(desc)}" key="${DF.esc(key)}" value="${Number(value)||0}"></df-setting-row>`;}
+  function toggleSetting(title,key,on,desc){return `<df-setting-row kind="toggle" label="${DF.esc(title)}" desc="${DF.esc(desc)}" key="${DF.esc(key)}" ${on?"on":""}></df-setting-row>`;}
 
   function renderStudy(state){
     const s=state.session;if(!s)return `<div class="study-layout"><div class="session-end"><h1>لا توجد جلسة نشطة</h1><button class="primary-btn" data-action="nav" data-route="home">العودة</button></div></div>`;
