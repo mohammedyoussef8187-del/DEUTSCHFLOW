@@ -307,7 +307,7 @@ Reasons:
 - The clip overview identifies KB 6a, phonetics clip 1 on *e*.
 - The copy-template package contains K2 A2 and A7d.
 - Both bilingual glossaries, both KB/UB solution families, the chapter test, transcripts, pacing plan, and Austrian Landeskunde worksheet are available.
-- It avoids the unresolved Kapitel 1 title inconsistency and the absent local Übungsbuch 1.1 file.
+- It avoids relying on the unresolved Kapitel 1 transcript-heading anomaly and the absent local Übungsbuch 1.1 file.
 
 The first intake should remain a small, provenance-preserving research fixture until rights, extraction, validation, and human educational review gates are passed.
 
@@ -345,11 +345,89 @@ Preserve the local A2 audio files in place. For Kapitel 2, use only read-only id
 # 12. Remaining Blockers
 
 1. **Full audio page/exercise mapping:** all 189 local MP3s have book/chapter/track identity, but none has complete official page/exercise proof. Licensed Allango page-associated media appears to be the strongest official route.
-2. **Kapitel 1 title identity:** the official KB and UB audio transcript PDFs call Kapitel 1 *Das bin ich.*, while the teacher board, glossaries, and plans call it *Und was machst du?*. Preserve both source assertions; do not auto-normalize them without edition/version reconciliation.
-3. **Edition pagination:** the official plans expose A2.1/A2.2 half-edition page ranges. The local scans require ISBN/edition and page reconciliation before page IDs can be trusted.
+2. **Kapitel 1 transcript heading:** edition identity has been reconciled, but the official audio transcript PDFs still call Kapitel 1 *Das bin ich.* while the printed-course source family calls it *Und was machst du?*. Preserve the transcript assertion as a source anomaly unless Klett confirms a correction.
+3. **Local scan pagination:** the official A2.1 half-edition pagination and the full-edition ISBN identities are now separated. The local Übungsbuch scan has no trustworthy global PDF-page offset, so only visible printed page numbers may be recorded from it, and the scan must not serve as official intake evidence.
 4. **Typography-aware extraction:** glossaries, Kapitelwortschatz, and plans use typographic syllable highlighting that fragments words in naive extraction. A layout-aware reconstruction and record-level validation gate is required.
 5. **Image-only test material:** the Kapitel 5 test and combined test answer key are image-only in the audited ZIP. Deterministic use requires verified OCR plus manual comparison.
 6. **Redistribution rights:** a public official download and classroom-copy notice do not automatically grant permission to redistribute content inside DeutschFlow. Legal/licensing confirmation is required before product ingestion or release.
 7. **Licensed exact-page evidence:** Allango digital editions and access-controlled packages must be accessed only under legitimate licences; no authentication or access control may be bypassed.
 
 None of these blockers prevents a small, read-only, provenance-preserving Kapitel 2 research fixture. They do prevent treating extracted text as release-ready course content or declaring complete track-to-page/exercise provenance.
+
+# Audio Mapping Resolution
+
+Research rechecked on 2026-08-21 against official Klett transcript, solution, teacher-material, product, and Allango sources. The acceptance rule remained strict: an audio mapping is **Proven** only when an official source explicitly binds the audio number to the component, Kapitel, printed page, and exercise/task. No mapping was promoted by sequence, duration, neighbouring files, file size, transcript similarity, or an unnumbered audio control.
+
+| Status | Count | Resolution |
+|---|---:|---|
+| Proven | 0 | No official public or legitimately accessible source supplied the complete track → component → Kapitel → page → exercise chain. |
+| Partially proven | 189 | The official transcript sets establish component, disc/track, and Kapitel for every local file in the audited inventory. |
+| Unresolved | 0 | No local file is unresolved at component/Kapitel level. Exact page/exercise remains unresolved for all 189 files. |
+
+There is therefore no proven-mapping table to add. The detailed 189-file partial ranges remain in section 8 and are not duplicated here.
+
+## Kapitel 2 audio result
+
+| Component | Local filenames | Official track range | Kapitel | Page | Exercise | Status | Official evidence |
+|---|---|---|---:|---|---|---|---|
+| Kursbuch | `NWn_A2_KB_Audio_1-008.mp3`–`NWn_A2_KB_Audio_1-017.mp3` | 1.8–1.17 | 2 | Unresolved | Unresolved | Partially proven (10) | [Official KB transcript, Kapitel 1–6](https://www.klett-sprachen.de/downloads/23661/netzwerk-neu-a2-transkript-audios-kursbuch-kapitel-1-6/pdf) |
+| Übungsbuch | `NWn_A2_UeB_Audio_1-011.mp3`–`NWn_A2_UeB_Audio_1-016.mp3` | 1.11–1.16 | 2 | Unresolved | Unresolved | Partially proven (6) | [Official ÜB transcript, Kapitel 1–6](https://www.klett-sprachen.de/downloads/23662/netzwerk-neu-a2-transkript-audios-uebungsbuch-kapitel-1-6/pdf) |
+
+The [official Kapitel 2 teacher board](https://einstufungstests.klett-sprachen.de/eks/Netzwerk-neu-A2-TB/files/lessons/lesson-2-1/Tafel-2-Lehrerhandreichung.pdf) explicitly identifies KB task 7d, but it does not identify an audio track. The KB/ÜB solutions and transcript indexes likewise do not explicitly bind tracks 1.8–1.17 or 1.11–1.16 to printed pages/tasks. They therefore cannot complete the chain.
+
+Allango documents that media in a licensed digital edition are sorted by exact book page and that page-specific media are shown on that page: [media-by-page help](https://hilfe.klett-sprachen.de/hc/de/articles/10088191577245-Welche-Medien-sind-in-meiner-Digitalen-Ausgabe-allango-verf%C3%BCgbar) and [audio access help](https://hilfe.klett-sprachen.de/hc/de/articles/19843383762077-Wie-kann-ich-die-Audios-zu-meinem-Lehrwerk-in-allango-abspielen). The public product records do not expose the required page/task associations, while the corresponding asset records require legitimate authenticated access. No access control was bypassed. Exact page/task proof remains blocked on an authorized Allango digital-edition view or a future explicit official track index.
+
+# Rights / Redistribution Matrix
+
+This is a source-policy classification, not legal advice. It records only what current official Klett/Allango notices expressly support; silence is classified as unclear rather than permission.
+
+| Use case | Status | Official evidence | Notes |
+|---|---|---|---|
+| A. Keep source references/URLs | CLEARLY PERMITTED | [Klett linking policy](https://hilfe.klett-sprachen.de/hc/de/articles/360018159898-Darf-ich-auf-Inhalte-der-Website-von-Ernst-Klett-Sprachen-per-Link-von-meiner-Website-Plattform-verweisen) | Applies to links to freely accessible, non-password-protected Klett content. It does not authorize copying the target content or republishing protected URLs/assets. |
+| B. Download materials for private development | UNCLEAR / NEEDS RIGHTS HOLDER CONFIRMATION | [Allango audio-download notice](https://hilfe.klett-sprachen.de/hc/de/articles/25778088982045-Kann-ich-die-Audios-von-meinem-Buch-herunterladen); [Klett digital-copy policy](https://hilfe.klett-sprachen.de/hc/de/articles/360018013237-Darf-ich-eine-digitale-Kopie-der-Produkte-von-Ernst-Klett-Sprachen-anfertigen-und-per-Mail-versenden-oder-auf-eine-Lern-Plattform-Cloud-oder-Serverumgebung-hochladen) | Some audio download is technically offered after login, but no official notice found grants reuse for software-development intake. Availability is not a redistribution licence. |
+| C. Extract small structured educational facts | UNCLEAR / NEEDS RIGHTS HOLDER CONFIRMATION | [Klett reproduction notice](https://hilfe.klett-sprachen.de/hc/de/articles/34419146927517-Ist-die-Vervielf%C3%A4ltigung-von-urheberrechtlich-gesch%C3%BCtzten-Materialien-erlaubt) | The official notices do not define an app-ingestion exception for facts, selections, exercise structures, or extracted records. Import only independently verified, non-expressive metadata until scope is confirmed. |
+| D. Store extracted publisher text locally for personal use | UNCLEAR / NEEDS RIGHTS HOLDER CONFIRMATION | [Klett reproduction notice](https://hilfe.klett-sprachen.de/hc/de/articles/34419146927517-Ist-die-Vervielf%C3%A4ltigung-von-urheberrechtlich-gesch%C3%BCtzten-Materialien-erlaubt); [digital-copy policy](https://hilfe.klett-sprachen.de/hc/de/articles/360018013237-Darf-ich-eine-digitale-Kopie-der-Produkte-von-Ernst-Klett-Sprachen-anfertigen-und-per-Mail-versenden-oder-auf-eine-Lern-Plattform-Cloud-oder-Serverumgebung-hochladen) | No official source found expressly permits systematic local extraction into an app. The transcript PDFs' short classroom-copy permission is limited to the user's own teaching and is not an app-use grant. |
+| E. Redistribute publisher text inside an app | CLEARLY RESTRICTED | [Digital-material upload policy](https://hilfe.klett-sprachen.de/hc/de/articles/360018159778-Darf-ich-digitale-Materialien-Downloads-MP3-Audios-etc-die-auf-der-Website-von-Ernst-Klett-Sprachen-stehen-auf-eine-Plattform-hochladen-und-einem-Kurs-zur-Verf%C3%BCgung-stellen); [digital-copy policy](https://hilfe.klett-sprachen.de/hc/de/articles/360018013237-Darf-ich-eine-digitale-Kopie-der-Produkte-von-Ernst-Klett-Sprachen-anfertigen-und-per-Mail-versenden-oder-auf-eine-Lern-Plattform-Cloud-oder-Serverumgebung-hochladen) | Current standard notices say such digital copying/upload is generally not permitted. Separate rights-holder permission/licence is required before embedding publisher text. |
+| F. Redistribute audio files inside an app | CLEARLY RESTRICTED | [Digital-material upload policy](https://hilfe.klett-sprachen.de/hc/de/articles/360018159778-Darf-ich-digitale-Materialien-Downloads-MP3-Audios-etc-die-auf-der-Website-von-Ernst-Klett-Sprachen-stehen-auf-eine-Plattform-hochladen-und-einem-Kurs-zur-Verf%C3%BCgung-stellen); [Allango audio-download notice](https://hilfe.klett-sprachen.de/hc/de/articles/25778088982045-Kann-ich-die-Audios-von-meinem-Buch-herunterladen) | Download/play access does not grant repackaging. Obtain a specific licence before bundling or serving Klett audio. |
+| G. Distribute the app privately for personal use | UNCLEAR / NEEDS RIGHTS HOLDER CONFIRMATION | [Digital-copy policy](https://hilfe.klett-sprachen.de/hc/de/articles/360018013237-Darf-ich-eine-digitale-Kopie-der-Produkte-von-Ernst-Klett-Sprachen-anfertigen-und-per-Mail-versenden-oder-auf-eine-Lern-Plattform-Cloud-oder-Serverumgebung-hochladen); [non-transferable licence notice](https://hilfe.klett-sprachen.de/hc/de/articles/360018333298-Kann-ich-meinen-eingel%C3%B6sten-Lizenzcode-f%C3%BCr-eine-Digitale-Ausgabe-BlinkLearning-an-eine-andere-Person-weitergeben) | If the private build contains copied publisher text/audio, private distribution is not expressly authorized. A build containing only DeutschFlow-owned content and permitted links is a different case not decided by these publisher-content notices. |
+| H. Distribute publicly / App Store | LICENSE REQUIRED | [Digital-material upload policy](https://hilfe.klett-sprachen.de/hc/de/articles/360018159778-Darf-ich-digitale-Materialien-Downloads-MP3-Audios-etc-die-auf-der-Website-von-Ernst-Klett-Sprachen-stehen-auf-eine-Plattform-hochladen-und-einem-Kurs-zur-Verf%C3%BCgung-stellen); [Klett reproduction notice](https://hilfe.klett-sprachen.de/hc/de/articles/34419146927517-Ist-die-Vervielf%C3%A4ltigung-von-urheberrechtlich-gesch%C3%BCtzten-Materialien-erlaubt) | No audited standard term grants public app redistribution of publisher text or audio. Use independently authored/licensed content, or obtain a written app-distribution licence. |
+
+The official transcript notice permits reproduction only for the user's own classroom use. That narrow notice must not be interpreted as permission for application ingestion, private sharing, or public redistribution.
+
+# Kapitel 1 Edition Reconciliation
+
+## Reconciled title
+
+The title supported by the printed-course source family is **Kapitel 1 — Und was machst du?** Official direct evidence includes the [Kapitel 1 teacher board](https://einstufungstests.klett-sprachen.de/eks/Netzwerk-neu-A2-TB/files/lessons/lesson-1-1/Tafel-1-Lehrerhandreichung.pdf), the official A2.1 pacing plan, chapter vocabulary, glossaries, and online/clip overviews.
+
+The official KB and ÜB audio transcript PDFs instead print **Kapitel 1: Das bin ich.** They identify themselves as *Netzwerk neu A2.1* and belong to the same audited product family; no separate official Netzwerk neu A2 edition with this Kapitel 1 title was found. The defensible reconciliation is therefore:
+
+- canonical printed-course chapter title: **Und was machst du?**
+- transcript-source heading: **Das bin ich.**
+- status: official-source heading anomaly; retain both provenance assertions and do not silently rewrite the transcript metadata
+- unresolved: only Klett can confirm whether the transcript heading is an editorial error or an intentionally different internal label
+
+## Edition identity and pagination
+
+| Component / edition | ISBN | Official pagination evidence | Kapitel 1 | Kapitel 2 | Relationship |
+|---|---|---|---|---|---|
+| Full A2 Kursbuch with audio/video | 978-3-12-607164-2 | [Official Klett product record](https://www.klett-sprachen.de/netzwerk-neu-a2/t-1/9783126071642): 176 pages; [official Allango product record](https://www.allango.net/api/product/MAXP-607164) | Printed pages 8–17 in the local ISBN-matching scan; exact range not independently exposed by the public official product record | Printed pages 18–27 in the local ISBN-matching scan; exact range not independently exposed by the public official product record | Allango identifies hybrid ISBN 978-3-12-607153-6 as the alternative edition. |
+| Full A2 Übungsbuch | 978-3-12-607165-9 | [Official Klett product record](https://www.klett-sprachen.de/netzwerk-neu-a2/t-1/9783126071659): 176 pages; [official Allango product record](https://www.allango.net/api/product/MAXP-607165) | Printed pages 6–17 in the local ISBN-matching scan; exact range not independently exposed by the public official product record | Printed pages 18–29 in the local ISBN-matching scan; exact range not independently exposed by the public official product record | Allango identifies hybrid ISBN 978-3-12-607018-8 as the alternative edition. |
+| A2.1 combined half edition | 978-3-12-607162-8 | [Official Allango product record](https://www.allango.net/api/product/MAXP-607162); [official A2.1 pacing plan](https://www.klett-sprachen.de/downloads/31656/netzwerk-neu-a2-1-stoffverteilungsplan/pdf) | KB 6–15; ÜB 78–89 | KB 16–25; ÜB 90–101 | Separate combined A2.1 pagination; hybrid alternative ISBN 978-3-12-607286-1. |
+
+The official Allango records keep the full KB, full ÜB, and combined A2.1 products separate. Klett also states that hybrid editions retain the existing printed formats/content ([hybrid-format notice](https://hilfe.klett-sprachen.de/hc/de/articles/19074351823005-Werden-die-Formate-Kurs-und-%C3%9Cbungsbuch-sowie-Teil-und-Vollb%C3%A4nde-bei-den-Hybriden-Ausgaben-allango-beibehalten)) and that a digital Allango edition matches its printed book ([digital-edition notice](https://hilfe.klett-sprachen.de/hc/de/articles/13022131544477-Was-beinhaltet-eine-Digitale-Ausgabe-allango)). This supports edition-family continuity, not interchangeability of page numbers across different component formats.
+
+For Kapitel 1–2, the observed printed-page relationship is:
+
+- full KB page = A2.1 KB page + 2
+- full ÜB page = A2.1 ÜB page − 72
+
+These offsets are recorded only for the officially bounded Kapitel 1–2 ranges above and must not be generalized without source-by-source validation.
+
+## Local-file reconciliation and unresolved issues
+
+- The local KB and ÜB scans visibly identify ISBNs 978-3-12-607164-2 and 978-3-12-607165-9, matching the official full-edition product records. They are not the A2.1 combined ISBN 978-3-12-607162-8.
+- The two local KB PDFs differ by one inserted front-matter map page, so their PDF page indexes differ by one even though their printed pagination is the same.
+- The local ÜB scan does not have a stable global PDF-index-to-printed-page offset. Record only the visible printed page number; never derive it arithmetically.
+- A local title page contains a third-party distribution watermark. The local scans are therefore comparison-only evidence: they are not approved official-source intake files and must not be used to justify redistribution or authoritative content extraction.
+- The public official product records prove ISBN/component identity and total extent, while the A2.1 plan proves its half-edition ranges. A licensed official full-edition page view would still be needed to make the local full-edition chapter ranges independently official-source proven.
