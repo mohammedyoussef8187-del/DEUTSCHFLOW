@@ -3,7 +3,7 @@
 This is the single canonical handoff file for **DeutschFlow** to track progress across sequential agent invocations.
 
 ## Metadata
-*   **Last AI/Agent Used:** Claude Code (Opus 4.8) — primary implementation agent
+*   **Last AI/Agent Used:** OpenAI Codex — Netzwerk source-verification and implementation preparation only; Claude remains primary implementation agent
 *   **baseline Git commit:** `80599f5bf1aa9ea6dcd52aa42339df2c8bb67e27`
 *   **second pass Git commit:** `2ce3631946f6fe962c48488048a7eaf4ac144e68`
 *   **audit Git commit:** `103970456900e24f6a8f6c85346248d34812aaa5`
@@ -19,14 +19,21 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
 *   **UI migration complete Git commit:** `60f2526` (feat: migrate the multiple-choice answers to Lit)
 *   **option (c) work Git commit:** `e872810` (fix: make the PWA actually work offline)
 *   **Gate 5 simulator PASSED commit:** `16807f9` (validated in Codemagic)
-*   **Last Update Timestamp:** 2026-08-21T22:35:00+03:00
+*   **Last Update Timestamp:** 2026-08-22
 
 ## Current Context
 *   **Current Phase:** PHASE 4 — MIGRATION MAPPING + SQLITE PARITY VALIDATION
 *   **Current Delivery Priority:** MOBILE FIRST — iOS/iPadOS + Android
 *   **Phase Status:** PHASE 2 AND PHASE 3 COMPLETE. PHASE 4 COMPLETE (migration mapping, SQLite parity, backup/restore Gate 2, real-data dry-run). PHASE 5 STARTED: Capacitor 8 mobile foundation and native SQLite executor implemented and contract-tested. Real learner storage NOT switched; on-device verification (Gate 5) NOT yet performed.
 *   **Implementation Status:** ACTIVE ON `mobile-foundation`
-*   **Current Task:** Gate 4 (Lit proof of architecture) is PASSED with a real, read-only dashboard component, and the iPad-first app shell foundation is in place. Native storage remains GATED OFF; on-device verification still requires user-only device actions.
+*   **Current Task:** Netzwerk neu A2 Kapitel 2 adapter implementation is prepared from verified official-source metadata. No adapter/runtime implementation was made by Codex. Native storage remains GATED OFF; on-device verification still requires user-only device actions.
+
+## Netzwerk neu A2 Adapter Preparation (documentation only, 2026-08-22)
+*   Traced the successful Nicos Weg intake through extraction, normalization, parsing, validation, canonical mapping, preview/diff, repository transactions, service verification, and its unit/integration fixtures.
+*   Added `NETZWERK_NEU_A2_KAPITEL_02_MANIFEST.json`: 3 edition identities, 23 official source records, and 16 source-only audio units for Kapitel 2. Exact audio page/exercise mappings remain 0 proven and are null in every audio record.
+*   Added `NETZWERK_NEU_A2_CLAUDE_IMPLEMENTATION_BRIEF.md` with exact reusable exports, the minimal manifest-backed adapter contract, likely code touch points, canonical field rules, and required tests.
+*   Smallest safe first slice is 22 canonical rows in an empty test store: course, level, A2.1 unit, Kapitel 2 lesson, two German title texts, and 16 unplayable source-only audio assets. It creates no vocabulary, translations, grammar, exercises, listening activities, lesson items, learner data, or SRS data.
+*   Publisher wording/audio payload remains blocked by rights; exact audio page/task links remain blocked by official evidence. Neither blocks the metadata/source-asset slice.
 
 ## Gate 4 — Lit Proof of Architecture (PASSED)
 *   Lit **3.3.3**, vendored as a single ESM bundle at `01_APPLICATION/CURRENT_APP/vendor/lit.js` (`npm run build:vendor`), so the app remains a no-bundler static site that Capacitor can serve directly.

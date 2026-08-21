@@ -8,6 +8,7 @@ All notable changes to the **DeutschFlow** project will be documented in this fi
 *   **Arabic no longer affects scored answer correctness.** Recognition became a self-assessed skill: the learner types the Arabic meaning and gets feedback, but rates their own recall, and that rating drives SRS. The advisory evaluator returns `isCorrect: null` rather than `false`, so a spelling variant cannot lapse a card. German and English keep deterministic accepted-answer scoring. No historical attempt, card, due date, ease, lapse, mastery or streak was modified or recomputed.
 
 ### Added
+*   Prepared the documentation-only Netzwerk neu A2 Kapitel 2 adapter handoff: a machine-readable manifest with 3 edition identities, 23 verified official source records, and 16 source-only audio units, plus an implementation brief tracing the reusable Nicos intake path and defining the smallest 22-row evidence-backed slice. No application, schema, learner, or SRS data changed.
 *   Feature B — grammar as first-class structured content. Canonical schema v3 adds topics, rules, examples, a vocabulary-to-rule link, and a `grammar_texts` table where language is a row rather than a column, making English and Arabic structural peers each with their own content lifecycle. `grammar-service.js` assembles the curriculum and reports translation coverage. Grammar grades nothing.
 *   Expanded the passing regression suite from 300 to 346 tests.
 *   Gate 5 (iOS Simulator) PASSED on commit `16807f9`; physical iPhone/iPad validation deferred as a release gate.
