@@ -1,6 +1,6 @@
 import { DAY, MINUTE, DEFAULT_SETTINGS, esc, clamp, round, randomUnit, randomInt, shuffle, sample, uniqueBy, localDateKey, startOfLocalDay, formatDate, formatRelative } from "./core/utils.js";
 import { ARTICLES, normalizeGerman, normalizeArabic, foldGerman, splitArticle, inferItemType } from "./core/text.js";
-import { levenshtein, validateGermanAnswer, validateArticleAnswer, validateArabicAnswer, arabicTokenScore } from "./exercises/answer-evaluator.js";
+import { levenshtein, validateGermanAnswer, validateArticleAnswer, validateArabicAnswer, arabicTokenScore, evaluateArabicAdvisory, isSelfAssessedSkill } from "./exercises/answer-evaluator.js";
 import { createCard, scheduleCard, cardMastery, automaticRating, skillLabel, skillWeight, wordMastery, wordStatus, cardStatus, preferredSkills, nextSkillUnlocks } from "./srs/scheduler.js";
 import { createRepositories } from "./data/repositories.js";
 import { createIndexedDbAdapter } from "./platform/indexeddb/adapter.js";
@@ -351,10 +351,13 @@ async function submitAnswer(state,payload){
     if(q.choices)answer=evaluateChoice(q,payload.choiceId);
     else if(q.skill==="article")answer=DF.validateArticleAnswer(payload.text,q.word);
     else if(q.skill==="order")answer=evaluateOrder(q,payload.tokens||[]);
-    else if(q.skill==="recognition")answer=DF.validateArabicAnswer(payload.text,q.word,q.expected,state.settings);
+    /* العربية لا تحدد الصحة: التقييم ذاتي والمطابقة إرشادية فقط. */
+    else if(isSelfAssessedSkill(q.skill))answer=evaluateArabicAdvisory(payload.text,q.word,q.expected,state.settings);
     else answer=DF.validateGermanAnswer(payload.text,q.word,state.settings,q.expected);
     const elapsed=Date.now()-q.startedAt;
-    const suggestedRating=DF.automaticRating(answer,{usedHint:q.usedHint,revealed:false,elapsedMs:elapsed});
+    /* للمهارات ذاتية التقييم لا يوجد اقتراح آلي مبني على النص العربي؛
+       نقترح "جيد" كنقطة بداية محايدة والمتعلم هو من يقرر. */
+    const suggestedRating=answer.selfAssessed?3:DF.automaticRating(answer,{usedHint:q.usedHint,revealed:false,elapsedMs:elapsed});
     s.result={answer,elapsedMs:elapsed,suggestedRating,revealed:false};
     s.updatedAt=Date.now();await DF.Repositories.metadata.set("session",s);
   }
@@ -390,13 +393,18 @@ async function submitAnswer(state,payload){
   async function finalizeAnswer(state,rating=null){
     const s=state.session,q=s?.current,r=s?.result;if(!s||!q||!r)return;
     const entry=s.queue.shift();
-    const finalRating=(!r.answer.isCorrect||r.revealed)?1:Number(rating||r.suggestedRating||1);
+    /* التقييم الذاتي: المتعلم يحدد الدرجة. الكشف عن الإجابة يظل خطأً في كل الحالات.
+       بهذا لا تؤثر مطابقة النص العربي إطلاقاً في الجدولة. */
+    const selfAssessed=r.answer.selfAssessed===true;
+    const finalRating=r.revealed?1
+      :selfAssessed?Number(rating||r.suggestedRating||3)
+      :(!r.answer.isCorrect)?1:Number(rating||r.suggestedRating||1);
     let card=q.card||ensureCardInMemory(state,q.word.id,q.skill);
     card=DF.scheduleCard(card,finalRating,Date.now());
     await persistCard(state,card);
 
     s.attempts++;
-    const correct=r.answer.isCorrect;
+    const correct=selfAssessed?(!r.revealed&&finalRating>=3):r.answer.isCorrect===true;
     if(correct){s.correctAttempts++;s.xp+=q.usedHint?6:10;}else{s.wrongAttempts++;s.xp+=1;}
     if(r.revealed)s.reveals++;
     if(entry.initial){s.initialCompleted++;if(correct)s.firstPassCorrect++;else s.firstPassWrong++;}
@@ -815,7 +823,7 @@ function renderQuestion(state,q){
     const o=state.orderState&&state.orderState.questionId===q.entry.id?state.orderState:{questionId:q.entry.id,selected:[],pool:q.tokens.slice()};state.orderState=o;
     return `<df-order-builder selected="${DF.esc(JSON.stringify(o.selected))}" pool="${DF.esc(JSON.stringify(o.pool))}" ${result?"hasresult":""}></df-order-builder>`;
   }
-function renderFeedback(state,q,r){const a=r.answer,lang=q.skill==="recognition"?"ar":"de";return `<df-answer-feedback ${a.isCorrect?"correct":""} note="${DF.esc(a.note)}" correctanswer="${DF.esc(a.correctAnswer||"")}" useranswer="${DF.esc(a.userAnswer||"")}" lang="${lang}" suggested="${r.suggestedRating||0}"></df-answer-feedback>`;}
+function renderFeedback(state,q,r){const a=r.answer,lang=q.skill==="recognition"?"ar":"de";return `<df-answer-feedback ${a.isCorrect?"correct":""} ${a.selfAssessed?"selfassessed":""} note="${DF.esc(a.note)}" correctanswer="${DF.esc(a.correctAnswer||"")}" useranswer="${DF.esc(a.userAnswer||"")}" lang="${lang}" suggested="${r.suggestedRating||0}"></df-answer-feedback>`;}
   function renderSessionEnd(state,s){const acc=DF.Learning.sessionAccuracy(s);return `<main class="study-layout"><section class="session-end"><div class="end-icon">✓</div><h1>اكتملت الجلسة</h1><p>تم فصل الكلمات الأساسية عن المحاولات والإعادات، لذلك الأرقام أدناه لا تتداخل.</p><div class="end-grid">${metricTile(s.initialCards,"عناصر أساسية")}${metricTile(s.attempts,"إجمالي المحاولات")}${metricTile(acc.first==null?"—":acc.first+"%","دقة أول محاولة")}${metricTile(acc.attempts==null?"—":acc.attempts+"%","دقة كل المحاولات")}${metricTile(s.reveals,"عرض إجابة")}${metricTile(s.hints,"تلميحات")}${metricTile(s.retriesCompleted,"إعادات مكتملة")}${metricTile("+"+s.xp,"نقطة خبرة")}</div><div class="grid grid-2"><button class="ghost-btn large" data-action="session-home">العودة للرئيسية</button><button class="primary-btn large" data-action="start-session" data-mode="${s.mode}">جلسة أخرى</button></div></section></main>`;}
 function afterRender(state){
     if(state.route==="study"&&state.session?.current?.kind==="test"&&!state.session.result&&!state.session.current.choices&&state.session.current.skill!=="order")setTimeout(()=>document.getElementById("answer-input")?.focus(),10);

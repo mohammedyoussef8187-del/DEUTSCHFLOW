@@ -111,3 +111,47 @@ export function validateArabicAnswer(userRaw,word,expectedOverride=null,settings
 function result(type,isCorrect,correctAnswer,userAnswer,note,quality,extra={}){
   return {type,isCorrect,correctAnswer,userAnswer,note,quality,...extra};
 }
+
+/*
+ * Arabic is educational content, never a grading input.
+ *
+ * validateArabicAnswer above is a pure text matcher. It is deliberately NOT wired into
+ * scoring any more: comparing Arabic free text is not reliable enough to move a card's
+ * ease, interval or lapses, because orthography (hamza and alif forms, diacritics,
+ * tatweel) and legitimate synonym breadth make "wrong" and "worded differently"
+ * indistinguishable.
+ *
+ * The runtime instead calls evaluateArabicAdvisory, which reuses the same matching to
+ * give the learner useful feedback while surrendering all scoring authority:
+ *
+ *   - isCorrect is null, never true/false, so any code that tries to score from it
+ *     fails loudly instead of quietly grading Arabic
+ *   - selfAssessed marks the result as one the LEARNER rates, not the matcher
+ *   - quality is 0, so it contributes nothing to an automatic rating
+ *
+ * advisoryMatch still reports whether the wording matched an accepted answer, purely so
+ * the learner can be told. It must never be fed into scheduling.
+ */
+export function evaluateArabicAdvisory(userRaw, word, expectedOverride = null, settings = DEFAULT_SETTINGS) {
+  const matched = validateArabicAnswer(userRaw, word, expectedOverride, settings);
+  return {
+    type: matched.type,
+    // Not false: false would be read as "answered incorrectly" and lapse the card.
+    isCorrect: null,
+    selfAssessed: true,
+    advisoryMatch: matched.isCorrect === true,
+    correctAnswer: matched.correctAnswer,
+    userAnswer: matched.userAnswer,
+    note: matched.isCorrect
+      ? "صياغتك تطابق معنى معتمداً. قيّم مدى تذكرك بنفسك."
+      : "قارن إجابتك بالمعنى المعروض، ثم قيّم مدى تذكرك بنفسك.",
+    quality: 0
+  };
+}
+
+/** Skills whose correctness the learner reports, because the answer language cannot score. */
+export const SELF_ASSESSED_SKILLS = Object.freeze(["recognition"]);
+
+export function isSelfAssessedSkill(skill) {
+  return SELF_ASSESSED_SKILLS.includes(skill);
+}

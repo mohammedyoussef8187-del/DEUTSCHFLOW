@@ -82,3 +82,32 @@ describe("answer feedback panel", () => {
     }
   });
 });
+
+describe("self-assessed feedback (Arabic never scores)", () => {
+  it("offers the full rating set even though the matcher gave no verdict", async () => {
+    const el = await mount({ selfassessed: true, note: "قارن إجابتك", correctanswer: "بيت", useranswer: "سيارة", lang: "ar" });
+    // hard/good/easy, not the single "again" a wrong answer would get.
+    expect([...document.querySelectorAll('[data-action="rate-answer"]')].map(b => b.dataset.rating))
+      .toEqual(["2", "3", "4"]);
+  });
+
+  it("stays visually neutral instead of claiming right or wrong", async () => {
+    const el = await mount({ selfassessed: true, note: "قارن إجابتك", correctanswer: "بيت" });
+    const panel = el.querySelector(".feedback");
+    expect(panel.classList.contains("neutral")).toBe(true);
+    expect(panel.classList.contains("error")).toBe(false);
+    expect(panel.classList.contains("success")).toBe(false);
+    expect(el.querySelector("h3").textContent).not.toContain("✗");
+  });
+
+  it("always shows the Arabic meaning, which is the educational point", async () => {
+    const el = await mount({ selfassessed: true, correct: true, correctanswer: "بيت", lang: "ar" });
+    // Even when the wording matched, the meaning stays on screen for review.
+    expect(el.querySelector(".feedback-row strong").textContent.trim()).toBe("بيت");
+  });
+
+  it("tells the learner that Arabic is not auto-corrected", async () => {
+    const el = await mount({ selfassessed: true });
+    expect(el.querySelector(".feedback-hint").textContent).toContain("لا تُصحَّح آلياً");
+  });
+});

@@ -220,3 +220,7 @@ body,button,select,textarea,.question-ar,.question-label,.intro-meaning,.feedbac
    to 44pt and centre their label. */
 .toggle::before{content:"";position:absolute;inset-inline:0;inset-block-start:50%;block-size:44px;transform:translateY(-50%)}
 .chip{min-block-size:44px;display:inline-flex;align-items:center}
+
+/* Self-assessed answers are neither correct nor incorrect until the learner rates them,
+   so the feedback panel stays neutral rather than claiming a verdict. */
+.feedback.neutral{border-color:var(--border);background:var(--surface)}

@@ -16,12 +16,15 @@ const LABELS = Object.freeze({
   yours: "إجابتك",
   flag: "الإبلاغ عن ترجمة أو بيانات غير صحيحة",
   rate: "قيّم صعوبة التذكر لتحديد الموعد التالي:",
-  willRetry: "ستسجل الإجابة كخطأ وستعاد البطاقة داخل الجلسة."
+  willRetry: "ستسجل الإجابة كخطأ وستعاد البطاقة داخل الجلسة.",
+  selfRate: "المعنى العربي معروض للمراجعة. قيّم مدى تذكرك بنفسك — الصياغة العربية لا تُصحَّح آلياً."
 });
 
 export class DfAnswerFeedback extends LitElement {
   static properties = {
     correct: { type: Boolean },
+    /* The learner rates this one; the matcher had no scoring authority. */
+    selfassessed: { type: Boolean },
     note: { type: String },
     correctanswer: { type: String },
     useranswer: { type: String },
@@ -34,6 +37,7 @@ export class DfAnswerFeedback extends LitElement {
   constructor() {
     super();
     this.correct = false;
+    this.selfassessed = false;
     this.note = "";
     this.correctanswer = "";
     this.useranswer = "";
@@ -43,9 +47,11 @@ export class DfAnswerFeedback extends LitElement {
 
   render() {
     return html`
-      <section class="feedback ${this.correct ? "success" : "error"}">
-        <h3>${this.correct ? "✓" : "✗"} ${this.note}</h3>
-        ${this.correct
+      <section class="feedback ${this.selfassessed ? "neutral" : this.correct ? "success" : "error"}">
+        <!-- A self-assessed answer is neither right nor wrong yet: the learner has not
+             rated it, and the Arabic matcher has no authority to say. -->
+        <h3>${this.selfassessed ? "•" : this.correct ? "✓" : "✗"} ${this.note}</h3>
+        ${this.correct && !this.selfassessed
           ? nothing
           : html`<div class="feedback-row">
               <span>${LABELS.expected}</span>
@@ -58,8 +64,13 @@ export class DfAnswerFeedback extends LitElement {
             </div>`
           : nothing}
         <button class="ghost-btn block feedback-flag" data-action="flag-current-word">${LABELS.flag}</button>
-        <div class="feedback-hint">${this.correct ? LABELS.rate : LABELS.willRetry}</div>
-        <df-rating-row ?correct=${this.correct} suggested=${this.suggested}></df-rating-row>
+        <div class="feedback-hint">
+          ${this.selfassessed ? LABELS.selfRate : this.correct ? LABELS.rate : LABELS.willRetry}
+        </div>
+        <df-rating-row
+          ?correct=${this.correct || this.selfassessed}
+          suggested=${this.suggested}
+        ></df-rating-row>
       </section>
     `;
   }
