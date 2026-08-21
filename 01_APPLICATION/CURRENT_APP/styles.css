@@ -171,3 +171,5 @@ body,button,select,textarea,.question-ar,.question-label,.intro-meaning,.feedbac
 /* Highlight for the rating the scheduler suggests. Replaces an inline style so the
    rating row can be rendered declaratively; appearance is unchanged. */
 .rating-btn.suggested{outline:2px solid var(--primary);outline-offset:1px}
+.feedback-flag{margin-block-start:12px}
+.feedback-hint{font-size:12px;color:var(--muted);margin-block-start:12px}
