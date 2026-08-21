@@ -1,0 +1,194 @@
+# Codemagic CI — DeutschFlow
+#
+# Gate 5 preparation. The default workflow validates that the Capacitor iOS project can
+# be generated and compiled on a real Mac, WITHOUT requiring Apple signing credentials,
+# so it can run today. Device installation and signing live in a separate workflow that
+# stays inactive until credentials are configured.
+#
+# Repository facts this config depends on (verified, not assumed):
+#   - package.json and capacitor.config.json are at the repository ROOT
+#   - the web app (Capacitor webDir) is 01_APPLICATION/CURRENT_APP
+#   - the test suite is `npm test` (vitest)
+#   - ios/ is generated on the build machine; it is not committed
+#
+# Toolchain: Capacitor 8 requires Xcode 26.0+ and Node 22+.
+
+definitions:
+  scripts:
+    - &verify_toolchain
+      name: Verify toolchain meets Capacitor 8 requirements
+      script: |
+        set -e
+        echo "Node:      $(node --version)"
+        echo "npm:       $(npm --version)"
+        echo "Xcode:     $(xcodebuild -version | head -1)"
+        echo "CocoaPods: $(pod --version)"
+        NODE_MAJOR=$(node -p "process.versions.node.split('.')[0]")
+        if [ "$NODE_MAJOR" -lt 22 ]; then
+          echo "ERROR: Capacitor 8 requires Node 22+, found $(node --version)"; exit 1
+        fi
+        XCODE_MAJOR=$(xcodebuild -version | head -1 | sed -E 's/Xcode ([0-9]+).*/\1/')
+        if [ "$XCODE_MAJOR" -lt 26 ]; then
+          echo "ERROR: Capacitor 8 requires Xcode 26.0+, found $(xcodebuild -version | head -1)"; exit 1
+        fi
+
+    - &install_dependencies
+      name: Install dependencies
+      script: |
+        set -e
+        # package.json lives at the repository root, alongside capacitor.config.json.
+        npm ci
+
+    - &run_tests
+      name: Run the regression suite
+      script: |
+        set -e
+        # The full suite must pass before any native work is attempted.
+        npm test
+
+    - &assert_native_storage_off
+      name: Assert native SQLite storage stays disabled
+      script: |
+        set -e
+        # Gate 5 validates that the native project builds, NOT that learner data moves.
+        # The persistence bootstrap must still default to IndexedDB.
+        BOOTSTRAP=01_APPLICATION/CURRENT_APP/src/platform/bootstrap-persistence.js
+        if ! grep -q "nativeStorageEnabled = false" "$BOOTSTRAP"; then
+          echo "ERROR: nativeStorageEnabled is no longer defaulted to false in $BOOTSTRAP"; exit 1
+        fi
+        echo "OK: nativeStorageEnabled defaults to false (IndexedDB remains active)"
+
+    - &generate_ios_platform
+      name: Generate the Capacitor iOS platform
+      script: |
+        set -e
+        # Uses the committed capacitor.config.json (appId, webDir, CapacitorSQLite config).
+        npx cap --version
+        if [ -d ios ]; then
+          echo "ios/ already present, reusing it"
+        else
+          npx cap add ios
+        fi
+
+    - &sync_ios
+      name: Sync web assets and install native dependencies
+      script: |
+        set -e
+        # cap sync copies webDir into the native project and runs pod install,
+        # which is where @capacitor-community/sqlite is integrated.
+        npx cap sync ios
+
+    - &verify_native_integration
+      name: Verify native dependency integration
+      script: |
+        set -e
+        PODFILE_LOCK=ios/App/Podfile.lock
+        test -f "$PODFILE_LOCK" || { echo "ERROR: $PODFILE_LOCK missing; pod install did not run"; exit 1; }
+
+        echo "--- Pods installed ---"
+        sed -n '/^PODS:/,/^DEPENDENCIES:/p' "$PODFILE_LOCK"
+
+        # The SQLite plugin must actually be linked, not merely present in node_modules.
+        if ! grep -qi "CapacitorCommunitySqlite" "$PODFILE_LOCK"; then
+          echo "ERROR: @capacitor-community/sqlite did not integrate into the Pods project"; exit 1
+        fi
+        echo "OK: CapacitorCommunitySqlite integrated"
+
+        # The web assets must have been copied into the native bundle.
+        test -f ios/App/App/public/index.html \
+          || { echo "ERROR: web assets were not copied into the iOS project"; exit 1; }
+        echo "OK: web assets copied from 01_APPLICATION/CURRENT_APP"
+
+    - &compile_unsigned
+      name: Compile the iOS project (unsigned)
+      script: |
+        set -e
+        # Simulator SDK + disabled code signing, so this validates that the project
+        # compiles without needing any Apple credentials.
+        xcodebuild \
+          -workspace ios/App/App.xcworkspace \
+          -scheme App \
+          -configuration Debug \
+          -sdk iphonesimulator \
+          -destination 'generic/platform=iOS Simulator' \
+          -derivedDataPath build/ios-derived \
+          CODE_SIGNING_ALLOWED=NO \
+          CODE_SIGNING_REQUIRED=NO \
+          CODE_SIGN_IDENTITY="" \
+          build | tee build/xcodebuild.log
+        echo "OK: Xcode project compiled"
+
+workflows:
+  ios-capacitor-validation:
+    name: iOS Capacitor Validation (unsigned)
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    environment:
+      # Capacitor 8 minimums: Xcode 26.0+, Node 22+.
+      xcode: 26.4
+      node: 22
+      cocoapods: default
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: mobile-foundation
+          include: true
+          source: true
+    scripts:
+      - *verify_toolchain
+      - *install_dependencies
+      - *run_tests
+      - *assert_native_storage_off
+      - name: Prepare build output directory
+        script: mkdir -p build
+      - *generate_ios_platform
+      - *sync_ios
+      - *verify_native_integration
+      - *compile_unsigned
+    artifacts:
+      - build/xcodebuild.log
+      - ios/App/Podfile.lock
+    publishing:
+      email:
+        recipients:
+          - mohammedyoussef8187@gmail.com
+        notify:
+          success: true
+          failure: true
+
+  # Not triggered automatically. Enable only after Apple signing credentials are
+  # configured in Codemagic (ios_signing certificate + provisioning profile, and a
+  # real bundle identifier replacing the com.deutschflow.app placeholder).
+  ios-signed-device-build:
+    name: iOS Signed Device Build (requires Apple credentials)
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    environment:
+      xcode: 26.4
+      node: 22
+      cocoapods: default
+      groups:
+        - appstore_credentials
+      ios_signing:
+        distribution_type: development
+        bundle_identifier: com.deutschflow.app
+    scripts:
+      - *verify_toolchain
+      - *install_dependencies
+      - *run_tests
+      - *assert_native_storage_off
+      - *generate_ios_platform
+      - *sync_ios
+      - *verify_native_integration
+      - name: Apply signing profiles
+        script: xcode-project use-profiles
+      - name: Build signed .ipa
+        script: |
+          set -e
+          xcode-project build-ipa \
+            --workspace ios/App/App.xcworkspace \
+            --scheme App
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log

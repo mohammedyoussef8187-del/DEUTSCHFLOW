@@ -1,1 +1,12 @@
 node_modules/
+
+# Native platform projects are generated on the build machine by `npx cap add ios`
+# during the Codemagic Gate 5 workflow, so they are build output rather than source.
+# Commit them deliberately later if native files need hand-editing (Info.plist,
+# signing, custom AppDelegate).
+ios/
+android/
+
+# Build output
+build/
+DerivedData/
