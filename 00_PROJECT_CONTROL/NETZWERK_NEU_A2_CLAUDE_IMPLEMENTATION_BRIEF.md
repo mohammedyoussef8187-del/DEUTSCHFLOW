@@ -6,13 +6,14 @@ Scope: implement the smallest evidence-backed Kapitel 2 intake slice. Do not ing
 
 Evidence and input:
 
-1. `00_PROJECT_CONTROL/NETZWERK_NEU_A2_KAPITEL_02_MANIFEST.json`
-2. `00_PROJECT_CONTROL/NETZWERK_NEU_A2_IMPLEMENTATION_INPUT.md`
-3. `00_PROJECT_CONTROL/NETZWERK_NEU_A2_OFFICIAL_SOURCE_AUDIT.md`
-4. `tools/intake/artifacts/netzwerk-inventory.json`
-5. `00_PROJECT_CONTROL/NETZWERK_NEU_A2_AUDIO_ASSET_INDEX.json`
-6. `00_PROJECT_CONTROL/NETZWERK_NEU_A2_STRUCTURE_INDEX.json`
-7. `00_PROJECT_CONTROL/NETZWERK_NEU_A2_KAPITEL_02_SAFE_SLICE.json`
+1. `00_PROJECT_CONTROL/NETZWERK_NEU_A2_PATCH_PLAN.md` — exact file edits, payloads, tests, and execution order
+2. `00_PROJECT_CONTROL/NETZWERK_NEU_A2_KAPITEL_02_MANIFEST.json`
+3. `00_PROJECT_CONTROL/NETZWERK_NEU_A2_IMPLEMENTATION_INPUT.md`
+4. `00_PROJECT_CONTROL/NETZWERK_NEU_A2_OFFICIAL_SOURCE_AUDIT.md`
+5. `tools/intake/artifacts/netzwerk-inventory.json`
+6. `00_PROJECT_CONTROL/NETZWERK_NEU_A2_AUDIO_ASSET_INDEX.json`
+7. `00_PROJECT_CONTROL/NETZWERK_NEU_A2_STRUCTURE_INDEX.json`
+8. `00_PROJECT_CONTROL/NETZWERK_NEU_A2_KAPITEL_02_SAFE_SLICE.json`
 
 Existing intake implementation:
 
@@ -62,11 +63,11 @@ Tests and fixtures:
 | Validation | `tools/intake/validate.js` | `SEVERITY`, `mergeValidation()` | Reuse result shape. Add Netzwerk-specific checks separately. |
 | Warning gate | `tools/intake/batch.js` | `classifyWarning()`, `DECISION`, `checkIdentity()` | Reuse concepts. Do not generalize `previewCandidate()` in the first slice; it imports Nicos functions directly. |
 | Preview/diff | `tools/intake/import.js` | `repositoryFor()`, `classifyRow()`, `flattenRows()`, `planImport()` | Reuse. Make only the optional-aggregate change described below. |
-| Import | `tools/intake/import.js` | `applyImport()` | Reuse repository-only transactional path; add top-level `audioAssets` and optional `listening`. |
-| Verification | `tools/intake/import.js` | `verifyImport()` | Reuse service readback; make listening optional and report source-only audio count. |
+| Import | `tools/intake/import.js` | `applyImport()` | Add top-level `audioAssets` and optional `listening`; wrap the whole batch in `repositories.lifecycle.transaction()` so nested aggregate writes share one rollback boundary. |
+| Verification | `tools/intake/import.js` | `verifyImport()` | Keep existing three-argument callers valid; accept optional `{ repositories }` for exact source-only audio readback, and make listening conditional. |
 | Nicos mapper | `tools/intake/map-canonical.js` | `IMPORTED_STATUS`, `vocabularyKey()`, `glossFingerprint()`, `mapLesson()` | Reuse `IMPORTED_STATUS` only. `mapLesson()` assumes Nicos transcript/vocabulary and must not receive Netzwerk data. |
 | Stable IDs | `src/migration/uuid.js` | `deterministicUuid()` | Reuse with the established intake namespaces listed below. |
-| Audio mapping | `tools/intake/netzwerk-audio.js` | `buildNetzwerkAudioAssets()`, `audioMappingReport()` | Reuse UUID, checksum, slug, and `source-only` behavior. Enrich `sourceReference` from the manifest; never add page/task. |
+| Audio mapping | `tools/intake/netzwerk-audio.js` | `buildNetzwerkAudioAssets()`, `audioMappingReport()` | Keep unchanged for the existing full 189-file inventory/registration route. The Kapitel 2 mapper consumes the reviewed safe slice and verifies the same path-based UUID convention. |
 | Persistence | `src/platform/sqlite/adapter.js` | `createSqliteAdapter()` | Existing adapter only; no direct SQL from intake. |
 | Repositories | `src/data/canonical-repositories.js` | `createCanonicalRepositories()`, `write.content.saveCourse()` | Required write boundary. Audio assets use their repository `upsert`; no learner repository is involved. |
 | Services | `src/runtime/composition-root.js` | `createServices()`, `REPOSITORY_ALIASES` | Verify course readback through `services.curriculum`; verify audio through repository/service as available. |
@@ -83,12 +84,21 @@ Provenance is built in private `provenance()` and `textRow()` helpers in `map-ca
 Do not refactor the Nicos batch adapter first. Add a manifest-backed Netzwerk builder parallel to `buildLesson()`:
 
 ```js
-buildNetzwerkChapter({ manifest, chapter = 2, now }) => {
+buildNetzwerkChapter({
+  manifest,
+  structureIndex,
+  audioAssetIndex,
+  safeSlice,
+  chapter = 2,
+  now
+}) => {
   evidence,
   validation,
   mapped
 }
 ```
+
+See `NETZWERK_NEU_A2_PATCH_PLAN.md` for the exact payload and orchestration contracts. Rich evidence remains adapter/validation data because the canonical schema has no source-metadata or JSON-provenance entity.
 
 Internally it needs only three pure operations:
 
@@ -194,6 +204,7 @@ Modify:
 - `tools/intake/run-netzwerk.mjs` — add manifest-backed preview/apply after existing inventory gate
 - `tools/intake/import.js` — allow `listening: null`; flatten/apply top-level `audioAssets`; verify optional listening and source-only assets
 - `tests/integration/netzwerk-intake.test.js` — retain all refusal/audio tests and add end-to-end manifest slice tests
+- `tests/integration/intake-import.test.js` — strengthen the existing rollback test to prove the whole batch, including the earlier course aggregate, rolls back
 
 Do not modify schema, repositories, application runtime, Nicos parser/fixtures, learner data, SRS, or the manifest during implementation.
 
