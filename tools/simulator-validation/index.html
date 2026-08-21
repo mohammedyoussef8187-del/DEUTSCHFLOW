@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<!--
+  Gate 5 simulator validation page.
+
+  Copied into the INSTALLED app bundle by the Codemagic workflow (as public/index.html)
+  for the validation launches only. It is not part of the production web app and is never
+  served to a learner.
+
+  It sits one directory above the app's own modules once copied, so the harness imports
+  ../src/... relative to public/.
+-->
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>DF-VALIDATION-RUNNING</title>
+  <style>
+    body { font: 13px/1.5 -apple-system, monospace; margin: 0; padding: 16px; background: #0b1120; color: #e2e8f0; }
+    h1 { font-size: 15px; margin: 0 0 12px; }
+    pre { white-space: pre-wrap; word-break: break-word; margin: 0; }
+  </style>
+</head>
+<body>
+  <h1>DeutschFlow — Gate 5 simulator validation</h1>
+  <pre id="out"></pre>
+
+  <!-- The app's own modules expect these mount points if anything touches them. -->
+  <div id="app" hidden></div>
+  <div id="modal-root" hidden></div>
+  <div id="toast-root" hidden></div>
+
+  <script type="module">
+    import { runValidation } from "./validation-harness.js";
+    runValidation();
+  </script>
+</body>
+</html>

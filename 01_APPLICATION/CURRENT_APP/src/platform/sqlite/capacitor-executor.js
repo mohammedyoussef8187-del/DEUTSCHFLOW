@@ -108,7 +108,10 @@ export async function openCapacitorSqlite(options = {}) {
 
   let sqlite = connection;
   if (!sqlite) {
-    const { CapacitorSQLite, SQLiteConnection } = await import("@capacitor-community/sqlite");
+    /* Vendored ESM bundle rather than the bare "@capacitor-community/sqlite"
+       specifier: this app ships plain ES modules with no bundler, and a bare
+       specifier does not resolve in the WebView. Rebuild with `npm run build:vendor`. */
+    const { CapacitorSQLite, SQLiteConnection } = await import("../../../vendor/capacitor-sqlite.js");
     sqlite = new SQLiteConnection(CapacitorSQLite);
   }
 

@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "vitest run",
-    "build:vendor": "esbuild node_modules/lit/index.js --bundle --format=esm --minify --legal-comments=inline --outfile=01_APPLICATION/CURRENT_APP/vendor/lit.js"
+    "build:vendor": "npm run build:vendor:lit && npm run build:vendor:sqlite",
+    "build:vendor:lit": "esbuild node_modules/lit/index.js --bundle --format=esm --minify --legal-comments=inline --outfile=01_APPLICATION/CURRENT_APP/vendor/lit.js",
+    "build:vendor:sqlite": "esbuild node_modules/@capacitor-community/sqlite/dist/esm/index.js --bundle --format=esm --legal-comments=inline --outfile=01_APPLICATION/CURRENT_APP/vendor/capacitor-sqlite.js"
   },
   "keywords": [],
   "author": "",
