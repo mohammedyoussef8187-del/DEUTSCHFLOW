@@ -58,6 +58,31 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
 *   **No history touched:** no attempt, card, due date, ease, lapse, mastery or streak modified or recomputed. A test migrates a recognition card built up under the old Arabic-scored rules and asserts all 14 SRS fields survive field-for-field, including through SQLite.
 *   **Verification limit:** the in-app recognition flow was not reachable in a browser from a fresh seeded profile, because recognition cards unlock with future due dates. Covered by tests of the runtime wiring, the advisory evaluator, and the feedback component instead of a live session.
 
+## PRODUCT COMPLETION AUDIT (2026-08-21, after Feature I)
+
+### Working end-to-end for a learner today
+*   Vocabulary study over **2,820 German↔Arabic items** (`data/seed-data.js`, `window.SEED`), on legacy IndexedDB.
+*   SRS scheduling (`recall` + `recognition`), deterministic German/article scoring, Arabic advisory-only and self-assessed.
+*   Full study loop: question prompt → answer input → reveal → hint → rating → session-end summary. Five routes: home, words, study, stats, settings.
+*   Words list and editor, stats and charts, settings, backup/restore, import, PWA offline, iPad-first shell, focus/a11y handling.
+*   **15 Lit components** are wired into `app.js`.
+
+### Architecture-only — built, tested, NOT reachable by a learner
+*   Features **A–I** (multilingual content, grammar, sentences, exercises, courses/lessons/CEFR, error learning, listening, pronunciation, reminders): schema + service + tests + a component each.
+*   **None of their services is imported by `app.js`.** Only `review-summary-service` is.
+*   **6 components are unreferenced by the runtime**: `df-sentence-card`, `df-course-outline`, `df-lesson-view`, `df-error-insights`, `df-listening-player`, `df-pronunciation-card`, plus `df-reminder-settings`.
+*   `bootstrapPersistence()` and `createCanonicalRepositories()` are **never called from the running app** — only from tests and the CI simulator harness. The canonical model is entirely outside the runtime.
+
+### Genuine functional gaps, ranked by what they block
+1.  **No incremental write path on the canonical model.** `createSqliteAdapter` exposes only `initializeSchema`, `schemaVersion`, `importCanonical` (bulk, migration-only), `readCanonical`, `selectAll`, `verifyIntegrity`; `createCanonicalRepositories` exposes `all()` per entity and nothing else. **Nothing new can be recorded**: no review, no error event, no lesson/section completion, no pronunciation attempt, no reminder row. This blocks wiring every feature A–I, because they all need to write. **Small, well-bounded, and fully testable today with the existing `node:sqlite` test executor — no device needed.**
+2.  **No authored canonical content exists anywhere.** Every content table is empty in every code path, by design (migration invents nothing, and there is no authoring pipeline). Even with reads wired, grammar/sentence/exercise/course/listening/pronunciation UI would render an empty state. Needs a content import pipeline plus real verified content; the Netzwerk PDFs are in `03_COURSE_CONTENT/` but nothing is extracted, and the 189 A2 MP3s stay `source-only` by explicit decision.
+3.  **No runtime composition root for the new services.** No routes, no navigation entries, and nothing that constructs repositories and injects them into the services.
+4.  **Learner storage is still legacy IndexedDB.** `learnerSwitchEnabled = false`, blocked on the physical-device gate, which is blocked on a paid Apple Developer account. Until then the canonical model holds no runtime data.
+5.  **Reminders can never fire**: gate off, no Capacitor plugin installed, no bridge, and no settings screen renders `<df-reminder-settings>`.
+6.  Known/deferred: physical-device gate; placeholder bundle id `com.deutschflow.app`; SQLCipher export-compliance review; `exportBackup` still writes `schemaVersion: 5` while the canonical schema is at 10.
+
+### Highest-value next step
+**Gap 1 — the incremental write path.** It unblocks gaps 2, 3 and 5, needs no hardware and no product decision, and is verifiable with the existing test executor. Wiring anything before it exists would produce read-only screens that cannot record what the learner does.
 ## Feature I — Reminders / Notifications (IMPLEMENTED)
 *   **Canonical schema v10**, 57 tables: `reminder_settings` (what the learner asked for) and `reminder_schedule` (what was scheduled, delivered or cancelled). Neither stores a due date, a card, a count of work or any progress — deleting every row changes nothing a learner earned.
 *   **A reminder time is wall-clock, not an instant.** `19:30` means half past seven in the learner's own evening, which is a different absolute instant after a flight or a clock change, so only `HH:MM` is stored and the instant is derived at planning time.
