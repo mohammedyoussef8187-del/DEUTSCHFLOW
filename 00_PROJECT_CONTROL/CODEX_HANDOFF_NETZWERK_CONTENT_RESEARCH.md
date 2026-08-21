@@ -61,7 +61,7 @@ Do not ingest Netzwerk publisher-authored educational content from the audited s
 
 ## Commit / cherry-pick
 
-Content commit SHA: `PENDING_COMMIT`
+Content commit SHA: `fc0129eebc0de4f031ccd38920da82c1967478ae`
 
 Cherry-pick that documentation commit onto the implementation branch. A handoff-only follow-up commit may also be listed if needed to record the content SHA.
 

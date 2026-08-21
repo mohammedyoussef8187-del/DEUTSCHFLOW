@@ -1,6 +1,6 @@
 # Netzwerk neu A2 — Content Rights Matrix
 
-Research date: 2026-08-22  
+Research date: 2026-08-22
 Scope: official Klett/Allango evidence only; all 12 chapters; no legal conclusion beyond the cited notices.
 
 ## Result
@@ -94,4 +94,3 @@ Audio totals remain: **0 proven exact page/exercise mappings**, **189 partially 
 ## Rights conclusion and unblock requirement
 
 The current maximum safe implementation boundary is source/bibliographic/structural metadata plus external official links. It does not include publisher-authored educational content. The only path to a non-empty `SAFE_TO_INGEST` publisher-content dataset is written permission or a licence from Ernst Klett Sprachen that expressly covers extraction, local app storage, modification if needed, and private/public application redistribution (including App Store distribution and audio where applicable).
-
