@@ -613,9 +613,27 @@ async function submitAnswer(state,payload){
   function render(state){
     applyTheme(state.settings);
     const app=document.getElementById("app");
-    if(state.route==="study"){app.innerHTML=renderStudy(state);afterRender(state);return;}
+    /* الصفحة تُعاد كتابتها بالكامل، فيضيع تركيز الحقل وموضع المؤشر أثناء الكتابة
+       (مثل حقل البحث الذي يُعاد رسمه بعد كل ضغطة). نلتقط الحالة ونعيدها بعد الرسم. */
+    const focus=captureFocus(app);
+    if(state.route==="study"){app.innerHTML=renderStudy(state);afterRender(state);restoreFocus(focus);return;}
     app.innerHTML=`<div class="layout">${renderTopbar(state)}<main class="content">${renderPage(state)}</main></div>${renderNav(state)}`;
     afterRender(state);
+    restoreFocus(focus);
+  }
+  function captureFocus(root){
+    const el=document.activeElement;
+    if(!el||!el.id||!root.contains(el))return null;
+    let start=null,end=null;
+    try{start=el.selectionStart;end=el.selectionEnd;}catch{}
+    return {id:el.id,start,end};
+  }
+  function restoreFocus(focus){
+    if(!focus)return;
+    const el=document.getElementById(focus.id);
+    if(!el||el===document.activeElement)return;
+    el.focus({preventScroll:true});
+    if(focus.start!=null){try{el.setSelectionRange(focus.start,focus.end);}catch{}}
   }
   function renderTopbar(state){return `<header class="topbar"><div class="brand"><span class="logo">DF</span><div>DeutschFlow<small>تعلّم الألمانية بذكاء</small></div></div><div class="top-actions"><button class="icon-btn" data-action="cycle-theme" title="تغيير المظهر">${ICONS.sun}</button>${state.installPrompt?'<button class="ghost-btn hide-mobile" data-action="install-app">تثبيت التطبيق</button>':''}</div></header>`;}
   function renderNav(state){const routes=[["home",ICONS.home,"الرئيسية"],["words",ICONS.words,"الكلمات"],["study",ICONS.study,"تعلّم"],["stats",ICONS.stats,"الإحصائيات"],["settings",ICONS.settings,"الإعدادات"]];return `<nav class="bottom-nav">${routes.map(([r,i,l])=>`<button class="nav-btn ${state.route===r?'active':''}" data-action="nav" data-route="${r}">${i}<span>${l}</span></button>`).join("")}</nav>`;}
