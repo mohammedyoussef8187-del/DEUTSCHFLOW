@@ -79,3 +79,22 @@ describe("iPad/iPhone viewport and touch refinements", () => {
     expect(CSS).toContain("@media (max-height:520px)");
   });
 });
+
+describe("iPad workspace density", () => {
+  it("splits the vocabulary list into two columns from tablet landscape", () => {
+    const tablet = CSS.slice(CSS.indexOf("iPad workspace density"));
+    expect(tablet).toContain(".list-card{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))");
+    // display:contents keeps the article as the grid item, preserving its own layout.
+    expect(tablet).toContain("df-word-row{display:contents}");
+  });
+
+  it("keeps the column seam RTL-safe", () => {
+    const tablet = CSS.slice(CSS.indexOf("iPad workspace density"));
+    expect(tablet).toContain("border-inline-end");
+    expect(tablet).not.toMatch(/border-right:\s*1px/);
+  });
+
+  it("tracks the visible viewport for modal height on iOS", () => {
+    expect(CSS).toContain(".modal{max-height:88vh;max-height:88dvh}");
+  });
+});

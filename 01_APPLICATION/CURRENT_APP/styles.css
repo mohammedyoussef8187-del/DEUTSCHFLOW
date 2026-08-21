@@ -195,3 +195,18 @@ body,button,select,textarea,.question-ar,.question-label,.intro-meaning,.feedbac
 @media (max-height:520px){
   .study-layout{padding-block-start:max(8px,env(safe-area-inset-top));padding-block-end:max(12px,env(safe-area-inset-bottom))}
 }
+
+/* ===== iPad workspace density =====
+   A single 1000px-wide row is a stretched phone layout, not a tablet one. From tablet
+   landscape the vocabulary list becomes two columns so more of the deck is scannable at
+   once. df-word-row is display:contents so the article itself remains the grid item and
+   its own internal grid is untouched. */
+@media (min-width:900px){
+  .list-card{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-content:start}
+  df-word-row{display:contents}
+  /* Vertical seam between the two columns. */
+  .list-card>df-word-row:nth-child(odd)>.word-row{border-inline-end:1px solid var(--border)}
+}
+
+/* Modal height should track the visible viewport on iOS, like the page layouts. */
+.modal{max-height:88vh;max-height:88dvh}
