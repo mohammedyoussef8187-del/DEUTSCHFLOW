@@ -14,6 +14,7 @@ import "./ui/components/df-answer-actions.js";
 import "./ui/components/df-rating-row.js";
 import "./ui/components/df-answer-feedback.js";
 import "./ui/components/df-question-prompt.js";
+import "./ui/components/df-word-row.js";
 
 (function(){
   "use strict";
@@ -677,7 +678,11 @@ async function submitAnswer(state,payload){
       <section class="card list-card">${shown.length?shown.map(w=>wordRow(state,w)).join(""):'<div class="empty">لا توجد كلمات مطابقة.</div>'}</section>
       ${shown.length<list.length?`<button class="ghost-btn load-more" data-action="load-more">عرض المزيد</button>`:""}`;
   }
-  function wordRow(state,w){const status=DF.wordStatus(w,state.cards),mastery=DF.wordMastery(w,state.cards);return `<article class="word-row" data-action="edit-word" data-id="${w.id}"><div class="word-main"><div class="word-german" lang="de">${DF.esc(w.german)}</div><div class="word-arabic">${DF.esc(w.arabic)}${w.pronunciation?` · ${DF.esc(w.pronunciation)}`:""}</div></div><div class="word-side">${w.favorite?'⭐':''}${w.qualityStatus==='review'?'<span class="pill due">بيانات</span>':''}<span class="pill">${mastery}%</span>${statusPill(status)}</div></article>`;}
+  function wordRow(state,w){
+    const status=DF.wordStatus(w,state.cards),mastery=DF.wordMastery(w,state.cards);
+    const statusClass=status==="overdue"?"weak":status;
+    return `<df-word-row wordid="${DF.esc(w.id)}" german="${DF.esc(w.german)}" arabic="${DF.esc(w.arabic)}" pronunciation="${DF.esc(w.pronunciation||"")}" ${w.favorite?"favorite":""} ${w.qualityStatus==="review"?"flagged":""} mastery="${mastery}" statusclass="${statusClass}" statuslabel="${DF.esc(statusLabel(status))}"></df-word-row>`;
+  }
 
   function renderStats(state){
     const counts=summarizeLearnerState({words:state.words,cards:state.cards}).counts,attempts=state.recentAttempts||[],analytics=DF.attemptAnalytics(attempts),audit=state.audit||DF.dataAudit(state.words),days=[];
