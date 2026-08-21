@@ -5,6 +5,17 @@ All notable changes to the **DeutschFlow** project will be documented in this fi
 ## [Unreleased]
 
 ### Added
+*   Completed all work that does not depend on the native SQLite switch (option (c); no learner data modified, SRS untouched):
+    *   Finished the study screen migration with the sentence-order builder; migrated settings rows and the statistics charts. 15 Lit components in total.
+    *   Indexed cards by word instead of rescanning per word: 14.9ms to 1.8ms on the real 2820-word deck with identical results. Not cached across renders, since state.cards is mutated in place.
+    *   Accessibility: role=switch settings toggles with names, aria-pressed filter chips, a polite live result count, a real progressbar for skill accuracy, a labelled activity chart with a per-day text alternative, proper search semantics, and every touch target at the 44pt minimum.
+
+### Fixed
+*   Statistics tiles rendered NaN for first-attempt accuracy and average answer time.
+*   Session-summary and audit-row number formatting differed; consolidating them naively would have changed the session summary and dropped the "+" from the XP tile.
+*   Field focus and caret were lost on every re-render, which dismissed the on-screen keyboard while typing in vocabulary search.
+*   Dialogs did not move, trap, or restore focus, making them unusable with a keyboard including an iPad external keyboard.
+*   The PWA did not work offline: the service worker never populated its cache, so the whole module graph missed on every offline request.
 *   Completed the Study/SRS UI migration and the main-screen migration (no learner data modified, SRS algorithm untouched):
     *   Migrated all five interactive study controls one at a time — answer input, hint, reveal, rating controls, and the session-end summary — each verified against the study interaction suite and in the browser.
     *   Migrated the remaining study presentation: study progress, teaching panel, question prompt, answer feedback, and multiple-choice answers; plus the vocabulary row on the words page.

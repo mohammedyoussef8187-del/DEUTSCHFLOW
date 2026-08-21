@@ -17,7 +17,8 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
 *   **UI consolidation Git commit:** `91f5804` (feat: migrate study progress strip to Lit)
 *   **study presentation Git commit:** `c7a58ba` (feat: migrate the study teaching panel to Lit)
 *   **UI migration complete Git commit:** `60f2526` (feat: migrate the multiple-choice answers to Lit)
-*   **Last Update Timestamp:** 2026-08-21T06:20:00+03:00
+*   **option (c) work Git commit:** `e872810` (fix: make the PWA actually work offline)
+*   **Last Update Timestamp:** 2026-08-21T07:10:00+03:00
 
 ## Current Context
 *   **Current Phase:** PHASE 4 — MIGRATION MAPPING + SQLITE PARITY VALIDATION
@@ -45,6 +46,29 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
 *   **Study route safe areas:** the study screen renders full-screen outside `.layout`, so the shell insets did not reach it. It now has its own inline/top/bottom safe-area padding for notched iPhones and iPad landscape.
 *   **Remaining study migration order:** session-end summary next (read-only), then the answer input, reveal, hint, and rating controls LAST, one at a time, re-running the study interaction suite after each.
 
+
+
+## Option (c) Work — Everything Not Requiring the Native SQLite Switch
+Decision recorded: build the richer canonical model ONCE, after Gate 5. The legacy IndexedDB schema is NOT extended with grammar/lessons/CEFR/English content.
+
+*   **Study screen fully migrated** (15 Lit components total): order builder completes it, alongside progress, word panel, question prompt, answer input, answer actions, rating row, feedback, and choice list.
+*   **Settings rows** migrated to `df-setting-row` (toggle + number variants).
+*   **Stats charts** migrated to `df-skill-bar` and `df-activity-chart`; dead `skillBar()` removed.
+*   **Vocabulary list**: `df-word-row`, two-column iPad layout, accessible search/filters.
+
+### Defects found and fixed (each separate from its refactor)
+1.  **Statistics tiles rendered NaN** (`ليس رقمًا`) for accuracy and average answer time.
+2.  **Session-summary vs audit formatting** — a shared helper would have silently localized raw values and dropped the `+` from the XP tile.
+3.  **Focus lost on every render** — typing in vocabulary search dropped focus and reset the caret every 160ms; on iPad/iPhone this dismissed the keyboard mid-search. `render()` now captures and restores focus and selection.
+4.  **Dialogs unusable by keyboard** — no focus move on open, no Tab trap, no focus return on close. All three now implemented, plus `aria-labelledby` from the dialog heading.
+5.  **PWA did not work offline** — the service worker never wrote to its cache, so the entire module graph missed on every offline request. Runtime caching added; strategy still network-first.
+
+### Performance
+*   Card lookups were O(words × cards) on the vocabulary page (per keystroke) and the dashboard summary. Now indexed by word: **14.9ms → 1.8ms** on the real 2820-word deck, zero result differences. Deliberately not cached across renders, because `state.cards` is mutated in place and a stale index would show wrong statuses after studying.
+
+### Accessibility
+*   Settings toggles are now `role=switch` with accessible names (previously empty buttons announcing only state); filter chips expose `aria-pressed`; the result count is a polite live region; the skill bar is a real progressbar; the activity chart is a labelled image with a per-day text alternative; search has proper `type=search` semantics and mobile keyboard hints.
+*   **All touch targets now meet the 44pt HIG minimum**, verified across every route at phone and tablet sizes. The switch keeps its 48×28 look via an invisible expanded hit area.
 
 ## Study/SRS UI Migration (COMPLETE) and Main-Screen Migration
 *   All five interactive study controls migrated one at a time, each verified against the study interaction suite and in the browser: **answer input**, **hint**, **reveal**, **rating controls**, plus the **session-end summary** consolidation.
