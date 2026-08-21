@@ -18,13 +18,20 @@
  * recording whether an answer may decide correctness. English and Arabic carry equal
  * educational weight; only German and English may score. See src/content/languages.js.
  *
+ * Version 3 adds grammar as first-class structured content: topics, rules, examples,
+ * and a single grammar_texts table where LANGUAGE IS A ROW rather than a column. That
+ * shape is deliberate — it makes English and Arabic structurally equal peers, lets a
+ * language be added without a schema change, and stops one language becoming the
+ * "default" that others hang off. Each text row carries its own content lifecycle, so an
+ * Arabic explanation can be verified independently of its English counterpart.
+ *
  * Version 1 was never activated for learners (nativeStorageEnabled stayed false through
  * Gate 5), so no deployed v1 database exists and v2 is the first version any learner
  * database will see. A forward migration step becomes necessary only once a learner
  * database has actually been written.
  */
 
-export const SCHEMA_VERSION = 2;
+export const SCHEMA_VERSION = 3;
 
 export const SCHEMA_STATEMENTS = [
   `CREATE TABLE IF NOT EXISTS learner_profiles (
@@ -146,6 +153,105 @@ export const SCHEMA_STATEMENTS = [
     revision INTEGER NOT NULL DEFAULT 1,
     deleted INTEGER NOT NULL DEFAULT 0,
     FOREIGN KEY (meaning_uuid) REFERENCES vocabulary_meanings(uuid) ON DELETE CASCADE
+  )`,
+
+  `CREATE TABLE IF NOT EXISTS grammar_topics (
+    uuid TEXT PRIMARY KEY,
+    slug TEXT NOT NULL UNIQUE,
+    level TEXT NOT NULL DEFAULT '',
+    category TEXT,
+    ordering INTEGER NOT NULL DEFAULT 0,
+    content_status TEXT NOT NULL DEFAULT 'draft',
+    content_version INTEGER NOT NULL DEFAULT 1,
+    source_reference TEXT,
+    source_type TEXT,
+    verified_at INTEGER,
+    verified_by TEXT,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    revision INTEGER NOT NULL DEFAULT 1,
+    deleted INTEGER NOT NULL DEFAULT 0
+  )`,
+
+  `CREATE TABLE IF NOT EXISTS grammar_rules (
+    uuid TEXT PRIMARY KEY,
+    topic_uuid TEXT NOT NULL,
+    slug TEXT NOT NULL,
+    ordering INTEGER NOT NULL DEFAULT 0,
+    content_status TEXT NOT NULL DEFAULT 'draft',
+    content_version INTEGER NOT NULL DEFAULT 1,
+    source_reference TEXT,
+    source_type TEXT,
+    verified_at INTEGER,
+    verified_by TEXT,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    revision INTEGER NOT NULL DEFAULT 1,
+    deleted INTEGER NOT NULL DEFAULT 0,
+    FOREIGN KEY (topic_uuid) REFERENCES grammar_topics(uuid) ON DELETE CASCADE
+  )`,
+
+  `CREATE INDEX IF NOT EXISTS idx_grammar_rules_topic ON grammar_rules (topic_uuid, ordering)`,
+
+  `CREATE TABLE IF NOT EXISTS grammar_examples (
+    uuid TEXT PRIMARY KEY,
+    rule_uuid TEXT NOT NULL,
+    german TEXT NOT NULL,
+    ordering INTEGER NOT NULL DEFAULT 0,
+    content_status TEXT NOT NULL DEFAULT 'draft',
+    content_version INTEGER NOT NULL DEFAULT 1,
+    source_reference TEXT,
+    source_type TEXT,
+    verified_at INTEGER,
+    verified_by TEXT,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    revision INTEGER NOT NULL DEFAULT 1,
+    deleted INTEGER NOT NULL DEFAULT 0,
+    FOREIGN KEY (rule_uuid) REFERENCES grammar_rules(uuid) ON DELETE CASCADE
+  )`,
+
+  `CREATE INDEX IF NOT EXISTS idx_grammar_examples_rule ON grammar_examples (rule_uuid, ordering)`,
+
+  /*
+   * One text row per (owner, language, kind). Language is a ROW, not a column, so
+   * English and Arabic are peers by construction and a third language needs no schema
+   * change. owner_type is 'topic' | 'rule' | 'example'.
+   */
+  `CREATE TABLE IF NOT EXISTS grammar_texts (
+    uuid TEXT PRIMARY KEY,
+    owner_type TEXT NOT NULL,
+    owner_uuid TEXT NOT NULL,
+    language TEXT NOT NULL,
+    kind TEXT NOT NULL,
+    text TEXT NOT NULL,
+    content_status TEXT NOT NULL DEFAULT 'draft',
+    content_version INTEGER NOT NULL DEFAULT 1,
+    source_reference TEXT,
+    source_type TEXT,
+    verified_at INTEGER,
+    verified_by TEXT,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    revision INTEGER NOT NULL DEFAULT 1,
+    deleted INTEGER NOT NULL DEFAULT 0,
+    UNIQUE(owner_type, owner_uuid, language, kind)
+  )`,
+
+  `CREATE INDEX IF NOT EXISTS idx_grammar_texts_owner ON grammar_texts (owner_type, owner_uuid)`,
+
+  /* Links vocabulary to the grammar it demonstrates, without either owning the other. */
+  `CREATE TABLE IF NOT EXISTS vocabulary_grammar (
+    uuid TEXT PRIMARY KEY,
+    vocab_uuid TEXT NOT NULL,
+    rule_uuid TEXT NOT NULL,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    revision INTEGER NOT NULL DEFAULT 1,
+    deleted INTEGER NOT NULL DEFAULT 0,
+    UNIQUE(vocab_uuid, rule_uuid),
+    FOREIGN KEY (vocab_uuid) REFERENCES vocabulary_items(uuid) ON DELETE CASCADE,
+    FOREIGN KEY (rule_uuid) REFERENCES grammar_rules(uuid) ON DELETE CASCADE
   )`,
 
   `CREATE TABLE IF NOT EXISTS review_cards (
@@ -306,6 +412,67 @@ export const TABLE_SPECS = [
       ["translation_uuid", "translationUuid"], ["text", "text"],
       ["language", "language"], ["scoreable", "scoreable"], ["created_at", "createdAt"],
       ["updated_at", "updatedAt"], ["revision", "revision"], ["deleted", "deleted"]
+    ]
+  },
+  {
+    entity: "grammarTopics",
+    table: "grammar_topics",
+    columns: [
+      ["uuid", "uuid"], ["slug", "slug"], ["level", "level"],
+      ["category", "category"], ["ordering", "ordering"],
+      ["content_status", "contentStatus"], ["content_version", "contentVersion"],
+      ["source_reference", "sourceReference"], ["source_type", "sourceType"],
+      ["verified_at", "verifiedAt"], ["verified_by", "verifiedBy"],
+      ["created_at", "createdAt"], ["updated_at", "updatedAt"],
+      ["revision", "revision"], ["deleted", "deleted"]
+    ]
+  },
+  {
+    entity: "grammarRules",
+    table: "grammar_rules",
+    columns: [
+      ["uuid", "uuid"], ["topic_uuid", "topicUuid"], ["slug", "slug"],
+      ["ordering", "ordering"],
+      ["content_status", "contentStatus"], ["content_version", "contentVersion"],
+      ["source_reference", "sourceReference"], ["source_type", "sourceType"],
+      ["verified_at", "verifiedAt"], ["verified_by", "verifiedBy"],
+      ["created_at", "createdAt"], ["updated_at", "updatedAt"],
+      ["revision", "revision"], ["deleted", "deleted"]
+    ]
+  },
+  {
+    entity: "grammarExamples",
+    table: "grammar_examples",
+    columns: [
+      ["uuid", "uuid"], ["rule_uuid", "ruleUuid"], ["german", "german"],
+      ["ordering", "ordering"],
+      ["content_status", "contentStatus"], ["content_version", "contentVersion"],
+      ["source_reference", "sourceReference"], ["source_type", "sourceType"],
+      ["verified_at", "verifiedAt"], ["verified_by", "verifiedBy"],
+      ["created_at", "createdAt"], ["updated_at", "updatedAt"],
+      ["revision", "revision"], ["deleted", "deleted"]
+    ]
+  },
+  {
+    entity: "grammarTexts",
+    table: "grammar_texts",
+    columns: [
+      ["uuid", "uuid"], ["owner_type", "ownerType"], ["owner_uuid", "ownerUuid"],
+      ["language", "language"], ["kind", "kind"], ["text", "text"],
+      ["content_status", "contentStatus"], ["content_version", "contentVersion"],
+      ["source_reference", "sourceReference"], ["source_type", "sourceType"],
+      ["verified_at", "verifiedAt"], ["verified_by", "verifiedBy"],
+      ["created_at", "createdAt"], ["updated_at", "updatedAt"],
+      ["revision", "revision"], ["deleted", "deleted"]
+    ]
+  },
+  {
+    entity: "vocabularyGrammar",
+    table: "vocabulary_grammar",
+    columns: [
+      ["uuid", "uuid"], ["vocab_uuid", "vocabUuid"], ["rule_uuid", "ruleUuid"],
+      ["created_at", "createdAt"], ["updated_at", "updatedAt"],
+      ["revision", "revision"], ["deleted", "deleted"]
     ]
   },
   {

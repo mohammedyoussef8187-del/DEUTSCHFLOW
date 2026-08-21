@@ -100,6 +100,15 @@ export function migrateToCanonical(snapshot = {}, options = {}) {
      */
     translations: [],
     acceptedAnswers: [],
+    /*
+     * Grammar is authored content, not migrated learner data: the legacy model has no
+     * grammar at all, so these start empty and are populated by content authoring.
+     */
+    grammarTopics: [],
+    grammarRules: [],
+    grammarExamples: [],
+    grammarTexts: [],
+    vocabularyGrammar: [],
     reviewCards: [],
     reviewEvents: [],
     quarantine: []

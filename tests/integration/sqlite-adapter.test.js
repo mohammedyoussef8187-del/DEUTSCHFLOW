@@ -36,8 +36,10 @@ describe("SQLite canonical persistence adapter", () => {
       "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name", []
     );
     expect(tables.map(t => t.name)).toEqual([
-      "accepted_answers", "learner_profiles", "migration_quarantine", "review_cards",
-      "review_events", "settings", "translations", "vocabulary_items", "vocabulary_meanings"
+      "accepted_answers", "grammar_examples", "grammar_rules", "grammar_texts",
+      "grammar_topics", "learner_profiles", "migration_quarantine", "review_cards",
+      "review_events", "settings", "translations", "vocabulary_grammar",
+      "vocabulary_items", "vocabulary_meanings"
     ]);
   });
 

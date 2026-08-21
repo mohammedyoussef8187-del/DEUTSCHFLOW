@@ -4,7 +4,12 @@ All notable changes to the **DeutschFlow** project will be documented in this fi
 
 ## [Unreleased]
 
+### Changed
+*   **Arabic no longer affects scored answer correctness.** Recognition became a self-assessed skill: the learner types the Arabic meaning and gets feedback, but rates their own recall, and that rating drives SRS. The advisory evaluator returns `isCorrect: null` rather than `false`, so a spelling variant cannot lapse a card. German and English keep deterministic accepted-answer scoring. No historical attempt, card, due date, ease, lapse, mastery or streak was modified or recomputed.
+
 ### Added
+*   Feature B — grammar as first-class structured content. Canonical schema v3 adds topics, rules, examples, a vocabulary-to-rule link, and a `grammar_texts` table where language is a row rather than a column, making English and Arabic structural peers each with their own content lifecycle. `grammar-service.js` assembles the curriculum and reports translation coverage. Grammar grades nothing.
+*   Expanded the passing regression suite from 300 to 346 tests.
 *   Gate 5 (iOS Simulator) PASSED on commit `16807f9`; physical iPhone/iPad validation deferred as a release gate.
 *   Activated the canonical SQLite model for DEVELOPMENT only. `CANONICAL_MODEL_STATUS` records the gate state in code; `nativeStorageEnabled` still defaults to false, no learner is switched, and the IndexedDB rollback path is unchanged.
 *   Feature A — English + Arabic multilingual content model:

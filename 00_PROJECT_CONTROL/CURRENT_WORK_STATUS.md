@@ -19,7 +19,7 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
 *   **UI migration complete Git commit:** `60f2526` (feat: migrate the multiple-choice answers to Lit)
 *   **option (c) work Git commit:** `e872810` (fix: make the PWA actually work offline)
 *   **Gate 5 simulator PASSED commit:** `16807f9` (validated in Codemagic)
-*   **Last Update Timestamp:** 2026-08-21T12:10:00+03:00
+*   **Last Update Timestamp:** 2026-08-21T13:20:00+03:00
 
 ## Current Context
 *   **Current Phase:** PHASE 4 — MIGRATION MAPPING + SQLITE PARITY VALIDATION
@@ -48,6 +48,22 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
 *   **Remaining study migration order:** session-end summary next (read-only), then the answer input, reveal, hint, and rating controls LAST, one at a time, re-running the study interaction suite after each.
 
 
+
+## Arabic Scoring Removal (gated milestone, commit `ecfcab3`)
+*   **Rule enforced:** Arabic can no longer decide correctness anywhere in the runtime. Recognition became a **self-assessed** skill: the learner still types the Arabic meaning and still gets feedback, but the SRS outcome comes from their own rating.
+*   `evaluateArabicAdvisory` returns `isCorrect: null` — deliberately not `false`, because `false` reads as "answered incorrectly" and would lapse the card, punishing learners for spelling variants. It carries `selfAssessed`, `quality: 0`, and an `advisoryMatch` flag used only to inform the learner.
+*   Suggested rating for self-assessed answers is a neutral 3; recorded correctness derives from the chosen rating; revealing still counts as a lapse (a learner action, not an Arabic decision).
+*   Feedback panel is neutral (no red cross), always shows the Arabic meaning, offers the full hard/good/easy set, and states that Arabic wording is not auto-corrected.
+*   **German/English scoring unchanged.** `validateArabicAnswer` survives as a pure matcher for non-scoring uses but is no longer in the submit path. `strictArabicAnswers` kept for settings compatibility; it now only tunes advisory wording.
+*   **No history touched:** no attempt, card, due date, ease, lapse, mastery or streak modified or recomputed. A test migrates a recognition card built up under the old Arabic-scored rules and asserts all 14 SRS fields survive field-for-field, including through SQLite.
+*   **Verification limit:** the in-app recognition flow was not reachable in a browser from a fresh seeded profile, because recognition cards unlock with future due dates. Covered by tests of the runtime wiring, the advisory evaluator, and the feedback component instead of a live session.
+
+## Feature B — Grammar as First-Class Structured Content (IMPLEMENTED)
+*   **Canonical schema v3**: `grammar_topics` → `grammar_rules` → `grammar_examples`, plus `vocabulary_grammar` linking words to the rules they demonstrate without either owning the other.
+*   **`grammar_texts` keys every string by (owner, language, kind), so LANGUAGE IS A ROW, not a column.** That makes English and Arabic peers by construction, lets a language be added with no schema change, and gives each language its own content lifecycle — an Arabic explanation can be verified while its English counterpart is still draft.
+*   `grammar-service.js` assembles ordered topics/rules/examples, reports an untranslated language as `null` rather than omitting it (so "not translated" is never confused with "not applicable"), and reports coverage per support language.
+*   Grammar grades nothing. Any future grammar exercise must still obtain scoreable answers through the language policy, where Arabic is excluded.
+*   Empty after migration by design: the legacy model contains no grammar, and none is invented.
 
 ## Gate 5 — iOS Simulator: PASSED (commit `16807f9`)
 *   Validated in Codemagic on an iOS Simulator, unsigned, with no Apple Developer account:
