@@ -5,11 +5,20 @@
 # so it can run today. Device installation and signing live in a separate workflow that
 # stays inactive until credentials are configured.
 #
-# Repository facts this config depends on (verified, not assumed):
+# Repository facts this config depends on (verified against the repo and the installed
+# Capacitor CLI, not assumed):
 #   - package.json and capacitor.config.json are at the repository ROOT
 #   - the web app (Capacitor webDir) is 01_APPLICATION/CURRENT_APP
 #   - the test suite is `npm test` (vitest)
 #   - ios/ is generated on the build machine; it is not committed
+#
+# Capacitor 8 generates a SWIFT PACKAGE MANAGER project, not a CocoaPods one
+# (see @capacitor/cli/assets/ios-spm-template.tar.gz). That means:
+#   - there is NO Podfile and NO .xcworkspace
+#   - the Xcode project is ios/App/App.xcodeproj
+#   - native dependencies live in ios/App/CapApp-SPM/Package.swift, which the CLI
+#     rewrites on every `cap sync`
+# CocoaPods is deliberately not requested or used anywhere below.
 #
 # Toolchain: Capacitor 8 requires Xcode 26.0+ and Node 22+.
 
@@ -19,17 +28,18 @@ definitions:
       name: Verify toolchain meets Capacitor 8 requirements
       script: |
         set -e
-        echo "Node:      $(node --version)"
-        echo "npm:       $(npm --version)"
-        echo "Xcode:     $(xcodebuild -version | head -1)"
-        echo "CocoaPods: $(pod --version)"
+        echo "Node:  $(node --version)"
+        echo "npm:   $(npm --version)"
+        echo "Xcode: $(xcodebuild -version | head -1)"
         NODE_MAJOR=$(node -p "process.versions.node.split('.')[0]")
         if [ "$NODE_MAJOR" -lt 22 ]; then
-          echo "ERROR: Capacitor 8 requires Node 22+, found $(node --version)"; exit 1
+          echo "ERROR: Capacitor 8 requires Node 22+, found $(node --version)"
+          exit 1
         fi
         XCODE_MAJOR=$(xcodebuild -version | head -1 | sed -E 's/Xcode ([0-9]+).*/\1/')
         if [ "$XCODE_MAJOR" -lt 26 ]; then
-          echo "ERROR: Capacitor 8 requires Xcode 26.0+, found $(xcodebuild -version | head -1)"; exit 1
+          echo "ERROR: Capacitor 8 requires Xcode 26.0+, found $(xcodebuild -version | head -1)"
+          exit 1
         fi
 
     - &install_dependencies
@@ -54,7 +64,8 @@ definitions:
         # The persistence bootstrap must still default to IndexedDB.
         BOOTSTRAP=01_APPLICATION/CURRENT_APP/src/platform/bootstrap-persistence.js
         if ! grep -q "nativeStorageEnabled = false" "$BOOTSTRAP"; then
-          echo "ERROR: nativeStorageEnabled is no longer defaulted to false in $BOOTSTRAP"; exit 1
+          echo "ERROR: nativeStorageEnabled is no longer defaulted to false in $BOOTSTRAP"
+          exit 1
         fi
         echo "OK: nativeStorageEnabled defaults to false (IndexedDB remains active)"
 
@@ -71,47 +82,83 @@ definitions:
         fi
 
     - &sync_ios
-      name: Sync web assets and install native dependencies
+      name: Sync web assets and native dependencies
       script: |
         set -e
-        # cap sync copies webDir into the native project and runs pod install,
-        # which is where @capacitor-community/sqlite is integrated.
+        # cap sync copies webDir into the native project and regenerates
+        # ios/App/CapApp-SPM/Package.swift with every SPM-capable plugin.
         npx cap sync ios
 
     - &verify_native_integration
-      name: Verify native dependency integration
+      name: Verify SPM integration and web assets
       script: |
         set -e
-        PODFILE_LOCK=ios/App/Podfile.lock
-        test -f "$PODFILE_LOCK" || { echo "ERROR: $PODFILE_LOCK missing; pod install did not run"; exit 1; }
+        PKG=ios/App/CapApp-SPM/Package.swift
+        PROJ=ios/App/App.xcodeproj
 
-        echo "--- Pods installed ---"
-        sed -n '/^PODS:/,/^DEPENDENCIES:/p' "$PODFILE_LOCK"
+        test -f "$PKG" || { echo "ERROR: $PKG missing; the SPM project was not generated"; exit 1; }
+        test -d "$PROJ" || { echo "ERROR: $PROJ missing; the Xcode project was not generated"; exit 1; }
+        echo "OK: SPM project generated"
 
-        # The SQLite plugin must actually be linked, not merely present in node_modules.
-        if ! grep -qi "CapacitorCommunitySqlite" "$PODFILE_LOCK"; then
-          echo "ERROR: @capacitor-community/sqlite did not integrate into the Pods project"; exit 1
+        echo "--- generated Package.swift ---"
+        cat "$PKG"
+        echo "-------------------------------"
+
+        # The plugin must be declared as a package dependency. The Capacitor CLI writes
+        # .package(name: "<iosName>", path: "...") for each SPM-capable plugin, and the
+        # iOS package name for @capacitor-community/sqlite is CapacitorCommunitySqlite
+        # (matching the product/library name in that plugin's own Package.swift).
+        if ! grep -q 'package(name: "CapacitorCommunitySqlite"' "$PKG"; then
+          echo "ERROR: @capacitor-community/sqlite is not in the SPM dependency graph."
+          echo "The Capacitor CLI only WARNS when a plugin lacks SPM support, so this must fail here."
+          exit 1
         fi
-        echo "OK: CapacitorCommunitySqlite integrated"
+        echo "OK: CapacitorCommunitySqlite declared as an SPM package dependency"
+
+        # Declaring it is not enough: it must also be linked into the app target.
+        if ! grep -q 'product(name: "CapacitorCommunitySqlite", package: "CapacitorCommunitySqlite")' "$PKG"; then
+          echo "ERROR: CapacitorCommunitySqlite is declared but not linked to the CapApp-SPM target"
+          exit 1
+        fi
+        echo "OK: CapacitorCommunitySqlite linked to the app target"
+
+        # An SPM project should carry no CocoaPods artefacts.
+        if [ -f ios/App/Podfile ] || [ -d ios/App/App.xcworkspace ]; then
+          echo "WARNING: CocoaPods artefacts found in what should be an SPM project"
+        fi
 
         # The web assets must have been copied into the native bundle.
-        test -f ios/App/App/public/index.html \
-          || { echo "ERROR: web assets were not copied into the iOS project"; exit 1; }
+        test -f ios/App/App/public/index.html || {
+          echo "ERROR: web assets were not copied into the iOS project"; exit 1;
+        }
         echo "OK: web assets copied from 01_APPLICATION/CURRENT_APP"
+
+    - &resolve_packages
+      name: Resolve Swift package dependencies
+      script: |
+        set -e
+        # Fetches capacitor-swift-pm plus the plugin's transitive packages
+        # (SQLCipher.swift, ZIPFoundation) before the compile step.
+        xcodebuild -resolvePackageDependencies \
+          -project ios/App/App.xcodeproj \
+          -scheme App \
+          -clonedSourcePackagesDirPath build/spm-cache
 
     - &compile_unsigned
       name: Compile the iOS project (unsigned)
       script: |
         set -e
-        # Simulator SDK + disabled code signing, so this validates that the project
-        # compiles without needing any Apple credentials.
+        # Simulator SDK plus disabled code signing, so this validates that the project
+        # compiles without any Apple credentials. An SPM project has no .xcworkspace,
+        # so this targets App.xcodeproj directly.
         xcodebuild \
-          -workspace ios/App/App.xcworkspace \
+          -project ios/App/App.xcodeproj \
           -scheme App \
           -configuration Debug \
           -sdk iphonesimulator \
           -destination 'generic/platform=iOS Simulator' \
           -derivedDataPath build/ios-derived \
+          -clonedSourcePackagesDirPath build/spm-cache \
           CODE_SIGNING_ALLOWED=NO \
           CODE_SIGNING_REQUIRED=NO \
           CODE_SIGN_IDENTITY="" \
@@ -125,9 +172,9 @@ workflows:
     max_build_duration: 60
     environment:
       # Capacitor 8 minimums: Xcode 26.0+, Node 22+.
+      # No cocoapods key: the generated project is Swift Package Manager based.
       xcode: 26.4
       node: 22
-      cocoapods: default
     triggering:
       events:
         - push
@@ -145,10 +192,11 @@ workflows:
       - *generate_ios_platform
       - *sync_ios
       - *verify_native_integration
+      - *resolve_packages
       - *compile_unsigned
     artifacts:
       - build/xcodebuild.log
-      - ios/App/Podfile.lock
+      - ios/App/CapApp-SPM/Package.swift
     publishing:
       email:
         recipients:
@@ -167,7 +215,6 @@ workflows:
     environment:
       xcode: 26.4
       node: 22
-      cocoapods: default
       groups:
         - appstore_credentials
       ios_signing:
@@ -178,16 +225,19 @@ workflows:
       - *install_dependencies
       - *run_tests
       - *assert_native_storage_off
+      - name: Prepare build output directory
+        script: mkdir -p build
       - *generate_ios_platform
       - *sync_ios
       - *verify_native_integration
+      - *resolve_packages
       - name: Apply signing profiles
         script: xcode-project use-profiles
       - name: Build signed .ipa
         script: |
           set -e
           xcode-project build-ipa \
-            --workspace ios/App/App.xcworkspace \
+            --project ios/App/App.xcodeproj \
             --scheme App
     artifacts:
       - build/ios/ipa/*.ipa
