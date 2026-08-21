@@ -19,7 +19,7 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
 *   **UI migration complete Git commit:** `60f2526` (feat: migrate the multiple-choice answers to Lit)
 *   **option (c) work Git commit:** `e872810` (fix: make the PWA actually work offline)
 *   **Gate 5 simulator PASSED commit:** `16807f9` (validated in Codemagic)
-*   **Last Update Timestamp:** 2026-08-21T21:10:00+03:00
+*   **Last Update Timestamp:** 2026-08-21T21:25:00+03:00
 
 ## Current Context
 *   **Current Phase:** PHASE 4 — MIGRATION MAPPING + SQLITE PARITY VALIDATION
@@ -83,6 +83,24 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
 
 ### Highest-value next step
 **Gap 1 — the incremental write path.** It unblocks gaps 2, 3 and 5, needs no hardware and no product decision, and is verifiable with the existing test executor. Wiring anything before it exists would produce read-only screens that cannot record what the learner does.
+## Canonical Incremental Write Path (IMPLEMENTED, commit `473bd98`)
+*   The adapter gained `insert`, `insertAll`, `update`, `upsert`, `softDelete`, `restore`, `hardDelete`, `getByUuid`, `exists`, `find`, `findOne`, `countWhere`, `transaction`. Every one is **entity-scoped**: the entity resolves to a `TABLE_SPEC` and only columns that spec declares are written or filtered on. Unknown field → rejected. Unknown order field → rejected. Every value is **bound**.
+*   **`write-policy.js` decides what each entity may do**, so the shape of a repository IS the invariant: append-only history has `insert` and no `update`; anything a learner earned is soft-deleted, never removed; **`review_cards` is refused by the generic surface entirely** and moves only through `srs.applyScheduledCard`.
+*   **Upsert conflict targets are derived from the schema's own UNIQUE constraints**, so a constraint and the upsert relying on it cannot drift. An upsert is idempotent for the *thing* (one settings row per profile, one progress row per learner+lesson), not for a reused uuid. Identity and `created_at` survive the update half.
+*   `revision`/`updated_at` are advanced by the adapter; `expectedRevision` turns a write into an optimistic-concurrency check that reports a conflict rather than overwriting.
+*   **Aggregates are atomic**: sentence+texts+links, course+lessons, lesson+section progress, error event+classifications, scheduled card+review event. Each is driven to failure in tests with nothing surviving. Nested transactions run inline rather than issuing a second `BEGIN`.
+*   Both executors now report change counts. Migration round-trips field-for-field and migrated SRS rows are byte-identical after incremental writes happen around them.
+
+## Runtime Composition Root (IMPLEMENTED, commit `d13123f`)
+*   **Two independent gates.** `learnerStorageSwitch` stays **false** (SRS history blocked on device validation); `canonicalRuntime` is **true** (the A–I screens may be reached). Conflating them would hold nine finished features hostage to a hardware account.
+*   Native + `canonicalNativeStore` gate open → real SQLite canonical store. Web/PWA/gate closed/failed open → **empty source**: real read shape, no writes, honest "nothing authored yet". No second model implementation for the browser.
+*   A failed open is **reported, never thrown** — study must survive a broken content store.
+*   The root **cannot reach legacy learner storage**: no legacy import, no SRS identifier, and a card proven byte-identical across a full bootstrap plus writes. Reminder due counts arrive as a *number* from a caller-supplied reader.
+
+### Remaining for end-to-end reachability
+1.  **`app.js` route wiring** — the composition root is built and tested but no route renders the A–I screens yet. This is the next step.
+2.  **Authored content** — every content table is still empty; the screens will render empty states until a content import pipeline exists.
+3.  Device gates (learner storage, canonical native store, notifications) remain deferred.
 ## Feature I — Reminders / Notifications (IMPLEMENTED)
 *   **Canonical schema v10**, 57 tables: `reminder_settings` (what the learner asked for) and `reminder_schedule` (what was scheduled, delivered or cancelled). Neither stores a due date, a card, a count of work or any progress — deleting every row changes nothing a learner earned.
 *   **A reminder time is wall-clock, not an instant.** `19:30` means half past seven in the learner's own evening, which is a different absolute instant after a flight or a clock change, so only `HH:MM` is stored and the instant is derived at planning time.
