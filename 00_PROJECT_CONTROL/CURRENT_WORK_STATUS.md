@@ -16,7 +16,8 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
 *   **Gate 4 Lit Git commit:** `da6993e` (feat: add iPad-first app shell layout foundation)
 *   **UI consolidation Git commit:** `91f5804` (feat: migrate study progress strip to Lit)
 *   **study presentation Git commit:** `c7a58ba` (feat: migrate the study teaching panel to Lit)
-*   **Last Update Timestamp:** 2026-08-21T02:48:00+03:00
+*   **UI migration complete Git commit:** `60f2526` (feat: migrate the multiple-choice answers to Lit)
+*   **Last Update Timestamp:** 2026-08-21T06:20:00+03:00
 
 ## Current Context
 *   **Current Phase:** PHASE 4 — MIGRATION MAPPING + SQLITE PARITY VALIDATION
@@ -43,6 +44,25 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
 *   **`<df-word-panel>`** is the second slice: the read-only teaching panel (German form, pronunciation, Arabic meaning, descriptive pills). Intro action buttons remain vanilla outside it. German text is marked `lang="de"` and bidi-isolated so it renders correctly inside the RTL page. Browser-verified with real seeded data; introducing a word still creates exactly one card.
 *   **Study route safe areas:** the study screen renders full-screen outside `.layout`, so the shell insets did not reach it. It now has its own inline/top/bottom safe-area padding for notched iPhones and iPad landscape.
 *   **Remaining study migration order:** session-end summary next (read-only), then the answer input, reveal, hint, and rating controls LAST, one at a time, re-running the study interaction suite after each.
+
+
+## Study/SRS UI Migration (COMPLETE) and Main-Screen Migration
+*   All five interactive study controls migrated one at a time, each verified against the study interaction suite and in the browser: **answer input**, **hint**, **reveal**, **rating controls**, plus the **session-end summary** consolidation.
+*   Study presentation migrated: **df-study-progress**, **df-word-panel**, **df-question-prompt**, **df-answer-feedback**, **df-choice-list**.
+*   Main list migrated: **df-word-row** (renders up to 200x per page).
+*   **Light vs shadow DOM rule established:** components containing dispatched controls render in LIGHT DOM, because the app routes every control through one delegated `document` click listener resolving `e.target.closest("[data-action]")`, and because `answer-input` is located via `document.getElementById` and `document.activeElement.id`. A shadow root would silently break typing, focus, Enter-to-submit, and every button. Read-only components use shadow DOM.
+*   **SRS untouched:** scheduler unchanged; rating values, labels, and classes preserved exactly. Browser-verified that clicking rating 3 while the engine suggested 4 moved the card reps 0->1, ease 2.5->2.52, interval 1, state review, and logged the attempt at rating 3.
+*   Two pre-existing bugs fixed separately from refactors: statistics tiles rendering `ليس رقمًا` (NaN), and the session-summary/audit formatting difference that a shared helper would have silently changed.
+*   11 Lit components; `app.js` at 942 lines.
+
+## iPad/iPhone UX Validation (browser-verified)
+*   **Touch targets:** every control now meets the 44x44pt Apple HIG minimum (the theme toggle was the only one below it).
+*   **Viewport:** `100vh` replaced with `100dvh` (vh fallback first) on page and study layouts, and on modal max-height, so iOS dynamic chrome no longer pushes content out of view.
+*   **Virtual keyboard:** at a keyboard-sized 375x380 viewport the answer field is fully visible, the action row reachable, no horizontal overflow; scroll margins keep the field clear of the keyboard.
+*   **External keyboard:** Enter-to-submit verified working through the migrated input.
+*   **German input:** the answer field carries `lang="de"`; German text is bidi-isolated so it renders correctly inside the RTL page.
+*   **Safe areas:** insets applied on all edges for both `.layout` and the full-screen study route.
+*   **iPad workspace:** vocabulary list is two columns from tablet landscape (rows 514px instead of a stretched 1030px), study column centred at 920px with a taller prompt card; iPhone stays single column.
 
 ## iPad-First App Shell Foundation
 *   Additive CSS layer only; existing rules and phone layouts unchanged.

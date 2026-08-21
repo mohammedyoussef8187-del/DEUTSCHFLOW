@@ -5,6 +5,13 @@ All notable changes to the **DeutschFlow** project will be documented in this fi
 ## [Unreleased]
 
 ### Added
+*   Completed the Study/SRS UI migration and the main-screen migration (no learner data modified, SRS algorithm untouched):
+    *   Migrated all five interactive study controls one at a time — answer input, hint, reveal, rating controls, and the session-end summary — each verified against the study interaction suite and in the browser.
+    *   Migrated the remaining study presentation: study progress, teaching panel, question prompt, answer feedback, and multiple-choice answers; plus the vocabulary row on the words page.
+    *   Established the light-DOM rule for components containing dispatched controls, since the app uses one delegated document click listener and locates the answer field by id and activeElement.
+    *   Fixed two pre-existing display bugs separately from the refactors: NaN statistics tiles, and a session-summary vs audit-row number-formatting difference.
+    *   iPad/iPhone validation: all controls at the 44pt HIG minimum, dvh-based full-height layouts, keyboard-clear answer field, safe-area insets on every edge, and a two-column iPad vocabulary workspace.
+    *   Expanded the passing regression suite from 155 to 216 tests.
 *   Consolidated the UI onto shared Lit components and took the first study-screen slice (no learner data modified):
     *   Extracted `<df-stat-tile>` as a shared presentation primitive; `<df-review-summary>` composes it and `statCard()` emits it, migrating the statistics page and import preview in one change.
     *   Deleted `dashboardStats()`, which duplicated the review-summary application service; the statistics page now uses the same service as the dashboard.
