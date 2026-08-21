@@ -1,0 +1,91 @@
+{
+  "datasetVersion": 1,
+  "generatedAt": "2026-08-22",
+  "course": "Netzwerk neu A2",
+  "scope": "Publisher-authored educational content supported by official evidence for ingestion and redistribution in DeutschFlow",
+  "classification": "SAFE_TO_INGEST",
+  "decision": "NO_EDUCATIONAL_ROWS_AUTHORIZED",
+  "constraints": {
+    "officialSourcesOnly": true,
+    "allowedOfficialDomains": [
+      "www.klett-sprachen.de",
+      "hilfe.klett-sprachen.de",
+      "einstufungstests.klett-sprachen.de",
+      "www.allango.net"
+    ],
+    "publisherTextIncluded": false,
+    "publisherAudioIncluded": false,
+    "translationsIncluded": false,
+    "inferredAnswersIncluded": false,
+    "guessedMappingsIncluded": false,
+    "metadataOnlyRecordsIncluded": false
+  },
+  "recordCounts": {
+    "total": 0,
+    "byChapter": {
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 0,
+      "6": 0,
+      "7": 0,
+      "8": 0,
+      "9": 0,
+      "10": 0,
+      "11": 0,
+      "12": 0
+    },
+    "byContentType": {}
+  },
+  "emptyDatasetReason": "No reviewed official Klett or Allango notice grants DeutschFlow permission to copy, store, or redistribute Netzwerk neu A2 publisher-authored educational text or audio inside an application. Official public-link permission does not extend to copying or re-uploading the linked materials. Structural and bibliographic facts remain classified METADATA_ONLY and are intentionally excluded from this educational-content dataset.",
+  "officialRightsEvidence": [
+    {
+      "id": "rights-linking-policy",
+      "url": "https://hilfe.klett-sprachen.de/hc/de/articles/360018159898-Darf-ich-auf-Inhalte-der-Website-von-Ernst-Klett-Sprachen-per-Link-von-meiner-Website-Plattform-verweisen",
+      "officialDomain": "hilfe.klett-sprachen.de",
+      "finding": "Linking to freely accessible, non-password-protected content is allowed; downloading and re-uploading it without explicit permission is not."
+    },
+    {
+      "id": "rights-digital-copy-policy",
+      "url": "https://hilfe.klett-sprachen.de/hc/de/articles/360018013237-Darf-ich-eine-digitale-Kopie-der-Produkte-von-Ernst-Klett-Sprachen-anfertigen-und-per-Mail-versenden-oder-auf-eine-Lern-Plattform-Cloud-oder-Serverumgebung-hochladen",
+      "officialDomain": "hilfe.klett-sprachen.de",
+      "finding": "Digital copying and distribution of Klett products are generally not permitted."
+    },
+    {
+      "id": "rights-reproduction-policy",
+      "url": "https://hilfe.klett-sprachen.de/hc/de/articles/34419146927517-Ist-die-Vervielf%C3%A4ltigung-von-urheberrechtlich-gesch%C3%BCtzten-Materialien-erlaubt",
+      "officialDomain": "hilfe.klett-sprachen.de",
+      "finding": "Reproduction of teaching materials requires permission from the publisher or rights holder."
+    },
+    {
+      "id": "rights-digital-material-upload-policy",
+      "url": "https://hilfe.klett-sprachen.de/hc/de/articles/360018159778-Darf-ich-digitale-Materialien-Downloads-MP3-Audios-etc-die-auf-der-Website-von-Ernst-Klett-Sprachen-stehen-auf-eine-Plattform-hochladen-und-einem-Kurs-zur-Verf%C3%BCgung-stellen",
+      "officialDomain": "hilfe.klett-sprachen.de",
+      "finding": "Uploading downloaded materials or MP3 audio to another platform is generally not permitted."
+    }
+  ],
+  "futureRecordContract": {
+    "note": "Apply only after written rights evidence supports SAFE_TO_INGEST. This contract is descriptive; it does not authorize content.",
+    "required": [
+      "id",
+      "chapter",
+      "contentType",
+      "languageContent",
+      "sourceUrl",
+      "sourceDomain",
+      "component",
+      "edition",
+      "isbn",
+      "page",
+      "exercise",
+      "provenance",
+      "evidence",
+      "verificationStatus",
+      "rightsClassification"
+    ],
+    "stableIdPattern": "netzwerk-neu-a2:chapter-{chapter}:{content-type}:{official-source-key}:{source-record-key}",
+    "requiredRightsClassification": "SAFE_TO_INGEST"
+  },
+  "records": []
+}
