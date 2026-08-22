@@ -398,3 +398,63 @@ Decision recorded: build the richer canonical model ONCE, after Gate 5. The lega
 
 ## Open Observation (non-blocking)
 *   The deployed RC build writes backups with `schemaVersion: 6` plus `appVersion` / `build` / `dbVersion` / `engineVersion`, while `src/app.js` `exportBackup` writes `schemaVersion: 5` without them. The backup module accepts both and preserves the extra metadata, so nothing is at risk; the source/deploy divergence is simply recorded here for a later reconciliation task.
+
+## Learner Journey Reachable On The Web/PWA Target (2026-08-22, commit `34bcf46`)
+
+**What changed, in one sentence:** the curriculum is now reachable by a learner, because the
+canonical model got a storage backend that exists outside a packaged native build.
+
+*   **The blocker that was removed.** `resolveCanonicalSource()` returned an EMPTY source for
+    every non-native target, so the web and PWA build — the only build anybody can run today —
+    showed "nothing authored yet" on all nine Feature A–I screens while a fully imported Nicos
+    Weg A2 lesson sat in `tools/intake/artifacts/intake.db`. Reads, writes, services, components
+    and routes were all already wired; there was simply no store behind them.
+*   **The local canonical store** (`src/platform/memory/`): the SAME schema, write policy,
+    repository layer and services over an in-memory adapter. It is a second STORAGE backend, not
+    a second model — `canonical-memory-adapter.js` derives DEFAULTs, NOT NULL columns, UNIQUE
+    keys and foreign keys from the same DDL SQLite is given, via `columnConstraintsFor()` in
+    `write-policy.js`. 21 parity tests drive both adapters through the repositories and compare
+    the results, including the real imported lesson field for field.
+*   **Content ships with the app.** `tools/intake/export-canonical.mjs` writes the content tables
+    to `01_APPLICATION/CURRENT_APP/data/canonical-content.json` (408 rows: 2 courses, 13 lessons,
+    11 vocabulary items, 10 sentences, 14 exercises, 1 listening activity, 189 source-only audio
+    assets). Learner-owned tables are refused by the exporter, so no one's history can ride along
+    in the bundle. The file is precached by `sw.js`.
+*   **Learner rows persist locally** in `deutschflow_canonical_local`, a database of its own.
+    `PERSISTED_ENTITIES` deliberately EXCLUDES `reviewCards` and `reviewEvents`: SRS history
+    stays in `deutschflow_v2` until the device gate passes, and a test asserts the exclusion so
+    an accidental addition cannot fork a learner's history in two. **`learnerStorageSwitch`
+    remains `false`.**
+*   **The lesson screen became a lesson.** `<df-lesson-view>` rendered each item as a raw uuid.
+    Items now carry a label resolved by the controller through the services (German word + Arabic
+    meaning, the task's instruction, the activity's title) and are buttons that open the exercise,
+    listening activity or reading they stand for. The exercise picker names each task instead of
+    listing slugs. `learn-courses` also lands on the first course that has something to study, so
+    a learner does not open on Netzwerk's twelve registered-but-empty chapters.
+*   **Verified in a real browser** (`python -m http.server`, `.claude/launch.json`), not only in
+    tests: runtime kind `local`, available and writable; lesson items read
+    "مفردة ab|hauen غادر" rather than a uuid; clicking a practice item opens that exercise;
+    a wrong answer scores `false` and writes one error event; a right answer scores `true`;
+    completing the lesson writes 1 lesson + 1 course + 3 section progress rows; **after a full
+    page reload** all of it is still there, content still loads, `reviewCards` is still 0, and
+    both IndexedDB databases exist side by side. The legacy SRS study loop still creates a real
+    card (recall, ease 2.5) from the same app.
+
+### Genuine remaining product gaps (not worked around, not faked)
+1.  **Error learning and SRS review are two islands.** A mistake in the curriculum writes a
+    canonical `error_events` row; the SRS reviews the 2,820-word legacy vocabulary in IndexedDB.
+    Joining them means writing canonical vocabulary into learner storage, which is exactly what
+    `learnerStorageSwitch` gates. Both steps of the journey work; the arrow between them does not
+    exist yet, and building it before the device gate would be the merge the gate exists to stop.
+2.  **No pronunciation content exists.** `learn-pronunciation` renders an honest empty state.
+    The service, component, write path and self-rating flow are all wired and tested; nothing has
+    been authored or imported for any course.
+3.  **No grammar content exists,** for the same reason.
+4.  **No audio is playable.** Nicos Weg audio was never downloaded; the 189 Netzwerk MP3s are
+    registered `source-only` by explicit rights decision. The listening screen says so and shows
+    the transcript.
+5.  **Netzwerk's twelve chapters carry no teachable content** — structure only, by rights
+    decision. They are listed and openable but are never the landing course.
+6.  **Service-worker offline could not be verified locally**: `register-sw.js` registers only on
+    `https:`, so the local http preview never installs it. The precache list is unit-tested and
+    now includes the dataset; on-device offline remains part of Gate 5.
