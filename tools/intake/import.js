@@ -96,9 +96,52 @@ function sameContent(a, b) {
  */
 const UPDATABLE_STATUSES = Object.freeze([IMPORTED_STATUS, DRAFT_STATUS]);
 
+/**
+ * How far along the lifecycle a status is.
+ *
+ * `draft` was authored, `imported` came from a source, `verified` was signed off by a
+ * person. `legacy` is not on this path at all — it is what a learner built up before the
+ * lifecycle existed — so it has no rank and is never overtaken.
+ */
+const LIFECYCLE_RANK = Object.freeze({ [DRAFT_STATUS]: 0, [IMPORTED_STATUS]: 1, verified: 2 });
+
+const rankOf = status => LIFECYCLE_RANK[status];
+
+/** The same row, with the lifecycle column set aside so only the content is compared. */
+function sameBody(a, b) {
+  const strip = row => {
+    const fields = meaningfulFields(row);
+    delete fields.contentStatus;
+    return JSON.stringify(fields);
+  };
+  return strip(a) === strip(b);
+}
+
 export function classifyRow(existing, proposed) {
   if (!existing) return { change: CHANGE.CREATE };
   if (sameContent(existing, proposed)) return { change: CHANGE.UNCHANGED };
+
+  /*
+   * The body is identical and only the review status differs.
+   *
+   * An importer always proposes the status the ARTIFACT declares, which is where the
+   * content started. Once a person has moved a row further along — approved an Arabic
+   * gloss, signed off a grammar rule — every later import arrives carrying stale news
+   * about that row. Treating it as a conflict would stop the whole lesson re-importing
+   * the moment review begins, and treating it as an update would quietly un-approve what
+   * the person decided. So the further-along row simply wins, and the row is unchanged.
+   *
+   * An import that moves a row FORWARD is a real change and is written.
+   */
+  if (sameBody(existing, proposed)) {
+    const stored = rankOf(existing.contentStatus);
+    const incoming = rankOf(proposed.contentStatus);
+    if (stored === undefined || incoming === undefined || incoming <= stored) {
+      return { change: CHANGE.UNCHANGED };
+    }
+    return { change: CHANGE.UPDATE, before: meaningfulFields(existing), after: meaningfulFields(proposed) };
+  }
+
   if (existing.contentStatus && !UPDATABLE_STATUSES.includes(existing.contentStatus)) {
     return {
       change: CHANGE.CONFLICT,

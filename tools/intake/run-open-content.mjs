@@ -138,6 +138,7 @@ async function main() {
   const chosen = args.includes("--json") ? [value("--json")] : OPEN_CONTENT_ARTIFACTS;
 
   const store = openStore(dbFile);
+  const lessons = [];
   try {
     const adapter = createSqliteAdapter(store.executor);
     await adapter.initializeSchema();
@@ -145,16 +146,92 @@ async function main() {
     for (const artifact of chosen) {
       console.log(`
 ════ ${artifact} ════`);
-      await importOne(repositories, artifact, apply);
+      lessons.push(await importOne(repositories, artifact, apply));
     }
   } finally {
     store.db.close();
   }
+
+  const auditFile = writeAudit(lessons);
+  console.log(`audit -> ${auditFile}`);
   console.log(`store: ${dbFile.split(path.sep).join("/")}`);
 }
 
+/**
+ * Persist what the run decided, the way every other intake runner does.
+ *
+ * Until now this runner printed its review split and threw it away, so the only record of
+ * WHICH rows are waiting for an educator was a terminal scrollback. The audit is the
+ * artifact review actually works from: it names every gated row, its lesson, its language
+ * and what it says, so the queue can be split by language or content type and worked
+ * through without reading the datasets.
+ */
+export function buildOpenContentAudit(lessons, now = Date.now()) {
+  /*
+   * One task per ROW, not per lesson that mentions it.
+   *
+   * Every lesson declares the shared course record, so the course's Arabic title appears
+   * in all seven per-lesson queues. It is one string and one decision, and a reviewer who
+   * met it seven times would rightly wonder which copy counts. The first lesson to carry
+   * it keeps it.
+   */
+  const seen = new Set();
+  const queue = [];
+  for (const lesson of lessons) {
+    for (const entry of lesson.audit.reviewQueue ?? []) {
+      if (seen.has(entry.uuid)) continue;
+      seen.add(entry.uuid);
+      queue.push(entry);
+    }
+  }
+  const by = key => {
+    const counts = {};
+    for (const entry of queue) counts[entry[key] ?? "(none)"] = (counts[entry[key] ?? "(none)"] ?? 0) + 1;
+    return counts;
+  };
+
+  return {
+    generatedAt: now,
+    artifacts: lessons.map(lesson => lesson.artifact),
+    licence: lessons[0]?.audit.licence ?? null,
+    attribution: lessons[0]?.audit.attributionTexts ?? [],
+    lessons: lessons.map(lesson => ({
+      artifact: lesson.artifact,
+      lessonTitle: lesson.audit.reviewQueue?.[0]?.lessonTitle ?? null,
+      published: lesson.audit.review.publishedRows,
+      draft: lesson.audit.review.draftRows,
+      withheldLinks: lesson.audit.review.withheldLinks,
+      reviewStates: lesson.audit.review.reviewStates,
+      applied: lesson.applied,
+      reason: lesson.reason
+    })),
+    /* Technical review, kept apart from educator review: different people, different
+       evidence. Media stays remote until someone can prove otherwise. */
+    technicalReview: {
+      remoteMedia: lessons.map(lesson => lesson.media).filter(Boolean),
+      pronunciationMetadata: lessons.flatMap(lesson => lesson.audit.pronunciationMetadata ?? [])
+    },
+    educatorReview: {
+      total: queue.length,
+      byLanguage: by("language"),
+      byEntity: by("entity"),
+      byLesson: by("lessonSourceId"),
+      queue
+    }
+  };
+}
+
+function writeAudit(lessons) {
+  const file = path.resolve(process.cwd(), "tools/intake/artifacts/open-content-audit.json");
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.writeFileSync(file, `${JSON.stringify(buildOpenContentAudit(lessons), null, 2)}\n`);
+  return file.split(path.sep).join("/");
+}
+
 async function importOne(repositories, artifact, apply) {
-  const built = buildOpenContentLesson({ dataset: readArtifact(artifact), now: Date.now() });
+  const dataset = readArtifact(artifact);
+  const built = buildOpenContentLesson({ dataset, now: Date.now() });
+  const media = describeRemoteMedia(dataset, artifact);
 
   console.log("── licence ──");
   console.log(`  ${built.audit.licence} — ${built.audit.licenceUrl}`);
@@ -182,7 +259,7 @@ async function importOne(repositories, artifact, apply) {
     if (!result.applied) {
       console.log(`  not applied: ${result.reason}`);
       if (result.reason === "conflicts") process.exit(3);
-      return;
+      return { artifact, audit: built.audit, media, applied: false, reason: result.reason };
     }
 
     console.log("── written ──");
@@ -200,8 +277,45 @@ async function importOne(repositories, artifact, apply) {
       `visible to a learner: ${verification.drafts.visible.length}`);
     console.log(`  links ${verification.links.found}/${verification.links.expected}`);
     console.log(`  ok: ${verification.ok}`);
+    return { artifact, audit: built.audit, media, applied: true, reason: null };
   }
 }
+
+/**
+ * What can be checked about a remote recording without reaching the network.
+ *
+ * Structure only: that the URL is well formed, https, on an official host, and that the
+ * row still says it is remote with nothing measured. Reachability, checksum, duration and
+ * codec need the file itself, so they stay unresolved and the asset stays gated rather
+ * than being described as ready on the strength of a URL that merely parses.
+ */
+export function describeRemoteMedia(dataset, artifact = null) {
+  const asset = dataset.listening?.mediaAsset?.canonicalTarget?.row;
+  if (!asset) return null;
+  let url = null;
+  try { url = new URL(asset.remoteUrl); } catch { url = null; }
+
+  return {
+    artifact,
+    uuid: asset.uuid,
+    slug: asset.slug,
+    remoteUrl: asset.remoteUrl ?? null,
+    structurallyValid: Boolean(url) && url.protocol === "https:" &&
+      OFFICIAL_MEDIA_HOSTS.includes(url.hostname) && /\.[a-z0-9]{2,5}$/i.test(url.pathname),
+    host: url?.hostname ?? null,
+    mimeType: asset.mimeType ?? null,
+    availability: asset.availability,
+    offlineReady: asset.availability !== "remote" && Boolean(asset.localPath),
+    /* Unresolved on purpose. Each needs the actual file. */
+    unresolved: ["reachability", "checksum", "durationMs", "codec", "redistribution"],
+    reviewState: "TECHNICAL_REVIEW_REQUIRED"
+  };
+}
+
+/** Hosts an official COERLL recording may legitimately live on. */
+export const OFFICIAL_MEDIA_HOSTS = Object.freeze([
+  "coerll.utexas.edu", "media.la.utexas.edu"
+]);
 
 if (process.argv[1]?.endsWith("run-open-content.mjs")) {
   await main();

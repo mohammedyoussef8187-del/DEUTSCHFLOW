@@ -835,6 +835,69 @@ function applyListening(mapped, listening, keepLink) {
 
 /* ---------------------------------------------------------------- audit */
 
+/**
+ * Every row this batch holds back, as a person can act on it.
+ *
+ * The counts alone do not make content reviewable: an educator needs to know WHICH gloss,
+ * in which lesson, in which language, and what it says. This is that list — one entry per
+ * gated row, carrying its identity so approving it is a status change on the same uuid
+ * and nothing about the row moves.
+ */
+function buildReviewQueue(dataset, records) {
+  const lesson = dataset.structure?.lesson;
+  const context = {
+    lessonSourceId: lesson?.sourceId ?? null,
+    lessonUuid: lesson?.canonicalTarget?.row?.uuid ?? null,
+    lessonTitle: (lesson?.canonicalTarget?.texts ?? [])
+      .find(text => text.kind === "title" && text.language === "de")?.text ?? null
+  };
+
+  const queue = [];
+  for (const { record } of records) {
+    for (const { entity, row } of canonicalRowsOf(record)) {
+      if (row.contentStatus !== DRAFT_STATUS) continue;
+      queue.push({
+        ...context,
+        uuid: row.uuid,
+        entity,
+        contentType: record.contentType,
+        sourceId: record.sourceId,
+        /* What a reviewer sorts and filters by: the language and the kind of text. */
+        language: row.language ?? languageOfBody(entity),
+        kind: row.kind ?? null,
+        reviewStatus: record.reviewStatus ?? null,
+        origin: row.language ? originFor(record, row.language, row.kind) ?? null : null,
+        text: readableText(entity, row),
+        sourceReference: row.sourceReference ?? null
+      });
+    }
+  }
+  return queue;
+}
+
+/** For a row whose text lives in a column rather than in a language-tagged row. */
+function languageOfBody(entity) {
+  switch (entity) {
+    case "vocabularyMeanings": return "ar";
+    case "sentences":
+    case "grammarExamples": return "de";
+    default: return null;
+  }
+}
+
+function readableText(entity, row) {
+  switch (entity) {
+    case "vocabularyMeanings": return row.arabicText ?? null;
+    case "translations": return row.englishText ?? null;
+    case "sentences":
+    case "grammarExamples": return row.german ?? null;
+    case "exercises":
+    case "grammarTopics":
+    case "grammarRules": return row.slug ?? null;
+    default: return row.text ?? null;
+  }
+}
+
 function buildAudit(dataset, records, statuses, withheldLinks, now) {
   const byEntity = { published: {}, draft: {} };
   const counted = new Set();
@@ -889,6 +952,8 @@ function buildAudit(dataset, records, statuses, withheldLinks, now) {
       licenceEvidence: source.licenceEvidence ?? null
     })),
     /* The whole point of the review gate, in numbers a reviewer can act on. */
+    /* One entry per gated row, so review is a task list rather than a number. */
+    reviewQueue: buildReviewQueue(dataset, records),
     review: {
       publishedRows: publishedTotal,
       draftRows: draftTotal,
