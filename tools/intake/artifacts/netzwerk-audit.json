@@ -1,5 +1,5 @@
 {
-  "generatedAt": 1787354931184,
+  "generatedAt": 1787378024958,
   "applied": true,
   "filesDiscovered": 193,
   "documents": [
@@ -76,7 +76,7 @@
   ],
   "parserStatus": "not-written-no-readable-source",
   "lessonsDiscovered": 1,
-  "lessonsImported": 0,
+  "lessonsImported": 1,
   "chapter": {
     "chapter": 2,
     "validationOk": true,
@@ -90,15 +90,81 @@
       "partialAudioRanges": 7,
       "exactAudioPageExerciseMappings": 0
     },
-    "applied": false,
-    "reason": "no-changes",
+    "applied": true,
+    "reason": null,
     "rows": {
-      "create": 0,
+      "create": 30,
       "update": 0,
-      "unchanged": 30,
+      "unchanged": 0,
       "conflicts": 0
     },
-    "verification": null
+    "verification": {
+      "course": {
+        "slug": "netzwerk-neu-a2",
+        "cefrLevel": "A2",
+        "title": {
+          "de": "Netzwerk neu A2",
+          "en": null,
+          "ar": null
+        }
+      },
+      "lessons": 12,
+      "claimedLessons": 12,
+      "missingLessons": [],
+      "lesson": {
+        "slug": "und-was-machst-du",
+        "sections": 0,
+        "items": 0
+      },
+      "listening": null,
+      "exercises": {
+        "total": 0,
+        "claimed": 0,
+        "gradeable": 0,
+        "ungradeable": 0
+      },
+      "grammar": {
+        "expectedTopics": 0,
+        "expectedRules": 0,
+        "topics": 0,
+        "rules": 0,
+        "missingTopics": [],
+        "missingRules": []
+      },
+      "links": {
+        "expected": 0,
+        "found": 0,
+        "missing": [],
+        "byEntity": {
+          "sentenceVocabulary": 0,
+          "sentenceGrammar": 0,
+          "exerciseTargets": 0,
+          "listeningLinks": 0,
+          "lessonItems": 0
+        }
+      },
+      "drafts": {
+        "rows": 0,
+        "stored": 0,
+        "notStored": [],
+        "visible": []
+      },
+      "vocabulary": 0,
+      "progress": {
+        "lessonsTotal": 12,
+        "resume": "first-available"
+      },
+      "audioAssets": {
+        "expected": 0,
+        "found": 0,
+        "sourceOnly": 0,
+        "playable": 0,
+        "missingUuids": [],
+        "mismatchedUuids": []
+      },
+      "englishMissing": true,
+      "ok": true
+    }
   },
   "lessonsQuarantined": [
     {
@@ -123,8 +189,8 @@
     }
   ],
   "rows": {
-    "created": 0,
-    "reused": 189,
+    "created": 189,
+    "reused": 0,
     "updated": 0
   },
   "audio": {
@@ -141,8 +207,8 @@
     "unresolvedMappings": 189,
     "unresolvedReason": "the track-to-lesson index is printed in the Kursbuch, which has no readable text layer; mapping by order or duration would be a guess",
     "registeredAssets": 189,
-    "created": 0,
-    "reused": 189
+    "created": 189,
+    "reused": 0
   },
   "duplicates": [],
   "findings": [

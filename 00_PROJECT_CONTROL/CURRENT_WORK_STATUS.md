@@ -458,3 +458,80 @@ canonical model got a storage backend that exists outside a packaged native buil
 6.  **Service-worker offline could not be verified locally**: `register-sw.js` registers only on
     `https:`, so the local http preview never installs it. The precache list is unit-tested and
     now includes the dataset; on-device offline remains part of Gate 5.
+
+## First Open-Licensed Lesson Imported, With A Review Gate (2026-08-22)
+
+**Source:** Deutsch im Blick and Grimm Grammar, Dr. Zsuzsanna Abrams, COERLL, The University
+of Texas at Austin, CC BY 4.0; adapted by DeutschFlow. Artifact:
+`00_PROJECT_CONTROL/A2_OPEN_CONTENT_FIRST_IMPORT.json` (Codex commit `2f18fb2`, cherry-picked).
+
+### The review gate, and why it is `draft`
+Codex flagged that an educator still has to review the original German and Arabic. The
+schema already had the word for that: 24 content tables declare
+`content_status TEXT NOT NULL DEFAULT 'draft'`, giving `draft → imported → verified`.
+Nothing had ever enforced the first step — a draft row read back exactly like a published
+one — so `src/content/publication.js` now provides one published-only view of the canonical
+source, and `createServices()` hands it to all nine services at once. No new lifecycle, no
+new column, no per-service filter to forget.
+
+`tools/intake/map-open-content.js` assigns the status from the artifact's OWN markers
+(`languageOrigins`, `originalAdaptedStatus`) rather than by judgement:
+
+*   **Published (91 rows):** text the artifact declares `source-adapted` or
+    `source-corrected-and-lightly-adapted` — 19 vocabulary items, 5 transcribed sentences,
+    the listening activity with its German and English transcript, course/unit/lesson/
+    section structure, and 4 exercises.
+*   **Held as draft (129 rows):** every original DeutschFlow body — 19 Arabic meanings with
+    their original German definitions, 19 English translations that hang off them, 7
+    sentences whose German DeutschFlow wrote, all 19 Arabic sentence texts, the whole
+    Perfekt grammar topic (1 topic, 2 rules, 7 examples, 15 texts), 16 exercise texts, 8
+    Arabic structure titles, and 12 Arabic listening texts.
+*   **Withheld links (109):** a lesson item, accepted answer, option or link has no status
+    column of its own, so one pointing at unpublished content is not written at all. A
+    later import creates it once its target is promoted.
+
+An exercise is published only when **every expected answer equals a published vocabulary
+form from the same batch** — a property the adapter verifies rather than accepts. Four pass
+(`parents`, `gift`, `invite`, `wedding`); the four Perfekt exercises answer to a grammar
+rule that is still a draft, so they wait with it.
+
+**Nothing unreviewed reaches a device.** `verifyImport` now checks both halves on every
+import — each draft row IS stored (it cannot be reviewed if it was never imported) and is
+invisible through the published view — and `export-canonical.mjs` ships published rows only,
+using the same `isPublished` predicate, so the file and the screens cannot disagree.
+
+### Media
+The COERLL MP4 is registered as `availability: "remote"`, `localPath: ""`,
+`checksum: null`, `durationMs: 0`, `byteSize: 0`. Validation REFUSES the artifact if any of
+those is invented. `isPlayableOffline()` is false and the listening screen reports
+`remote-only`. No binary is bundled.
+
+### Intake path extended, not duplicated
+`tools/intake/import.js` now flattens, plans, prunes, writes and verifies grammar topics/
+rules/examples/texts, sentence-vocabulary and sentence-grammar links, and listening links —
+the existing stages, extended for existing schema entities and existing aggregate writers.
+Two corrections fell out of it: `classifyRow` treated a stored `draft` as a conflict (it is
+unreviewed, not signed off, so it is updatable), and the derived `normalized*` columns were
+briefly in the meaningful set, where they reported a change whenever a mapper left them to
+the column default.
+
+### Verified in a real browser
+Course list shows `deutschflow-open-a2` with its COERLL attribution; the lesson opens with
+29 items (19 vocabulary, 5 sentences, 4 exercises, 1 listening); a wrong answer scores
+`false` deterministically and writes one error event; the right answer scores `true`;
+completing the lesson writes course and lesson progress; after a full reload progress and
+error history survive, `review_cards` is still 0, and the device holds 0 grammar topics
+because the drafts were never shipped.
+
+### Remaining, and what unblocks it
+1.  **A German/Arabic educator review** is the only thing standing between the 129 draft
+    rows and a learner. Promoting them is a status change plus a re-import; the withheld
+    links are recreated by the same run. Until then the open lesson teaches 19 German words
+    without their Arabic gloss, 5 sentences, and 4 exercises.
+2.  **The editorial A2 label** is DeutschFlow's, recorded as
+    `EDITORIAL_A2_ASSIGNMENT` with `noSourceLevelClaim: true`. It needs pedagogical sign-off
+    before it can be presented as CEFR alignment.
+3.  **The media URL is metadata only** — reachability, checksum, duration, codec and
+    redistribution rights are deliberately unresolved.
+4.  **No promotion tool exists yet.** Moving a row from `draft` to `imported` currently means
+    editing the artifact and re-importing. A reviewer-facing path is the natural next task.

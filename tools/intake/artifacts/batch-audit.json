@@ -1,5 +1,5 @@
 {
-  "generatedAt": 1787339516883,
+  "generatedAt": 1787378024235,
   "applied": true,
   "discovered": 1,
   "unrecognisedFiles": [
@@ -25,9 +25,9 @@
   ],
   "skipped": [],
   "rows": {
-    "create": 0,
+    "create": 189,
     "update": 0,
-    "unchanged": 189,
+    "unchanged": 0,
     "conflicts": 0
   },
   "warnings": [
@@ -128,18 +128,21 @@
     {
       "lessonKey": "nicos-weg-a2-e2-l1",
       "courses": 1,
-      "vocabulary": 0,
-      "vocabularyReused": 11,
+      "audioAssets": 0,
+      "vocabulary": 11,
+      "vocabularyReused": 0,
+      "grammar": 0,
       "sentences": 10,
       "listening": 1,
-      "exercises": 14
+      "exercises": 14,
+      "skippedUnchanged": 0
     }
   ],
   "reuse": [
     {
       "lessonKey": "nicos-weg-a2-e2-l1",
-      "vocabularyReused": 11,
-      "vocabularyCreated": 0,
+      "vocabularyReused": 0,
+      "vocabularyCreated": 11,
       "homographs": []
     }
   ],

@@ -18,6 +18,9 @@
  */
 
 import { IMPORTED_STATUS } from "./map-canonical.js";
+import {
+  DRAFT_STATUS, isPublished, publishedOnly
+} from "../../01_APPLICATION/CURRENT_APP/src/content/publication.js";
 import { REPOSITORY_ALIASES } from "../../01_APPLICATION/CURRENT_APP/src/runtime/composition-root.js";
 
 /* The repository layer renames a few entities; resolve a schema entity to its repo. */
@@ -49,7 +52,23 @@ const MEANINGFUL = Object.freeze([
   "courseUuid", "courseLevelUuid", "unitUuid", "ownerType", "ownerUuid",
   "sourceEdition", "sourceIsbn", "sourceType", "contentVersion",
   "availability", "localPath", "sourcePath", "remoteUrl", "mimeType",
-  "byteSize", "durationMs", "checksum"
+  "byteSize", "durationMs", "checksum",
+  /* Grammar, sentence and listening structure: which topic a rule belongs to, which
+     rule a sentence practises, what an activity points at. */
+  "topicUuid", "ruleUuid", "vocabUuid", "sentenceUuid", "itemUuid", "meaningUuid",
+  "translationUuid", "exerciseUuid", "segmentUuid", "speakerUuid", "lessonUuid",
+  "targetType", "targetUuid", "role", "category", "register", "variety", "required",
+  "startMs", "endMs", "explanation", "pronunciation", "article", "plural", "itemType",
+  "tags",
+  /* `normalizedGerman`, `normalizedArabic` and `normalizedEnglish` are deliberately NOT
+     here: each is a pure function of the text beside it, so it can never differ on its
+     own. Treating a derived column as content would report a change whenever a mapper
+     leaves it to the column default instead of computing it — a difference in who
+     computed the value, not in what the row says. */
+  /* Publication state. Promoting a row out of `draft` is a real change to what a learner
+     can see, so an import that promotes one must be planned and written, not read as a
+     row that already matches. */
+  "contentStatus"
 ]);
 
 export function meaningfulFields(row) {
@@ -67,10 +86,20 @@ function sameContent(a, b) {
  * @param {object} existing row already in the store, or null
  * @param {object} proposed row produced by the mapper
  */
+/*
+ * Statuses an import may still write over.
+ *
+ * `imported` came from a source and can be refreshed from that source. `draft` was
+ * authored but never published, so nothing a learner saw depends on it. Everything else
+ * — a `verified` row a human signed off, a `legacy` row a learner built up — is a
+ * decision this pipeline does not get to overwrite silently.
+ */
+const UPDATABLE_STATUSES = Object.freeze([IMPORTED_STATUS, DRAFT_STATUS]);
+
 export function classifyRow(existing, proposed) {
   if (!existing) return { change: CHANGE.CREATE };
   if (sameContent(existing, proposed)) return { change: CHANGE.UNCHANGED };
-  if (existing.contentStatus && existing.contentStatus !== IMPORTED_STATUS) {
+  if (existing.contentStatus && !UPDATABLE_STATUSES.includes(existing.contentStatus)) {
     return {
       change: CHANGE.CONFLICT,
       reason: `stored row is ${existing.contentStatus}; a source change must be reviewed`,
@@ -103,9 +132,20 @@ export function flattenRows(mapped) {
     push("translations", entry.translations);
     push("acceptedAnswers", entry.acceptedAnswers);
   }
+  /* Grammar before the sentences and exercises that reference a rule. */
+  for (const entry of mapped.grammar ?? []) {
+    push("grammarTopics", [entry.topic]);
+    push("grammarRules", entry.rules);
+    push("grammarExamples", entry.examples);
+    push("grammarTexts", entry.texts);
+  }
+
   for (const entry of mapped.sentences ?? []) {
     push("sentences", [entry.sentence]);
     push("sentenceTexts", entry.texts);
+    push("sentenceVocabulary", entry.vocabulary);
+    push("sentenceGrammar", entry.grammar);
+    push("sentenceTags", entry.tags);
   }
   /* Assets registered in their own right, with no activity built on them. */
   push("audioAssets", mapped.audioAssets);
@@ -121,6 +161,7 @@ export function flattenRows(mapped) {
     push("listeningSpeakers", mapped.listening.speakers);
     push("listeningSegments", mapped.listening.segments);
     push("listeningSegmentTexts", mapped.listening.segmentTexts);
+    push("listeningLinks", mapped.listening.links);
   }
 
   for (const entry of mapped.exercises ?? []) {
@@ -207,8 +248,20 @@ export function pruneUnchanged(mapped, unchanged) {
 
   const sentences = (mapped.sentences ?? []).map(entry => ({
     sentence: one(entry.sentence),
+    texts: filter(entry.texts),
+    vocabulary: filter(entry.vocabulary),
+    grammar: filter(entry.grammar),
+    tags: filter(entry.tags)
+  })).filter(entry => Boolean(entry.sentence) || entry.texts.length ||
+    entry.vocabulary.length || entry.grammar.length || entry.tags.length);
+
+  const grammar = (mapped.grammar ?? []).map(entry => ({
+    topic: one(entry.topic),
+    rules: filter(entry.rules),
+    examples: filter(entry.examples),
     texts: filter(entry.texts)
-  })).filter(entry => Boolean(entry.sentence) || entry.texts.length);
+  })).filter(entry => Boolean(entry.topic) || entry.rules.length ||
+    entry.examples.length || entry.texts.length);
 
   const exercises = (mapped.exercises ?? []).map(entry => ({
     exercise: one(entry.exercise),
@@ -226,7 +279,7 @@ export function pruneUnchanged(mapped, unchanged) {
   const listeningRows = mapped.listening?.item
     ? [mapped.listening.audio, mapped.listening.item, ...(mapped.listening.texts ?? []),
        ...(mapped.listening.speakers ?? []), ...(mapped.listening.segments ?? []),
-       ...(mapped.listening.segmentTexts ?? [])]
+       ...(mapped.listening.segmentTexts ?? []), ...(mapped.listening.links ?? [])]
     : [];
   const listening = listeningRows.some(keep) ? mapped.listening : null;
 
@@ -235,6 +288,7 @@ export function pruneUnchanged(mapped, unchanged) {
     course,
     audioAssets: filter(mapped.audioAssets),
     vocabulary,
+    grammar,
     sentences,
     exercises,
     listening
@@ -275,7 +329,7 @@ export async function applyImport(repositories, mapped, options = {}) {
     return {
       courses: 0, audioAssets: 0, vocabulary: 0,
       vocabularyReused: pending.skipped.vocabulary,
-      sentences: 0, listening: 0, exercises: 0,
+      grammar: 0, sentences: 0, listening: 0, exercises: 0,
       skippedUnchanged: pending.skippedTotal
     };
   }
@@ -295,7 +349,7 @@ async function writeBatch(repositories, pending, now) {
     courses: 0, audioAssets: 0, vocabulary: 0,
     // A row the store already holds unchanged is reused, never rewritten.
     vocabularyReused: pending.skipped.vocabulary,
-    sentences: 0, listening: 0, exercises: 0,
+    grammar: 0, sentences: 0, listening: 0, exercises: 0,
     skippedUnchanged: pending.skippedTotal
   };
 
@@ -320,6 +374,16 @@ async function writeBatch(repositories, pending, now) {
   for (const asset of mapped.audioAssets ?? []) {
     await repositories.audioAssets.upsert(asset, { now });
     written.audioAssets += 1;
+  }
+
+  /*
+   * Grammar before anything that references a rule: a sentence links to one, and an
+   * exercise targets one. Written through the aggregate writer, so a topic, its rules,
+   * their examples and every text land together or not at all.
+   */
+  for (const entry of mapped.grammar ?? []) {
+    await repositories.write.content.saveGrammarTopic(entry, { now });
+    written.grammar += 1;
   }
 
   for (const entry of mapped.vocabulary ?? []) {
@@ -395,8 +459,16 @@ export async function verifyImport(services, mapped, profileUuid = "local", opti
         .find(a => a.uuid === mapped.keys.listeningUuid) ?? null
     : null;
   const allExercises = await services.exercises.all();
-  const exerciseUuids = new Set(mapped.exercises.map(entry => entry.exercise.uuid));
+  /* Only exercises this batch PUBLISHES should read back: a draft is stored and stays
+     invisible on purpose, so counting it as missing would fail every review gate. */
+  const publishedExercises = (mapped.exercises ?? [])
+    .filter(entry => isPublished(entry.exercise));
+  const exerciseUuids = new Set(publishedExercises.map(entry => entry.exercise.uuid));
   const exercises = allExercises.filter(exercise => exerciseUuids.has(exercise.uuid));
+
+  const grammarReport = await verifyGrammar(services, mapped);
+  const linkReport = await verifyLinks(mapped, options.repositories ?? null);
+  const draftReport = await verifyDrafts(mapped, options.repositories ?? null);
   const progress = course ? await services.curriculum.progressForCourse(course.slug, profileUuid) : null;
 
   /*
@@ -440,9 +512,13 @@ export async function verifyImport(services, mapped, profileUuid = "local", opti
     } : null,
     exercises: {
       total: exercises.length,
+      claimed: publishedExercises.length,
       gradeable: exercises.filter(exercise => exercise.gradeable).length,
       ungradeable: exercises.filter(exercise => !exercise.gradeable).length
     },
+    grammar: grammarReport,
+    links: linkReport,
+    drafts: draftReport,
     vocabulary: (await services.content.allEntries())
       .filter(entry => entry.uuid && mapped.vocabulary.some(v => v.item.uuid === entry.uuid)).length,
     progress: progress ? { lessonsTotal: progress.lessonsTotal, resume: progress.resume.reason } : null,
@@ -459,7 +535,91 @@ export async function verifyImport(services, mapped, profileUuid = "local", opti
       audioReport.mismatchedUuids.length === 0 &&
       audioReport.playable === 0 &&
       audioReport.found === audioReport.expected &&
-      exercises.length === (mapped.exercises ?? []).length &&
+      exercises.length === publishedExercises.length &&
+      grammarReport.missingTopics.length === 0 &&
+      grammarReport.missingRules.length === 0 &&
+      linkReport.missing.length === 0 &&
+      draftReport.notStored.length === 0 &&
+      draftReport.visible.length === 0 &&
       (!mapped.listening || Boolean(activity))
   };
+}
+
+/** Grammar the batch published must assemble back through the grammar service. */
+async function verifyGrammar(services, mapped) {
+  const topics = (mapped.grammar ?? []).map(entry => entry.topic).filter(isPublished);
+  const rules = (mapped.grammar ?? []).flatMap(entry => entry.rules ?? []).filter(isPublished);
+  const report = {
+    expectedTopics: topics.length, expectedRules: rules.length,
+    topics: 0, rules: 0, missingTopics: [], missingRules: []
+  };
+  if (!topics.length && !rules.length) return report;
+
+  const assembled = await services.grammar.topics();
+  const byUuid = new Map(assembled.map(topic => [topic.uuid, topic]));
+  const assembledRules = new Set(assembled.flatMap(topic => topic.rules.map(rule => rule.uuid)));
+
+  for (const topic of topics) {
+    if (byUuid.has(topic.uuid)) report.topics += 1;
+    else report.missingTopics.push(topic.uuid);
+  }
+  for (const rule of rules) {
+    if (assembledRules.has(rule.uuid)) report.rules += 1;
+    else report.missingRules.push(rule.uuid);
+  }
+  return report;
+}
+
+/**
+ * Relationship rows carry no lifecycle of their own, so they are read straight back from
+ * the store. A link the batch wrote and cannot find again means the aggregate writer
+ * dropped it, which no service would reveal — a sentence simply loses its vocabulary.
+ */
+async function verifyLinks(mapped, repositories) {
+  const expected = {
+    sentenceVocabulary: (mapped.sentences ?? []).flatMap(entry => entry.vocabulary ?? []),
+    sentenceGrammar: (mapped.sentences ?? []).flatMap(entry => entry.grammar ?? []),
+    exerciseTargets: (mapped.exercises ?? []).flatMap(entry => entry.targets ?? []),
+    listeningLinks: mapped.listening?.links ?? [],
+    lessonItems: mapped.course?.items ?? []
+  };
+  const report = { expected: 0, found: 0, missing: [], byEntity: {} };
+  for (const [entity, rows] of Object.entries(expected)) {
+    report.byEntity[entity] = rows.length;
+    report.expected += rows.length;
+  }
+  if (!report.expected || !repositories) return report;
+
+  for (const [entity, rows] of Object.entries(expected)) {
+    for (const row of rows) {
+      if (await repositoryFor(repositories, entity).get(row.uuid)) report.found += 1;
+      else report.missing.push({ entity, uuid: row.uuid });
+    }
+  }
+  return report;
+}
+
+/**
+ * The review gate, checked rather than assumed.
+ *
+ * Every row the batch marked `draft` must be IN the store — it cannot be reviewed if it
+ * was never imported — and must be invisible through the published view every service
+ * reads from. Both halves matter: the first stops the gate becoming data loss, the
+ * second stops it becoming decoration.
+ */
+async function verifyDrafts(mapped, repositories) {
+  const drafts = flattenRows(mapped).filter(({ row }) => row.contentStatus === DRAFT_STATUS);
+  const report = { rows: drafts.length, stored: 0, notStored: [], visible: [] };
+  if (!drafts.length || !repositories) return report;
+
+  const readable = publishedOnly(repositories);
+  for (const { entity, row } of drafts) {
+    if (await repositoryFor(repositories, entity).get(row.uuid)) report.stored += 1;
+    else report.notStored.push({ entity, uuid: row.uuid });
+
+    if (await repositoryFor(readable, entity).get(row.uuid)) {
+      report.visible.push({ entity, uuid: row.uuid });
+    }
+  }
+  return report;
 }

@@ -87,10 +87,15 @@ describe("select a course and a lesson", () => {
     const { data } = await harness.navigate("learn-courses");
 
     expect(data.courses.length).toBeGreaterThan(1);
-    expect(data.course.slug).toBe("nicos-weg-a2");
     const lessons = data.course.units.flatMap(unit => unit.lessons);
     expect(lessons.length).toBeGreaterThan(0);
     expect(lessons.some(lesson => lesson.sections.length > 0)).toBe(true);
+
+    /* And it is the FIRST such course, not merely any of them: a course with nothing to
+       study must never be the one a learner opens on. */
+    const firstStudyable = data.courses.find(course =>
+      course.units.some(unit => unit.lessons.some(lesson => lesson.sections.length > 0)));
+    expect(data.course.slug).toBe(firstStudyable.slug);
   });
 
   it("still lists the structure-only course, and it is still openable", async () => {
@@ -172,8 +177,12 @@ describe("a lesson leads somewhere", () => {
     }
   });
 
-  it("shows a word with its German form and its Arabic meaning", async () => {
+  it("shows a word with its German form and its reviewed Arabic meaning", async () => {
     const harness = await bootLocalLearnerHarness();
+    /* The Nicos lesson, whose Arabic gloss came from the source and is published. The
+       open-content lesson deliberately has none yet — its Arabic is a draft awaiting an
+       educator — and a word there shows its German alone. */
+    await harness.act("learn-course", { slug: "nicos-weg-a2" });
     const { data } = await openLesson(harness);
 
     const word = data.lesson.sections.flatMap(s => s.items)

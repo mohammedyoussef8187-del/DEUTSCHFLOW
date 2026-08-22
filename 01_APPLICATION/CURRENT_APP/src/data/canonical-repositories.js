@@ -158,11 +158,11 @@ export function createCanonicalRepositories(adapter) {
 
     async saveGrammarTopic({ topic, rules, examples, texts }, options) {
       return adapter.transaction(async () => {
-        await adapter.upsert("grammarTopics", topic, options);
+        if (topic) await adapter.upsert("grammarTopics", topic, options);
         await upsertAll("grammarRules", rules, options);
         await upsertAll("grammarExamples", examples, options);
         await upsertAll("grammarTexts", texts, options);
-        return topic.uuid;
+        return topic?.uuid ?? null;
       });
     },
 

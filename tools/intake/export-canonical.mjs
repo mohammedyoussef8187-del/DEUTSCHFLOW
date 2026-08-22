@@ -17,6 +17,12 @@
  * this file is shipped to every device: one learner's history must never travel inside
  * the app bundle. Empty tables are omitted so the file stays readable.
  *
+ * It also exports PUBLISHED rows only. A row still marked `draft` is authored but not
+ * released — unreviewed wording, a translation waiting on an educator — and shipping it
+ * would put it on every device where only a runtime filter stood between it and a
+ * learner. Both the exporter and the services decide this with the same `isPublished`,
+ * so the file and the screens can never disagree about what is published.
+ *
  *   node tools/intake/export-canonical.mjs [--db <file>] [--out <file>] [--pretty]
  */
 
@@ -25,6 +31,7 @@ import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { createSqliteAdapter } from "../../01_APPLICATION/CURRENT_APP/src/platform/sqlite/adapter.js";
 import { SCHEMA_VERSION, TABLE_SPECS } from "../../01_APPLICATION/CURRENT_APP/src/platform/sqlite/schema.js";
+import { publishedRows } from "../../01_APPLICATION/CURRENT_APP/src/content/publication.js";
 
 /**
  * Tables that hold something a person did, rather than something an editor authored.
@@ -51,17 +58,27 @@ export const CONTENT_ENTITIES = Object.freeze(
 export async function exportCanonicalContent(adapter) {
   const entities = {};
   const counts = {};
+  const withheld = {};
   let total = 0;
+  let withheldTotal = 0;
 
   for (const entity of CONTENT_ENTITIES) {
-    const rows = await adapter.selectAll(entity);
+    const stored = await adapter.selectAll(entity);
+    const rows = publishedRows(stored);
+    if (stored.length !== rows.length) {
+      withheld[entity] = stored.length - rows.length;
+      withheldTotal += stored.length - rows.length;
+    }
     if (!rows.length) continue;              // an empty table says nothing; omit it
     entities[entity] = rows;
     counts[entity] = rows.length;
     total += rows.length;
   }
 
-  return { schemaVersion: await adapter.schemaVersion(), entities, counts, total };
+  return {
+    schemaVersion: await adapter.schemaVersion(),
+    entities, counts, total, withheld, withheldTotal
+  };
 }
 
 function openReadOnly(file) {
@@ -118,9 +135,15 @@ async function main() {
     fs.writeFileSync(outFile,
       JSON.stringify(dataset, null, args.includes("--pretty") ? 2 : 0) + "\n");
 
-    console.log(`wrote ${exported.total} content rows to ${outFile}`);
+    console.log(`wrote ${exported.total} published content rows to ${outFile}`);
     for (const [entity, count] of Object.entries(exported.counts)) {
       console.log(`  ${entity}: ${count}`);
+    }
+    if (exported.withheldTotal) {
+      console.log(`held back ${exported.withheldTotal} draft rows, awaiting review:`);
+      for (const [entity, count] of Object.entries(exported.withheld)) {
+        console.log(`  ${entity}: ${count}`);
+      }
     }
   } finally {
     store.close();

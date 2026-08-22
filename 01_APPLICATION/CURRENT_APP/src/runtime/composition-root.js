@@ -45,6 +45,7 @@ import { TABLE_SPECS } from "../platform/sqlite/schema.js";
 import { detectNativePlatform } from "../platform/storage-selection.js";
 import { resolveNotificationAdapter } from "../platform/notifications/local-notification-adapter.js";
 import { isEnabled } from "./feature-gates.js";
+import { publishedOnly } from "../content/publication.js";
 
 /** Names the repository layer uses that differ from the schema's entity names. */
 export const REPOSITORY_ALIASES = Object.freeze({
@@ -185,6 +186,13 @@ async function resolveLocalSource(options) {
  * @param {object} [options] { notificationAdapter, readDueCount, readLastStudiedAt, now }
  */
 export function createServices(source, options = {}) {
+  /*
+   * Every service reads through the published view, so a draft row is invisible to all
+   * nine of them at once rather than to whichever ones remembered to filter. Writes are
+   * not affected: the importer still writes drafts, and promoting one later makes it
+   * appear without another import.
+   */
+  const readable = publishedOnly(source);
   const reminders = createReminderService({
     adapter: options.notificationAdapter ?? resolveNotificationAdapter({ isNativePlatform: false }),
     // Due state is READ from whatever the caller already has open — the running app's
@@ -192,8 +200,8 @@ export function createServices(source, options = {}) {
     readDueCount: options.readDueCount ?? (async () => 0),
     readLastStudiedAt: options.readLastStudiedAt ?? (async () => null),
     readSettings: async profileUuid =>
-      (await source.reminderSettings.find({ profileUuid }))[0] ?? null,
-    readHistory: async profileUuid => source.reminderSchedule.find({ profileUuid }),
+      (await readable.reminderSettings.find({ profileUuid }))[0] ?? null,
+    readHistory: async profileUuid => readable.reminderSchedule.find({ profileUuid }),
     writeSettings: source.write ? (row => source.write.reminders.save({ settings: row })) : null,
     writeSchedule: source.write
       ? (rows => source.write.reminders.save({ scheduled: rows }))
@@ -202,14 +210,14 @@ export function createServices(source, options = {}) {
   });
 
   return Object.freeze({
-    content: createContentService(source),
-    grammar: createGrammarService(source),
-    sentences: createSentenceService(source),
-    exercises: createExerciseService(source),
-    curriculum: createCurriculumService(source),
-    errors: createErrorService(source),
-    listening: createListeningService(source),
-    pronunciation: createPronunciationService(source),
+    content: createContentService(readable),
+    grammar: createGrammarService(readable),
+    sentences: createSentenceService(readable),
+    exercises: createExerciseService(readable),
+    curriculum: createCurriculumService(readable),
+    errors: createErrorService(readable),
+    listening: createListeningService(readable),
+    pronunciation: createPronunciationService(readable),
     reminders
   });
 }
