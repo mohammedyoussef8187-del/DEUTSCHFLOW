@@ -479,9 +479,13 @@ describe("nothing that already existed is disturbed", () => {
         expect(row.contentStatus ?? "imported", `${entity} ${row.uuid}`).not.toBe("draft");
       }
     }
-    // The unreviewed rows are held back rather than shipped to every device.
-    const openSentences = shipped.entities.sentences.filter(row =>
-      (row.sourceType ?? "") === "cc-by-4.0-open-content");
-    expect(openSentences).toHaveLength(5);
+    // The unreviewed rows are held back rather than shipped to every device: of this
+    // lesson's twelve sentences, the five transcribed from the source are shipped and
+    // the seven DeutschFlow wrote are not.
+    const lessonOne = new Set(built().mapped.sentences.map(entry => entry.sentence.uuid));
+    const shippedFromLessonOne = shipped.entities.sentences
+      .filter(row => lessonOne.has(row.uuid));
+    expect(shippedFromLessonOne).toHaveLength(5);
+    expect(lessonOne.size).toBe(12);
   });
 });

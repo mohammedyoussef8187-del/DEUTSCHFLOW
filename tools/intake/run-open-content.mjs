@@ -23,7 +23,20 @@ import { createServices } from "../../01_APPLICATION/CURRENT_APP/src/runtime/com
 import { applyImport, planImport, verifyImport } from "./import.js";
 import { buildOpenContentLesson } from "./map-open-content.js";
 
-export const DEFAULT_ARTIFACT = "00_PROJECT_CONTROL/A2_OPEN_CONTENT_FIRST_IMPORT.json";
+/**
+ * Every open-content artifact, in the order it should be imported.
+ *
+ * Later lessons reuse the course, level and course titles the first one created, so the
+ * order is the order they were authored in: an import that ran them the other way round
+ * would still work — the rows are identical and the diff reports them unchanged — but
+ * reading the audits in publication order is easier for a reviewer.
+ */
+export const OPEN_CONTENT_ARTIFACTS = Object.freeze([
+  "00_PROJECT_CONTROL/A2_OPEN_CONTENT_FIRST_IMPORT.json",
+  "00_PROJECT_CONTROL/A2_OPEN_CONTENT_LESSON_02_IMPORT.json"
+]);
+
+export const DEFAULT_ARTIFACT = OPEN_CONTENT_ARTIFACTS[0];
 
 export function readArtifact(file = DEFAULT_ARTIFACT) {
   return JSON.parse(fs.readFileSync(path.resolve(process.cwd(), file), "utf8"));
@@ -107,8 +120,25 @@ async function main() {
   };
   const apply = args.includes("--apply");
   const dbFile = path.resolve(process.cwd(), value("--db", "tools/intake/artifacts/intake.db"));
-  const artifact = value("--json", DEFAULT_ARTIFACT);
+  const chosen = args.includes("--json") ? [value("--json")] : OPEN_CONTENT_ARTIFACTS;
 
+  const store = openStore(dbFile);
+  try {
+    const adapter = createSqliteAdapter(store.executor);
+    await adapter.initializeSchema();
+    const repositories = createCanonicalRepositories(adapter);
+    for (const artifact of chosen) {
+      console.log(`
+════ ${artifact} ════`);
+      await importOne(repositories, artifact, apply);
+    }
+  } finally {
+    store.db.close();
+  }
+  console.log(`store: ${dbFile.split(path.sep).join("/")}`);
+}
+
+async function importOne(repositories, artifact, apply) {
   const built = buildOpenContentLesson({ dataset: readArtifact(artifact), now: Date.now() });
 
   console.log("── licence ──");
@@ -124,11 +154,7 @@ async function main() {
     `links withheld ${built.audit.review.withheldLinks}`);
   console.log(`  draft by entity: ${JSON.stringify(built.audit.review.draftByEntity)}`);
 
-  const store = openStore(dbFile);
-  try {
-    const adapter = createSqliteAdapter(store.executor);
-    await adapter.initializeSchema();
-    const repositories = createCanonicalRepositories(adapter);
+  {
     const result = await runOpenContent(repositories, built, { apply });
 
     console.log("── plan ──");
@@ -159,10 +185,7 @@ async function main() {
       `visible to a learner: ${verification.drafts.visible.length}`);
     console.log(`  links ${verification.links.found}/${verification.links.expected}`);
     console.log(`  ok: ${verification.ok}`);
-  } finally {
-    store.db.close();
   }
-  console.log(`store: ${dbFile.split(path.sep).join("/")}`);
 }
 
 if (process.argv[1]?.endsWith("run-open-content.mjs")) {

@@ -54,20 +54,59 @@ export const OFFICIAL_HOSTS = Object.freeze([
 ]);
 
 /**
- * Field origins that mean "this text came from the source". Everything else — an
- * original translation, an original definition, an original adaptation — is DeutschFlow
- * wording awaiting educator review.
+ * Origins that mean "this text came from the source". Everything else — an original
+ * translation, an original definition, an original adaptation — is DeutschFlow wording
+ * awaiting educator review.
+ *
+ * Matched as a PREFIX, because an artifact may qualify what it did: an origin recorded as
+ * "source-adapted for natural written German; source meaning preserved" is still adapted
+ * from the source, and the qualification is for a reader, not for this decision.
  */
 export const SOURCE_ORIGINS = Object.freeze([
-  "source-adapted", "source-corrected-and-lightly-adapted"
+  "source-transcribed", "source-adapted", "source-corrected-and-lightly-adapted"
 ]);
+
+/**
+ * Where an artifact may record the origin of one language.
+ *
+ * Two schemes are in use. The first lesson keyed `languageOrigins` by language code; the
+ * second keys `fieldOrigins` by the field it filled — `german`, `english`, `arabic` — or
+ * by the part of the record it describes, such as `germanTranscript`. All of them are
+ * read here so a lesson is judged by what its own artifact says, rather than by which
+ * spelling the build happened to use.
+ */
+const ORIGIN_KEYS_BY_LANGUAGE = Object.freeze({
+  de: ["de", "german", "germanTranscript"],
+  en: ["en", "english", "englishTranscript"],
+  ar: ["ar", "arabic", "arabicTranscript"]
+});
+
+/** Text kinds that are a label rather than teaching content. */
+const LABEL_KINDS = Object.freeze(["title", "instruction", "objective", "subtitle"]);
 
 /** Record-level statuses that carry no authored language body of their own. */
 export const METADATA_STATUSES = Object.freeze(["source-metadata"]);
 
 const SPEC_BY_ENTITY = new Map(TABLE_SPECS.map(spec => [spec.entity, spec]));
 
-const fromSource = origin => SOURCE_ORIGINS.includes(origin);
+const fromSource = origin => typeof origin === "string" &&
+  SOURCE_ORIGINS.some(prefix => origin.startsWith(prefix));
+
+/**
+ * What the artifact says about one language of one row, or undefined if it says nothing.
+ * A title or instruction is answered by the record's own note about its labels when it
+ * has one, because those are written by DeutschFlow even where the body is transcribed.
+ */
+export function originFor(record, language, kind = null) {
+  const declared = { ...(record?.fieldOrigins ?? {}), ...(record?.languageOrigins ?? {}) };
+  if (kind && LABEL_KINDS.includes(kind) && declared.titlesAndInstructions !== undefined) {
+    return declared.titlesAndInstructions;
+  }
+  for (const key of ORIGIN_KEYS_BY_LANGUAGE[language] ?? [language]) {
+    if (declared[key] !== undefined) return declared[key];
+  }
+  return undefined;
+}
 
 /* ------------------------------------------------------------- validation */
 
@@ -374,17 +413,14 @@ function canonicalRowsOf(record) {
  * text at all is a container and is published with its record.
  */
 export function publicationOf(record, entity, row, context = {}) {
-  const origins = record.languageOrigins ?? null;
-
   if (row?.language) {
     /* A language the artifact declares as source-derived is published. Anything else is
        DeutschFlow wording: the changes notice states in the artifact itself that the
        Arabic translations, the German definitions and the examples were newly written,
-       and every `ar` origin the artifact does declare is `original-translation`. So an
+       and every Arabic origin any artifact declares is an original translation. So an
        undeclared language is published only when it is not Arabic. */
-    if (origins && origins[row.language] !== undefined) {
-      return fromSource(origins[row.language]) ? IMPORTED_STATUS : DRAFT_STATUS;
-    }
+    const origin = originFor(record, row.language, row.kind);
+    if (origin !== undefined) return fromSource(origin) ? IMPORTED_STATUS : DRAFT_STATUS;
     return row.language === "ar" ? DRAFT_STATUS : IMPORTED_STATUS;
   }
 
@@ -402,11 +438,11 @@ export function publicationOf(record, entity, row, context = {}) {
   switch (entity) {
     case "sentences":
       // The sentence row IS its German text.
-      return origins && fromSource(origins.de) ? IMPORTED_STATUS : DRAFT_STATUS;
+      return fromSource(originFor(record, "de")) ? IMPORTED_STATUS : DRAFT_STATUS;
 
     case "vocabularyMeanings":
       // The meaning row is the Arabic gloss plus an original German definition.
-      return origins && fromSource(origins.ar) ? IMPORTED_STATUS : DRAFT_STATUS;
+      return fromSource(originFor(record, "ar")) ? IMPORTED_STATUS : DRAFT_STATUS;
 
     case "grammarTopics":
     case "grammarRules":
@@ -759,8 +795,9 @@ function buildAudit(dataset, records, statuses, withheldLinks, now) {
 
   const origins = {};
   for (const { record } of records) {
-    for (const [language, origin] of Object.entries(record.languageOrigins ?? {})) {
-      const key = `${language}:${origin}`;
+    const declared = { ...(record.fieldOrigins ?? {}), ...(record.languageOrigins ?? {}) };
+    for (const [field, origin] of Object.entries(declared)) {
+      const key = `${field}:${origin}`;
       origins[key] = (origins[key] ?? 0) + 1;
     }
   }
