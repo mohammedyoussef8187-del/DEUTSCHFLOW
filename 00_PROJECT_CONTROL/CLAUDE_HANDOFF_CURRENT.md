@@ -3,7 +3,7 @@
 - **agent:** Claude
 - **branch:** `mobile-foundation` (worked in an isolated worktree on `claude/open-content`, pushed to `origin/mobile-foundation`)
 - **starting commit:** `fa23863`
-- **final commit SHA:** `PENDING_FINAL`
+- **final commit SHA:** `8f2c59b` (`feat: import the complete seven-lesson A2 curriculum`)
 - **cherry-picked from Codex:** `877e580` (lesson-02 dataset rebuild, superseded), `2853d65` (seven-lesson curriculum), `4581f79` (curriculum handoff)
 
 ## Seven-lesson import status — 7/7 imported, verified, no conflicts
