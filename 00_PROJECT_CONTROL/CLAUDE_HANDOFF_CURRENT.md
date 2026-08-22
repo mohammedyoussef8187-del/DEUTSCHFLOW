@@ -4,7 +4,7 @@
   `git push origin claude/open-content:mobile-foundation`; never merged to `main`)
 - **starting commit:** `65109d9`, plus the Gemini audit commit `4c6b280` cherry-picked as
   `8bc08c0`
-- **commit SHA:** `PENDING_FINAL`
+- **commit SHA:** `8c5eebb` (`fix: let approval and re-import coexist, and make the review queue an artifact`)
 - **phase:** Educator Review / Release Candidate preparation
 
 ---
