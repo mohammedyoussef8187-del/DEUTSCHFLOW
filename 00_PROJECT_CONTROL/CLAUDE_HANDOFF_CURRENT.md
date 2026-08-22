@@ -3,7 +3,8 @@
 - **agent:** Claude
 - **branch:** `mobile-foundation` (worked in an isolated worktree on `claude/open-content`, pushed to `origin/mobile-foundation`)
 - **starting commit:** `8f5a12d`
-- **final commit SHA:** `PENDING_FINAL` (see the last commit on `origin/mobile-foundation`)
+- **final commit SHA:** `2944397` (`feat: import open A2 lesson 2 and read its provenance scheme`)
+- **preceding commits:** `a779fd6` (multilingual fix), `aed53cc` (Codex lesson 2 dataset, cherry-picked)
 
 ## Work completed
 
