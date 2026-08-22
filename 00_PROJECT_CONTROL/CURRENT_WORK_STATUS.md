@@ -542,3 +542,10 @@ because the drafts were never shipped.
 *   The artifact contains 20 vocabulary items, 12 sentences, 1 grammar topic / 2 rules, 8 deterministic exercises, and a 4-segment interview with remote-only media metadata. Original/adapted German and Arabic remain explicitly educator-review pending.
 *   Validation: 53 unique high-level records, 358 schema-compatible canonical rows, 395 resolved UUID references, zero lesson-1 vocabulary overlap, and exactly 5 byte-identical shared course rows. No learner/SRS/runtime data or application code was modified.
 *   Next step after merging the content branch: ingest through the same open-content adapter as lesson 1, preview before apply, verify 353 creates plus 5 unchanged rows when lesson 1 is present, then require a 358-row no-op second import.
+
+## Complete Open-Licensed A2 Curriculum Preparation (2026-08-22)
+
+*   Content-only branch `codex/a2-complete-content` now contains seven ordered CC BY 4.0 lesson datasets covering everyday services, family/events, travel, health, housing/work, education/environment, and city/culture.
+*   Aggregate learner material: 139 unique vocabulary records, 74 context sentences, 7 grammar topics / 14 rules, 70 exercises (56 deterministic and 14 ungraded production prompts), 7 listening items / 32 segments, and 7 pronunciation metadata records.
+*   All seven artifacts pass the existing open-content validator. Cross-artifact checks confirm seven datasets and seven continuation handoffs, unique vocabulary, resolvable source relationships, deterministic answer-option parity, and zero scoreable Arabic answers.
+*   Publication remains gated: 372 educational records require educator review, 7 remote media records require technical review, and pronunciation remains verified metadata only. No runtime code, learner data, or SRS state was modified.

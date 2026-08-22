@@ -1,0 +1,383 @@
+{
+  "artifactType": "deutschflow-a2-complete-content-manifest-v1",
+  "generatedAt": "2026-08-22",
+  "cefr": "A2",
+  "lessonCount": 7,
+  "curriculumOrder": [
+    "Everyday services",
+    "Family and events",
+    "Travel",
+    "Health",
+    "Housing and work",
+    "Education and environment",
+    "City and culture"
+  ],
+  "sourceFamily": {
+    "names": [
+      "Deutsch im Blick",
+      "Grimm Grammar"
+    ],
+    "owner": "COERLL, The University of Texas at Austin",
+    "licence": "CC BY 4.0",
+    "licenceEvidence": "https://coerll.utexas.edu/coerll/oer/deutsch-im-blick/"
+  },
+  "reviewStates": [
+    "SOURCE_VERIFIED",
+    "EDUCATOR_REVIEW_REQUIRED",
+    "TECHNICAL_REVIEW_REQUIRED",
+    "EXCLUDED"
+  ],
+  "gradingPolicy": {
+    "deterministicExerciseLanguage": "de",
+    "arabicSupportOnly": true,
+    "arabicScoreable": false,
+    "openProductionPromptsGraded": false
+  },
+  "totals": {
+    "vocabulary": 139,
+    "sentences": 74,
+    "grammarTopics": 7,
+    "grammarRules": 14,
+    "exercises": 70,
+    "listeningItems": 7,
+    "remoteMediaAssets": 7,
+    "listeningSegments": 32,
+    "pronunciationMetadata": 7,
+    "educatorReviewRequired": 372,
+    "technicalReviewRequired": 7
+  },
+  "lessons": [
+    {
+      "curriculumOrder": 1,
+      "title": "Alltag organisieren und einkaufen",
+      "datasetPath": "00_PROJECT_CONTROL/A2_CONTENT/A2_LESSON_01_EVERYDAY_SERVICES.json",
+      "continuationHandoffPath": "00_PROJECT_CONTROL/A2_CONTENT/A2_LESSON_01_HANDOFF.md",
+      "canonicalUnitOrdering": 1,
+      "recordCounts": {
+        "courses": 1,
+        "courseLevels": 1,
+        "units": 1,
+        "lessons": 1,
+        "lessonSections": 6,
+        "vocabulary": 20,
+        "sentences": 10,
+        "grammarTopics": 1,
+        "grammarRules": 2,
+        "exercises": 10,
+        "listeningItems": 1,
+        "remoteMediaAssets": 1,
+        "listeningSegments": 2,
+        "pronunciationMetadata": 1
+      },
+      "reviewSummary": {
+        "educationalRecords": 53,
+        "educatorReviewRequired": 53,
+        "technicalReviewRequired": 1,
+        "sourceAndLicenceVerified": true,
+        "finalVerified": 0
+      },
+      "sourceUrls": [
+        "https://coerll.utexas.edu/dib/toc.php?k=5",
+        "https://coerll.utexas.edu/gg/gr/vcp_01.html",
+        "https://coerll.utexas.edu/dib/toc.php?k=3",
+        "https://coerll.utexas.edu/dib/voc.php?k=3",
+        "https://coerll.utexas.edu/dib/vidt.php?f=03_09_int_ju_mittag",
+        "https://coerll.utexas.edu/gg/gr/vm_01.html",
+        "https://coerll.utexas.edu/gg/gr/con_03.html",
+        "https://coerll.utexas.edu/dib/pho.php?k=3"
+      ],
+      "pronunciation": {
+        "status": "SOURCE_VERIFIED",
+        "learnerReady": false,
+        "scope": "metadata-only; no IPA, phoneme, model audio, or guessed technical values"
+      }
+    },
+    {
+      "curriculumOrder": 2,
+      "title": "Familie und Feiern: über die Vergangenheit sprechen",
+      "datasetPath": "00_PROJECT_CONTROL/A2_CONTENT/A2_LESSON_02_FAMILY_EVENTS.json",
+      "continuationHandoffPath": "00_PROJECT_CONTROL/A2_CONTENT/A2_LESSON_02_HANDOFF.md",
+      "canonicalUnitOrdering": 2,
+      "recordCounts": {
+        "courses": 1,
+        "units": 1,
+        "lessons": 1,
+        "lessonSections": 5,
+        "vocabulary": 19,
+        "sentences": 12,
+        "grammarTopics": 1,
+        "grammarRules": 2,
+        "exercises": 10,
+        "listeningItems": 1,
+        "remoteMediaAssets": 1,
+        "listeningSegments": 10,
+        "pronunciationMetadata": 1
+      },
+      "reviewSummary": {
+        "educationalRecords": 53,
+        "educatorReviewRequired": 53,
+        "technicalReviewRequired": 1,
+        "sourceAndLicenceVerified": true,
+        "finalVerified": 0
+      },
+      "sourceUrls": [
+        "https://coerll.utexas.edu/coerll/oer/deutsch-im-blick/",
+        "https://coerll.utexas.edu/dib/pdfs/DeutschImBlick-textbook.pdf",
+        "https://coerll.utexas.edu/dib/toc.php?k=5",
+        "https://coerll.utexas.edu/dib/voc.php?k=5",
+        "https://coerll.utexas.edu/dib/vidt.php?f=05_07_int_scl_familie",
+        "https://coerll.utexas.edu/dib/vidt.php?f=05_26_int_ek_geburtstag",
+        "https://coerll.utexas.edu/gg/gr/vcp_01.html",
+        "https://coerll.utexas.edu/dib/pho.php?k=5"
+      ],
+      "pronunciation": {
+        "status": "SOURCE_VERIFIED",
+        "learnerReady": false,
+        "scope": "metadata-only; no IPA, phoneme, model audio, or guessed technical values"
+      }
+    },
+    {
+      "curriculumOrder": 3,
+      "title": "Reisen planen und von Reisen erzählen",
+      "datasetPath": "00_PROJECT_CONTROL/A2_CONTENT/A2_LESSON_03_TRAVEL.json",
+      "continuationHandoffPath": "00_PROJECT_CONTROL/A2_CONTENT/A2_LESSON_03_HANDOFF.md",
+      "canonicalUnitOrdering": 3,
+      "recordCounts": {
+        "courses": 1,
+        "courseLevels": 1,
+        "units": 1,
+        "lessons": 1,
+        "lessonSections": 5,
+        "vocabulary": 20,
+        "sentences": 12,
+        "grammarTopics": 1,
+        "grammarRules": 2,
+        "exercises": 10,
+        "listeningItems": 1,
+        "remoteMediaAssets": 1,
+        "listeningSegments": 4,
+        "pronunciationMetadata": 1
+      },
+      "reviewSummary": {
+        "educationalRecords": 54,
+        "educatorReviewRequired": 54,
+        "technicalReviewRequired": 1,
+        "sourceAndLicenceVerified": true,
+        "finalVerified": 0
+      },
+      "sourceUrls": [
+        "https://coerll.utexas.edu/coerll/oer/deutsch-im-blick/",
+        "https://coerll.utexas.edu/dib/pdfs/DeutschImBlick-textbook.pdf",
+        "https://coerll.utexas.edu/dib/toc.php?k=5",
+        "https://coerll.utexas.edu/gg/gr/vcp_01.html",
+        "https://coerll.utexas.edu/dib/toc.php?k=6",
+        "https://coerll.utexas.edu/dib/voc.php?k=6",
+        "https://coerll.utexas.edu/dib/vidt.php?f=06_07_int_ju_reisen",
+        "https://coerll.utexas.edu/gg/gr/vcp_07.html",
+        "https://coerll.utexas.edu/gg/gr/vcp_08.html",
+        "https://coerll.utexas.edu/dib/pho.php?k=6"
+      ],
+      "pronunciation": {
+        "status": "SOURCE_VERIFIED",
+        "learnerReady": false,
+        "scope": "metadata-only; no IPA, phoneme, model audio, or guessed technical values"
+      }
+    },
+    {
+      "curriculumOrder": 4,
+      "title": "Gesund leben und beim Arzt sprechen",
+      "datasetPath": "00_PROJECT_CONTROL/A2_CONTENT/A2_LESSON_04_GESUNDHEIT_UND_TERMINE.json",
+      "continuationHandoffPath": "00_PROJECT_CONTROL/A2_CONTENT/A2_LESSON_04_HANDOFF.md",
+      "canonicalUnitOrdering": 4,
+      "recordCounts": {
+        "courses": 1,
+        "courseLevels": 1,
+        "units": 1,
+        "lessons": 1,
+        "lessonSections": 6,
+        "vocabulary": 20,
+        "sentences": 10,
+        "grammarTopics": 1,
+        "grammarRules": 2,
+        "exercises": 10,
+        "listeningItems": 1,
+        "remoteMediaAssets": 1,
+        "listeningSegments": 4,
+        "pronunciationMetadata": 1
+      },
+      "reviewSummary": {
+        "educationalRecords": 53,
+        "educatorReviewRequired": 53,
+        "technicalReviewRequired": 1,
+        "sourceAndLicenceVerified": true,
+        "finalVerified": 0
+      },
+      "sourceUrls": [
+        "https://coerll.utexas.edu/dib/toc.php?k=5",
+        "https://coerll.utexas.edu/gg/gr/vcp_01.html",
+        "https://coerll.utexas.edu/dib/toc.php?k=7",
+        "https://coerll.utexas.edu/dib/voc.php?k=7",
+        "https://coerll.utexas.edu/dib/vidt.php?f=07_07_int_ek_gesundessen",
+        "https://coerll.utexas.edu/gg/gr/vrf_01.html",
+        "https://coerll.utexas.edu/gg/gr/vimp_01.html",
+        "https://coerll.utexas.edu/dib/pho.php?k=7"
+      ],
+      "pronunciation": {
+        "status": "SOURCE_VERIFIED",
+        "learnerReady": false,
+        "scope": "metadata-only; no IPA, phoneme, model audio, or guessed technical values"
+      }
+    },
+    {
+      "curriculumOrder": 5,
+      "title": "Über Wohnen, Beziehungen und Arbeit sprechen",
+      "datasetPath": "00_PROJECT_CONTROL/A2_CONTENT/A2_LESSON_05_WOHNEN_UND_ARBEITEN.json",
+      "continuationHandoffPath": "00_PROJECT_CONTROL/A2_CONTENT/A2_LESSON_05_HANDOFF.md",
+      "canonicalUnitOrdering": 5,
+      "recordCounts": {
+        "courses": 1,
+        "courseLevels": 1,
+        "units": 1,
+        "lessons": 1,
+        "lessonSections": 6,
+        "vocabulary": 20,
+        "sentences": 10,
+        "grammarTopics": 1,
+        "grammarRules": 2,
+        "exercises": 10,
+        "listeningItems": 1,
+        "remoteMediaAssets": 1,
+        "listeningSegments": 4,
+        "pronunciationMetadata": 1
+      },
+      "reviewSummary": {
+        "educationalRecords": 53,
+        "educatorReviewRequired": 53,
+        "technicalReviewRequired": 1,
+        "sourceAndLicenceVerified": true,
+        "finalVerified": 0
+      },
+      "sourceUrls": [
+        "https://coerll.utexas.edu/dib/toc.php?k=5",
+        "https://coerll.utexas.edu/gg/gr/vcp_01.html",
+        "https://coerll.utexas.edu/dib/toc.php?k=8",
+        "https://coerll.utexas.edu/dib/voc.php?k=8",
+        "https://coerll.utexas.edu/dib/vidt.php?f=08_22_int_ju_arbeit",
+        "https://coerll.utexas.edu/gg/gr/adj_05.html",
+        "https://coerll.utexas.edu/gg/gr/vsub_02.html",
+        "https://coerll.utexas.edu/dib/pho.php?k=8"
+      ],
+      "pronunciation": {
+        "status": "SOURCE_VERIFIED",
+        "learnerReady": false,
+        "scope": "metadata-only; no IPA, phoneme, model audio, or guessed technical values"
+      }
+    },
+    {
+      "curriculumOrder": 6,
+      "title": "Über Bildung und umweltbewusstes Handeln sprechen",
+      "datasetPath": "00_PROJECT_CONTROL/A2_CONTENT/A2_LESSON_06_BILDUNG_UND_UMWELT.json",
+      "continuationHandoffPath": "00_PROJECT_CONTROL/A2_CONTENT/A2_LESSON_06_HANDOFF.md",
+      "canonicalUnitOrdering": 6,
+      "recordCounts": {
+        "courses": 1,
+        "courseLevels": 1,
+        "units": 1,
+        "lessons": 1,
+        "lessonSections": 6,
+        "vocabulary": 20,
+        "sentences": 10,
+        "grammarTopics": 1,
+        "grammarRules": 2,
+        "exercises": 10,
+        "listeningItems": 1,
+        "remoteMediaAssets": 1,
+        "listeningSegments": 4,
+        "pronunciationMetadata": 1
+      },
+      "reviewSummary": {
+        "educationalRecords": 53,
+        "educatorReviewRequired": 53,
+        "technicalReviewRequired": 1,
+        "sourceAndLicenceVerified": true,
+        "finalVerified": 0
+      },
+      "sourceUrls": [
+        "https://coerll.utexas.edu/dib/toc.php?k=5",
+        "https://coerll.utexas.edu/gg/gr/vcp_01.html",
+        "https://coerll.utexas.edu/dib/toc.php?k=9",
+        "https://coerll.utexas.edu/dib/voc.php?k=9",
+        "https://coerll.utexas.edu/dib/vidt.php?f=09_10_int_ju_informiert",
+        "https://coerll.utexas.edu/gg/gr/vinf_01.html",
+        "https://coerll.utexas.edu/gg/gr/con_04.html",
+        "https://coerll.utexas.edu/dib/pho.php?k=9"
+      ],
+      "pronunciation": {
+        "status": "SOURCE_VERIFIED",
+        "learnerReady": false,
+        "scope": "metadata-only; no IPA, phoneme, model audio, or guessed technical values"
+      }
+    },
+    {
+      "curriculumOrder": 7,
+      "title": "In der Stadt nach dem Weg fragen und Kultur erleben",
+      "datasetPath": "00_PROJECT_CONTROL/A2_CONTENT/A2_LESSON_07_STADT_KULTUR_UND_WEGE.json",
+      "continuationHandoffPath": "00_PROJECT_CONTROL/A2_CONTENT/A2_LESSON_07_HANDOFF.md",
+      "canonicalUnitOrdering": 7,
+      "recordCounts": {
+        "courses": 1,
+        "courseLevels": 1,
+        "units": 1,
+        "lessons": 1,
+        "lessonSections": 6,
+        "vocabulary": 20,
+        "sentences": 10,
+        "grammarTopics": 1,
+        "grammarRules": 2,
+        "exercises": 10,
+        "listeningItems": 1,
+        "remoteMediaAssets": 1,
+        "listeningSegments": 4,
+        "pronunciationMetadata": 1
+      },
+      "reviewSummary": {
+        "educationalRecords": 53,
+        "educatorReviewRequired": 53,
+        "technicalReviewRequired": 1,
+        "sourceAndLicenceVerified": true,
+        "finalVerified": 0
+      },
+      "sourceUrls": [
+        "https://coerll.utexas.edu/dib/toc.php?k=5",
+        "https://coerll.utexas.edu/gg/gr/vcp_01.html",
+        "https://coerll.utexas.edu/dib/toc.php?k=10",
+        "https://coerll.utexas.edu/dib/voc.php?k=10",
+        "https://coerll.utexas.edu/dib/vidt.php?f=10_06_int_ju_theater",
+        "https://coerll.utexas.edu/gg/gr/cas_09.html",
+        "https://coerll.utexas.edu/gg/gr/vm_02.html",
+        "https://coerll.utexas.edu/dib/pho.php?k=10"
+      ],
+      "pronunciation": {
+        "status": "SOURCE_VERIFIED",
+        "learnerReady": false,
+        "scope": "metadata-only; no IPA, phoneme, model audio, or guessed technical values"
+      }
+    }
+  ],
+  "exclusions": [
+    "Klett/Netzwerk publisher-authored content",
+    "bundled media binaries",
+    "guessed media facts",
+    "guessed pronunciation content",
+    "learner or SRS state"
+  ],
+  "validationContract": {
+    "exactLessonCount": 7,
+    "uniqueVocabularyAcrossLessons": true,
+    "deterministicIdsRequired": true,
+    "allSourceReferencesResolvable": true,
+    "arabicAcceptedAnswersMustHaveScoreableZero": true,
+    "canonicalPreviewRequiredBeforeApply": true,
+    "educatorAndTechnicalReviewRequiredBeforePublication": true
+  }
+}
