@@ -11,6 +11,8 @@
  * Storage is an in-memory fake IndexedDB; no real learner data is touched.
  */
 
+import fs from "node:fs";
+import path from "node:path";
 import { beforeAll, describe, expect, it } from "vitest";
 import { IDBFactory, IDBKeyRange } from "fake-indexeddb";
 
@@ -93,6 +95,15 @@ beforeAll(async () => {
   globalThis.indexedDB = new IDBFactory();
   globalThis.IDBKeyRange = IDBKeyRange;
   globalThis.SEED = SEED;
+  /*
+   * Booting the app now also loads the curriculum dataset over the network. There is no
+   * server here, so it is served the same file the app ships with — a 404 would still
+   * boot (the store degrades honestly), but it would exercise a path a device never
+   * takes and leave a failed connection in every run of this suite.
+   */
+  const dataset = JSON.parse(fs.readFileSync(
+    path.resolve(process.cwd(), "01_APPLICATION/CURRENT_APP/data/canonical-content.json"), "utf8"));
+  globalThis.fetch = async () => ({ ok: true, status: 200, json: async () => dataset });
 
   await import("../../01_APPLICATION/CURRENT_APP/src/app.js");
   DF = window.DF;

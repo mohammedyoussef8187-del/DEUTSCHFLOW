@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "deutschflow",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "4173", "--directory", "01_APPLICATION/CURRENT_APP"],
+      "port": 4173
+    }
+  ]
+}

@@ -98,6 +98,73 @@ export function conflictTargetFor(entity, preferNaturalKey = true) {
   return ["uuid"];
 }
 
+/*
+ * Column-level constraints, also read from the DDL rather than restated.
+ *
+ * A second storage backend has to honour the same table definition, and the only way to
+ * be sure it does is to derive its rules from the same text SQLite is given. A DEFAULT
+ * that lives in the DDL and is hand-copied elsewhere is a divergence waiting to happen:
+ * one backend stores `not_started`, the other stores null, and the difference surfaces
+ * as a screen that renders nothing on one platform.
+ */
+
+function parseColumnConstraints() {
+  const byTable = new Map();
+  for (const statement of SCHEMA_STATEMENTS) {
+    const table = /CREATE TABLE IF NOT EXISTS (\w+)/.exec(statement)?.[1];
+    if (!table) continue;
+
+    const defaults = {};
+    const notNull = [];
+    const foreignKeys = [];
+
+    for (const line of statement.split("\n")) {
+      const body = line.trim().replace(/,$/, "");
+      const fk = /^FOREIGN KEY \((\w+)\) REFERENCES (\w+)\((\w+)\)/.exec(body);
+      if (fk) {
+        foreignKeys.push({ column: fk[1], table: fk[2], references: fk[3] });
+        continue;
+      }
+      // A column definition, not a table-level constraint.
+      const column = /^(\w+)\s+(TEXT|INTEGER|REAL|BLOB|NUMERIC)\b/.exec(body);
+      if (!column) continue;
+
+      const name = column[1];
+      if (/\bNOT NULL\b/.test(body) && !/\bPRIMARY KEY\b/.test(body)) notNull.push(name);
+
+      const literal = /\bDEFAULT\s+('(?:[^']*)'|-?\d+(?:\.\d+)?)/.exec(body);
+      if (literal) {
+        const raw = literal[1];
+        defaults[name] = raw.startsWith("'") ? raw.slice(1, -1) : Number(raw);
+      }
+      const inlineFk = /\bREFERENCES (\w+)\((\w+)\)/.exec(body);
+      if (inlineFk) foreignKeys.push({ column: name, table: inlineFk[1], references: inlineFk[2] });
+    }
+    byTable.set(table, Object.freeze({
+      defaults: Object.freeze(defaults),
+      notNull: Object.freeze(notNull),
+      foreignKeys: Object.freeze(foreignKeys)
+    }));
+  }
+  return byTable;
+}
+
+const COLUMN_CONSTRAINTS_BY_TABLE = parseColumnConstraints();
+
+const NO_CONSTRAINTS = Object.freeze({
+  defaults: Object.freeze({}), notNull: Object.freeze([]), foreignKeys: Object.freeze([])
+});
+
+/**
+ * What the DDL says about an entity's columns: literal DEFAULTs, NOT NULL columns, and
+ * the foreign keys it declares. Column names, because that is what the DDL names.
+ */
+export function columnConstraintsFor(entity) {
+  const spec = TABLE_SPECS.find(candidate => candidate.entity === entity);
+  if (!spec) return NO_CONSTRAINTS;
+  return COLUMN_CONSTRAINTS_BY_TABLE.get(spec.table) ?? NO_CONSTRAINTS;
+}
+
 /* ------------------------------------------------------------------ policy */
 
 export function policyFor(entity) {

@@ -42,6 +42,15 @@ import "../ui/components/df-pronunciation-card.js";
 import "../ui/components/df-reminder-settings.js";
 import "../ui/components/df-choice-list.js";
 
+/** Cut a label to a readable length without cutting a word in half mid-screen. */
+function truncate(value, limit) {
+  const text = String(value ?? "").replace(/\s+/g, " ").trim();
+  return text.length <= limit ? text : `${text.slice(0, limit - 1).trimEnd()}…`;
+}
+
+/** Shown against an exercise the evaluator is not allowed to score. */
+const SELF_CHECKED = "تصحيح ذاتي";
+
 const esc = value => String(value ?? "").replace(/[&<>"']/g,
   c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" })[c]);
 
@@ -126,6 +135,77 @@ export function createLearnController(runtime, options = {}) {
     return view.data;
   }
 
+  /**
+   * Resolve every item in one lesson to something a learner can read.
+   *
+   * The lesson structure references content as (contentType, contentUuid). Rendering the
+   * uuid is what the store knows, not what a learner needs, so each reference is looked
+   * up through the service that owns that content type and reduced to a title and a
+   * detail line. An item whose content is missing keeps its uuid — a dangling reference
+   * should look wrong rather than be quietly dropped.
+   */
+  async function labelLessonItems(lesson) {
+    const items = (lesson.sections ?? []).flatMap(section => section.items ?? []);
+    if (!items.length) return {};
+    const wanted = type => items.some(item => item.contentType === type);
+    const labels = {};
+
+    if (wanted("vocabulary")) {
+      for (const entry of await services.content.allEntries()) {
+        labels[entry.uuid] = {
+          title: [entry.article, entry.german].filter(Boolean).join(" "),
+          detail: entry.primary?.arabic ?? null,
+          lang: "de"
+        };
+      }
+    }
+    if (wanted("exercise")) {
+      for (const exercise of await services.exercises.all()) {
+        labels[exercise.uuid] = {
+          title: exercise.instruction?.de ?? exercise.prompt?.de ?? exercise.slug,
+          detail: exercise.gradeable ? null : SELF_CHECKED,
+          lang: "de"
+        };
+      }
+    }
+    if (wanted("listening")) {
+      for (const activity of await services.listening.activities()) {
+        labels[activity.uuid] = {
+          title: activity.title?.de ?? activity.slug, detail: null, lang: "de"
+        };
+      }
+    }
+    if (wanted("sentence")) {
+      for (const sentence of await services.sentences.all()) {
+        labels[sentence.uuid] = {
+          title: sentence.german, detail: sentence.translations?.ar ?? null, lang: "de"
+        };
+      }
+    }
+    if (wanted("grammar")) {
+      for (const topic of await services.grammar.topics()) {
+        labels[topic.uuid] = { title: topic.title?.de ?? topic.slug, detail: null, lang: "de" };
+      }
+    }
+    return labels;
+  }
+
+  /*
+   * Which course a learner lands on when they have not chosen one.
+   *
+   * A course whose chapters are registered but carry no teachable section is real
+   * structure, not a lesson: opening it first would greet a learner with a list of
+   * chapters that all lead to a blank screen. So the landing course is the first one
+   * that actually has something to study, and the empty ones stay listed and reachable
+   * rather than hidden — the structure is true, it is just not where to begin.
+   */
+  function defaultCourseSlug(courses) {
+    const studyable = courses.find(course =>
+      (course.units ?? []).some(unit =>
+        (unit.lessons ?? []).some(lesson => (lesson.sections ?? []).length > 0)));
+    return (studyable ?? courses[0])?.slug ?? null;
+  }
+
   const loaders = {
     "learn": async () => ({
       courses: (await services.curriculum.courses()).length,
@@ -139,14 +219,17 @@ export function createLearnController(runtime, options = {}) {
 
     "learn-courses": async () => {
       const courses = await services.curriculum.courses();
-      const slug = view.courseSlug ?? courses[0]?.slug ?? null;
+      const slug = view.courseSlug ?? defaultCourseSlug(courses);
       view.courseSlug = slug;
       const course = slug ? courses.find(c => c.slug === slug) ?? null : null;
       const progress = slug ? await services.curriculum.progressForCourse(slug, profileUuid) : null;
       const lesson = view.lessonUuid
         ? (course?.units ?? []).flatMap(u => u.lessons).find(l => l.uuid === view.lessonUuid) ?? null
         : null;
-      return { courses, course, progress, lesson };
+      // Only for the lesson actually open: resolving every lesson in the course would
+      // read the whole curriculum to render a list of titles nobody is looking at.
+      const labels = lesson ? await labelLessonItems(lesson) : null;
+      return { courses, course, progress, lesson, labels };
     },
 
     "learn-grammar": async () => ({ topics: await services.grammar.topics() }),
@@ -285,10 +368,17 @@ export function createLearnController(runtime, options = {}) {
           ${emptyState("لا توجد تمارين بعد", "لم يُستورد أي تمرين إلى مخزن المحتوى حتى الآن.")}`;
       }
       const exercise = data.exercise;
+      /* The picker names each task the way the source does. A slug is an identifier,
+         not a title, so it is the last resort rather than the first choice. */
+      const pickerLabel = item => item.instruction?.ar || item.instruction?.de ||
+        item.prompt?.de || item.prompt?.ar || item.slug;
       const picker = data.exercises.length > 1
         ? `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-block-end:12px">${
             data.exercises.map(item => `<button class="ghost-btn" data-action="learn-exercise"
-              data-uuid="${esc(item.uuid)}" style="min-height:44px">${esc(item.slug)}</button>`).join("")}</div>`
+              data-uuid="${esc(item.uuid)}" title="${esc(item.slug)}"
+              style="min-height:44px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
+              ${item.uuid === exercise?.uuid ? 'aria-current="true"' : ""}
+              >${esc(truncate(pickerLabel(item), 48))}</button>`).join("")}</div>`
         : "";
 
       /* German first because it is the target language, then the support languages.
@@ -391,6 +481,7 @@ export function createLearnController(runtime, options = {}) {
       const lessonEl = document.getElementById("learn-lesson");
       if (lessonEl) {
         lessonEl.lesson = data.lesson;
+        lessonEl.labels = data.labels ?? null;
         lessonEl.progress = data.progress?.lessons?.find(l => l.uuid === data.lesson?.uuid) ?? null;
       }
     }
@@ -621,6 +712,9 @@ export function createLearnController(runtime, options = {}) {
         view.lessonUuid = detail.lessonUuid ?? null;
         return { reload: true };
 
+      case "item-select":
+        return openLessonItem(detail);
+
       case "practice-select":
         return { reload: false };
 
@@ -639,6 +733,40 @@ export function createLearnController(runtime, options = {}) {
 
       default:
         return null;
+    }
+  }
+
+  /**
+   * Follow a lesson item to the screen that can actually teach it.
+   *
+   * A vocabulary item is already shown in full on the lesson screen — its German form
+   * and its Arabic meaning are the content — so it stays where it is rather than
+   * navigating to a screen that would repeat it.
+   */
+  async function openLessonItem(detail) {
+    switch (detail.contentType) {
+      case "exercise":
+        view.exerciseUuid = detail.contentUuid;
+        view.result = null;
+        view.answer = "";
+        return { route: "learn-exercises" };
+
+      case "listening":
+        view.activityUuid = detail.contentUuid;
+        return { route: "learn-listening" };
+
+      case "pronunciation":
+        view.pronunciationUuid = detail.contentUuid;
+        return { route: "learn-pronunciation" };
+
+      case "sentence":
+        return { route: "learn-sentences" };
+
+      case "grammar":
+        return { route: "learn-grammar" };
+
+      default:
+        return { reload: false };
     }
   }
 

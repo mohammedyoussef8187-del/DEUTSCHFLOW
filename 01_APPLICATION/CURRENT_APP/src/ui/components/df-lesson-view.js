@@ -9,6 +9,15 @@
  * It renders the structure, not the content bodies — resolving a contentUuid to a word
  * or an exercise belongs to the content services, not to this component. Nothing here
  * reads storage, scores an answer, or touches SRS state.
+ *
+ * What it will not do is show a learner a uuid. Resolution stays outside, but the
+ * resolved LABEL is accepted as a property: the host looks each item up through the
+ * services and hands the result over. Without one an item falls back to its identifier,
+ * which is a visible defect rather than a silent one.
+ *
+ * Each item is a button that announces `item-select` with the item it stands for. The
+ * component decides nothing about what that means — the host routes it — but a lesson
+ * whose parts cannot be opened is a table of contents, not a lesson.
  */
 
 import { LitElement, html, css, nothing } from "../../../vendor/lit.js";
@@ -45,7 +54,9 @@ export class DfLessonView extends LitElement {
     // Assembled lesson from the curriculum service.
     lesson: { attribute: false },
     // Optional per-lesson progress view from courseProgressFor().
-    progress: { attribute: false }
+    progress: { attribute: false },
+    // contentUuid -> { title, detail, lang }, resolved by the host through the services.
+    labels: { attribute: false }
   };
 
   static styles = css`
@@ -70,12 +81,16 @@ export class DfLessonView extends LitElement {
     .section-head { display: flex; gap: 8px; align-items: baseline; }
     .section-title { font-size: 14px; font-weight: 700; }
     .items { margin: 8px 0 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+    .detail { color: var(--muted); font-size: 12px; }
+    .item:hover, .item:focus-visible { border-color: var(--accent, currentColor); }
     .item {
-      display: flex; gap: 10px; align-items: center;
+      display: flex; gap: 10px; align-items: center; width: 100%; text-align: start;
       padding: 10px 12px; min-height: 44px; box-sizing: border-box;
       border-radius: 12px; border: 1px solid var(--border, #e2e8f0);
+      background: none; color: inherit; font: inherit; cursor: pointer;
     }
     .ref { flex: 1; font-size: 12px; color: var(--muted, #64748b); direction: ltr; unicode-bidi: isolate; }
+    .label { flex: 1; font-weight: 600; unicode-bidi: isolate; }
     .empty { color: var(--muted, #64748b); font-style: italic; }
     @media (min-width: 900px) { .lesson { padding: 22px; } }
   `;
@@ -84,18 +99,46 @@ export class DfLessonView extends LitElement {
     super();
     this.lesson = null;
     this.progress = null;
+    this.labels = null;
   }
 
   #sectionStatus(sectionUuid) {
     return this.progress?.sections?.find(section => section.uuid === sectionUuid)?.status ?? null;
   }
 
+  #labelFor(item) {
+    return this.labels?.[item.contentUuid] ?? null;
+  }
+
+  #select(item) {
+    this.dispatchEvent(new CustomEvent("item-select", {
+      bubbles: true,
+      composed: true,
+      detail: {
+        itemUuid: item.uuid,
+        contentType: item.contentType,
+        contentUuid: item.contentUuid
+      }
+    }));
+  }
+
   #renderItem(item) {
+    const label = this.#labelFor(item);
     return html`
-      <li class="item" data-item=${item.uuid} data-content-type=${item.contentType}>
-        <span class="pill">${CONTENT_LABEL[item.contentType] ?? item.contentType}</span>
-        <span class="ref">${item.contentUuid}</span>
-        ${item.required ? nothing : html`<span class="pill">${LABELS.optional}</span>`}
+      <li>
+        <button
+          class="item"
+          type="button"
+          data-item=${item.uuid}
+          data-content-type=${item.contentType}
+          @click=${() => this.#select(item)}
+        >
+          <span class="pill">${CONTENT_LABEL[item.contentType] ?? item.contentType}</span>
+          <span class=${label?.title ? "label" : "ref"} lang=${label?.lang ?? "ar"} dir="auto"
+            >${label?.title ?? item.contentUuid}</span>
+          ${label?.detail ? html`<span class="detail" dir="auto">${label.detail}</span>` : nothing}
+          ${item.required ? nothing : html`<span class="pill">${LABELS.optional}</span>`}
+        </button>
       </li>
     `;
   }

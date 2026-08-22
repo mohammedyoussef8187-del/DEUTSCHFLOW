@@ -23,6 +23,9 @@ import "./ui/components/df-activity-chart.js";
 /* المنهج: يُبنى فوق مخزن المحتوى الأساسي، ومعزول تماماً عن تخزين المتعلّم القديم. */
 import { bootstrapCanonicalRuntime } from "./runtime/composition-root.js";
 import { createLearnController, isLearnRoute, LEARN_ROUTES } from "./runtime/learn-controller.js";
+import {
+  createContentFetcher, createIndexedDbStatePersistence
+} from "./platform/memory/local-canonical-persistence.js";
 
 (function(){
   "use strict";
@@ -995,7 +998,7 @@ function afterRender(state){
   });
 
   /* أحداث مكوّنات Lit في شاشات المنهج. المكوّن يطلب، والتطبيق يقرّر. */
-  for(const type of ["lesson-select","practice-select","segment-select","self-rate","reminder-change","permission-request"]){
+  for(const type of ["lesson-select","item-select","practice-select","segment-select","self-rate","reminder-change","permission-request"]){
     document.addEventListener(type,e=>{
       if(!DF.Learn||!isLearnRoute(state.route))return;
       withBusy(async()=>{await applyLearnResult(await DF.Learn.handleEvent(type,e.detail||{}));});
@@ -1026,6 +1029,11 @@ function afterRender(state){
   async function bootLearn(){
     try{
       const runtime=await bootstrapCanonicalRuntime({
+        /* المحتوى المستورد يُشحن مع التطبيق، وتقدّم المتعلّم يُحفظ محلياً في قاعدة
+           بيانات مستقلة تماماً عن مخزن المفردات والمراجعة القديم. */
+        loadContent:createContentFetcher(),
+        persistence:createIndexedDbStatePersistence(),
+        onStoreError:(error,stage)=>console.error(`canonical store ${stage}`,error),
         readDueCount:async()=>state.cards.filter(c=>!c.suspended&&c.dueAt<=Date.now()).length,
         readLastStudiedAt:async()=>state.profile?.lastStudyDate??null
       });

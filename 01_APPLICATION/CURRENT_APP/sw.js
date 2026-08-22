@@ -13,7 +13,7 @@
  * list every file here.
  */
 
-const CACHE = "deutschflow-pro-rc4-2026-08-21";
+const CACHE = "deutschflow-pro-rc5-2026-08-22";
 
 // Enough to boot offline even before anything else has been visited.
 const SHELL = [
@@ -23,7 +23,9 @@ const SHELL = [
   "/icon-512.png",
   "/styles.css",
   "/src/app.js",
-  "/data/seed-data.js"
+  "/data/seed-data.js",
+  // The curriculum has to be on the device before the device goes offline.
+  "/data/canonical-content.json"
 ];
 
 self.addEventListener("install", e => e.waitUntil(
