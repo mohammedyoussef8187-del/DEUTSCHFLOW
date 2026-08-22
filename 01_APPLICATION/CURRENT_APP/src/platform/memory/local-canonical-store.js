@@ -94,7 +94,16 @@ export async function openLocalCanonicalStore(options = {}) {
   if (persistence?.read) {
     try {
       const saved = await persistence.read();
-      if (saved?.entities && Number(saved.schemaVersion) === SCHEMA_VERSION) {
+      /*
+       * Compatibility is decided by the STATE version, not the schema version.
+       *
+       * What was saved is a snapshot of the learner-owned tables listed above, and those
+       * are unchanged by a schema release that only touches content tables. Keying on the
+       * schema version would throw a learner's progress away every time the content model
+       * moved — which is the opposite of what a version check is for. `stateVersion` is
+       * bumped only when the shape of THESE tables changes.
+       */
+      if (saved?.entities && Number(saved.stateVersion ?? 0) === LOCAL_STORE_STATE_VERSION) {
         restored = adapter.memory.load(pick(saved.entities, PERSISTED_ENTITIES));
       }
     } catch (error) {

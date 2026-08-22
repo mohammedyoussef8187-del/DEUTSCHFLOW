@@ -28,6 +28,7 @@ import {
 import {
   PERSISTED_ENTITIES
 } from "../../01_APPLICATION/CURRENT_APP/src/platform/memory/local-canonical-store.js";
+import { SCHEMA_VERSION } from "../../01_APPLICATION/CURRENT_APP/src/platform/sqlite/schema.js";
 
 const NOW = HARNESS_TIMESTAMP;
 
@@ -544,7 +545,7 @@ describe("the curriculum cannot reach SRS state", () => {
 describe("the shipped dataset is the one the tests assume", () => {
   it("carries content and no learner rows", async () => {
     const dataset = readShippedContent();
-    expect(dataset.schemaVersion).toBe(10);
+    expect(dataset.schemaVersion).toBe(SCHEMA_VERSION);
     expect(dataset.entities.courses.length).toBeGreaterThan(0);
     expect(dataset.entities.exercises.length).toBeGreaterThan(0);
 

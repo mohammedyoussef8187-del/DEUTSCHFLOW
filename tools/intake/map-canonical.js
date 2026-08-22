@@ -217,6 +217,9 @@ export function mapLesson(input) {
       translations: [],
       acceptedAnswers: [{
         uuid: deterministicUuid(NS.answer, `${key}:de`),
+        // The answer belongs to the WORD. Naming the Arabic sense is optional, and a
+        // German answer must survive whatever review state that sense is in.
+        vocabUuid,
         meaningUuid: entry.arabic ? meaningUuid : null,
         translationUuid: null,
         text: entry.headword.replace(/\|/g, ""),

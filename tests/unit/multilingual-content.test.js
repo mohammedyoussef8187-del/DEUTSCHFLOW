@@ -98,14 +98,18 @@ describe("content assembly", () => {
     const { dataset } = migrateToCanonical(fixture.clean, { now: NOW });
     const meaning = dataset.vocabularyMeanings[0];
     dataset.translations.push({
-      uuid: "t-1", meaningUuid: meaning.uuid, englishText: "house",
+      // Since schema 11 an English translation belongs to the WORD; naming the sense is
+      // an optional pairing, used here because this fixture has one of each.
+      uuid: "t-1", vocabUuid: meaning.vocabUuid, meaningUuid: meaning.uuid,
+      englishText: "house",
       normalizedEnglish: "house", explanation: "a building for living in",
       contentStatus: "verified", contentVersion: 2, sourceReference: null,
       sourceType: "editorial", verifiedAt: NOW, verifiedBy: "editor",
       createdAt: NOW, updatedAt: NOW, revision: 1, deleted: 0
     });
     dataset.acceptedAnswers.push({
-      uuid: "aa-en", meaningUuid: meaning.uuid, translationUuid: "t-1",
+      uuid: "aa-en", vocabUuid: meaning.vocabUuid, meaningUuid: meaning.uuid,
+      translationUuid: "t-1",
       text: "house", language: ENGLISH, scoreable: 1,
       createdAt: NOW, updatedAt: NOW, revision: 1, deleted: 0
     });

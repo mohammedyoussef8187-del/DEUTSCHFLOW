@@ -173,22 +173,26 @@ describe("the remote media asset stays remote", () => {
 describe("unreviewed content is imported but not published", () => {
   it("marks original German and Arabic as draft, and source text as imported", () => {
     const { audit } = built();
-    expect(audit.review.publishedRows).toBe(91);
-    expect(audit.review.draftRows).toBe(129);
+    expect(audit.review.publishedRows).toBe(110);
+    expect(audit.review.draftRows).toBe(110);
     expect(audit.review.draftByEntity).toMatchObject({
       vocabularyMeanings: 19,     // the Arabic gloss and the original German definition
       sentences: 7,               // sentences whose German DeutschFlow wrote
       grammarTopics: 1, grammarRules: 2, grammarExamples: 7,
       exercises: 4                // the four whose answer key is not source vocabulary
     });
+    // The English translations are published even though every Arabic meaning is a
+    // draft: since schema 11 neither language passes through the other.
+    expect(audit.review.publishedByEntity.translations).toBe(19);
+    expect(audit.review.draftByEntity.translations).toBeUndefined();
   });
 
   it("stores every draft row rather than dropping it", async () => {
     const { result, lesson } = await imported();
     const drafts = flattenRows(lesson.mapped)
       .filter(({ row }) => row.contentStatus === "draft");
-    expect(drafts.length).toBe(129);
-    expect(result.verification.drafts.stored).toBe(129);
+    expect(drafts.length).toBe(110);
+    expect(result.verification.drafts.stored).toBe(110);
     expect(result.verification.drafts.notStored).toEqual([]);
   });
 

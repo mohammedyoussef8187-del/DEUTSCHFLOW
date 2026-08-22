@@ -11,6 +11,11 @@
  *      English translation never degrades the Arabic meaning (or vice versa). An entry
  *      with only one support language is complete in that language, not "half broken".
  *
+ *      Since schema 11 the tables say this too: a translation hangs off the vocabulary
+ *      ITEM, not off the Arabic sense, so an entry whose Arabic is still a draft still
+ *      shows its verified English. `meaningUuid` remains as an optional pairing for a
+ *      polysemous word and is never consulted to decide whether English exists.
+ *
  *   2. Only German and English answers can ever reach a grader. `scoringAnswers` is
  *      filtered through the language policy on the way out, so an Arabic row that was
  *      mis-stored with scoreable=1 still cannot influence correctness.
@@ -45,33 +50,40 @@ const notDeleted = row => !row.deleted;
 export function buildContentEntries(canonical = {}) {
   const items = (canonical.vocabularyItems ?? []).filter(notDeleted);
   const meaningsByVocab = indexBy((canonical.vocabularyMeanings ?? []).filter(notDeleted), "vocabUuid");
-  const translationsByMeaning = indexBy((canonical.translations ?? []).filter(notDeleted), "meaningUuid");
-  const answersByMeaning = indexBy((canonical.acceptedAnswers ?? []).filter(notDeleted), "meaningUuid");
+  const translationsByVocab = indexBy((canonical.translations ?? []).filter(notDeleted), "vocabUuid");
+  const answersByVocab = indexBy((canonical.acceptedAnswers ?? []).filter(notDeleted), "vocabUuid");
 
   return items.map(item => {
     const meanings = meaningsByVocab.get(item.uuid) ?? [];
+    const translations = translationsByVocab.get(item.uuid) ?? [];
+    const answers = answersByVocab.get(item.uuid) ?? [];
 
+    /*
+     * Both languages are read from the ITEM and then paired, rather than one being read
+     * through the other. Where a translation names the sense it matches, it is shown with
+     * that sense; where it does not — the common case, and the only case for a word with
+     * one meaning — it belongs to the word and appears whatever the Arabic is doing.
+     */
+    const pairedTranslations = new Set();
     const senses = meanings.map(meaning => {
-      const translations = translationsByMeaning.get(meaning.uuid) ?? [];
-      const answers = answersByMeaning.get(meaning.uuid) ?? [];
-      return {
-        uuid: meaning.uuid,
-        // English and Arabic sit side by side, deliberately at the same level.
-        arabic: meaning.arabicText || null,
-        english: translations.length ? translations[0].englishText : null,
-        englishAll: translations.map(t => t.englishText),
-        explanations: {
-          [ARABIC]: meaning.explanation ?? null,
-          [ENGLISH]: translations.length ? translations[0].explanation ?? null : null
-        },
-        pronunciation: meaning.pronunciation || null,
-        provenance: {
-          arabic: contentProvenance(meaning),
-          english: translations.length ? contentProvenance(translations[0]) : null
-        },
-        answers: partitionAnswers(answers)
-      };
+      const matching = translations.filter(row => row.meaningUuid === meaning.uuid);
+      for (const row of matching) pairedTranslations.add(row.uuid);
+      const forSense = matching.length ? matching : unpaired(translations);
+      const senseAnswers = answers.filter(answer =>
+        answer.meaningUuid === meaning.uuid || answer.meaningUuid == null);
+      return senseEntry(meaning, forSense, senseAnswers);
     });
+
+    /*
+     * English with no Arabic to sit beside is still English. A word whose Arabic sense is
+     * absent or still a draft is presented as an entry that teaches in English only,
+     * rather than as an entry with nothing in it.
+     */
+    const orphanEnglish = translations.filter(row =>
+      !pairedTranslations.has(row.uuid) && (!meanings.length || row.meaningUuid == null));
+    if (!senses.length && orphanEnglish.length) {
+      senses.push(senseEntry(null, orphanEnglish, answers));
+    }
 
     return {
       uuid: item.uuid,
@@ -89,6 +101,29 @@ export function buildContentEntries(canonical = {}) {
       coverage: coverageOf(senses)
     };
   });
+}
+
+const unpaired = translations => translations.filter(row => row.meaningUuid == null);
+
+/** One sense: the Arabic side, the English side, and what either may be graded against. */
+function senseEntry(meaning, translations, answers) {
+  return {
+    uuid: meaning?.uuid ?? null,
+    // English and Arabic sit side by side, deliberately at the same level.
+    arabic: meaning?.arabicText || null,
+    english: translations.length ? translations[0].englishText : null,
+    englishAll: translations.map(row => row.englishText),
+    explanations: {
+      [ARABIC]: meaning?.explanation ?? null,
+      [ENGLISH]: translations.length ? translations[0].explanation ?? null : null
+    },
+    pronunciation: meaning?.pronunciation || null,
+    provenance: {
+      arabic: meaning ? contentProvenance(meaning) : null,
+      english: translations.length ? contentProvenance(translations[0]) : null
+    },
+    answers: partitionAnswers(answers)
+  };
 }
 
 /** Split accepted answers into what may grade and what may only teach. */

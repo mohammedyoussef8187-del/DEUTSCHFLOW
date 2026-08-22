@@ -599,11 +599,16 @@ describe("repository write APIs", () => {
       item: { uuid: "v-1", german: "das Buch", normalizedGerman: "das buch", article: "das",
         itemType: "noun", level: "A1", ...meta },
       meanings: [{ uuid: "m-1", vocabUuid: "v-1", arabicText: "كتاب", normalizedArabic: "كتاب", ...meta }],
-      translations: [{ uuid: "tr-1", meaningUuid: "m-1", englishText: "book", normalizedEnglish: "book", ...meta }],
+      // Since schema 11 both support languages hang off the WORD; naming the Arabic
+      // sense is optional, and English does not pass through it.
+      translations: [{ uuid: "tr-1", vocabUuid: "v-1", meaningUuid: "m-1", englishText: "book",
+        normalizedEnglish: "book", ...meta }],
       acceptedAnswers: [
-        { uuid: "aa-en", translationUuid: "tr-1", text: "book", language: "en", scoreable: 1, ...linkMeta },
+        { uuid: "aa-en", vocabUuid: "v-1", translationUuid: "tr-1", text: "book",
+          language: "en", scoreable: 1, ...linkMeta },
         // Arabic is stored as content and marked unscoreable, exactly as Feature A requires.
-        { uuid: "aa-ar", meaningUuid: "m-1", text: "كتاب", language: "ar", scoreable: 0, ...linkMeta }
+        { uuid: "aa-ar", vocabUuid: "v-1", meaningUuid: "m-1", text: "كتاب",
+          language: "ar", scoreable: 0, ...linkMeta }
       ]
     }, { now: NOW });
 

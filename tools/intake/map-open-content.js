@@ -33,6 +33,17 @@ import { IMPORTED_STATUS } from "./map-canonical.js";
 export const ARTIFACT_TYPE = "deutschflow-open-content-intermediate-v1";
 export const SUPPORTED_DATASET_VERSIONS = Object.freeze([1]);
 
+/**
+ * Canonical schema versions an artifact may declare and still be imported.
+ *
+ * Schema 11 only ADDED `translations.vocab_uuid` and `accepted_answers.vocab_uuid` and
+ * relaxed `meaning_uuid` to optional, so every row an artifact written for 10 carries is
+ * still valid; this adapter fills the new column from the vocabulary record the row
+ * already belongs to. A version outside this list is refused rather than guessed at,
+ * because a field that MOVED would be silently misplaced.
+ */
+export const COMPATIBLE_SCHEMA_VERSIONS = Object.freeze([10, SCHEMA_VERSION]);
+
 /** The licence marker every canonical `sourceReference` must end up carrying. */
 export const LICENCE_MARKER = "licence: CC BY 4.0";
 export const LICENCE_ID = "cc-by-4.0";
@@ -103,9 +114,10 @@ export function validateOpenContent(dataset) {
     issues.error("unreviewed-dataset-version",
       `version ${dataset?.datasetVersion} has not been reviewed`, "datasetVersion");
   }
-  if (Number(dataset?.importContract?.canonicalSchemaVersion) !== SCHEMA_VERSION) {
+  if (!COMPATIBLE_SCHEMA_VERSIONS.includes(Number(dataset?.importContract?.canonicalSchemaVersion))) {
     issues.error("schema-version-mismatch",
-      `artifact targets ${dataset?.importContract?.canonicalSchemaVersion}, this build is ${SCHEMA_VERSION}`,
+      `artifact targets ${dataset?.importContract?.canonicalSchemaVersion}, ` +
+      `this build reads ${COMPATIBLE_SCHEMA_VERSIONS.join(" or ")}`,
       "importContract");
   }
 
@@ -416,8 +428,12 @@ export function publicationOf(record, entity, row, context = {}) {
 
 /** Parent of a row, for cascading a draft down foreign keys. */
 const PARENT_OF = Object.freeze({
-  translations: row => row.meaningUuid,
-  acceptedAnswers: row => row.meaningUuid ?? row.translationUuid,
+  /*
+   * `translations` and `acceptedAnswers` are deliberately ABSENT. Since schema 11 both
+   * hang off the vocabulary item, not off the Arabic sense, and cascading a draft from
+   * that sense is exactly the coupling the schema change removed: a verified English
+   * translation must not disappear because the Arabic beside it is still being reviewed.
+   */
   sentenceTexts: row => row.sentenceUuid,
   grammarExamples: row => row.ruleUuid,
   grammarRules: row => row.topicUuid,
@@ -532,7 +548,7 @@ export function mapOpenContent(source, options = {}) {
   const structure = dataset.structure ?? {};
 
   applyStructure(mapped, structure);
-  applyVocabulary(mapped, dataset.vocabulary ?? [], keepLink);
+  applyVocabulary(mapped, dataset.vocabulary ?? [], keepLink, published);
   applySentences(mapped, dataset.sentences ?? [], keepLink);
   applyGrammar(mapped, dataset.grammar ?? {}, keepLink);
   applyExercises(mapped, dataset.exercises ?? [], keepLink);
@@ -592,21 +608,53 @@ function applyStructure(mapped, structure) {
   }
 }
 
-function applyVocabulary(mapped, records, keepLink) {
+function applyVocabulary(mapped, records, keepLink, published) {
   for (const record of records) {
     const target = record.canonicalTarget;
+    const vocabUuid = target.item.uuid;
+
+    /*
+     * Both support languages are attached to the WORD.
+     *
+     * Where a row names an Arabic sense that is not published, the PAIRING is dropped
+     * rather than the row: the English or the German answer is still real, it simply has
+     * no reviewed sense to sit beside yet. A later import restores the pairing once the
+     * sense is promoted, exactly as it restores a withheld link.
+     */
+    const unpair = row => ({
+      ...row,
+      vocabUuid,
+      meaningUuid: row.meaningUuid && published(row.meaningUuid) ? row.meaningUuid : null
+    });
+
     mapped.vocabulary.push({
       item: target.item,
       meanings: target.meanings ?? [],
-      translations: target.translations ?? [],
-      // An accepted answer hangs off a meaning and a translation; it is written only
-      // when both are published, so it can never outlive what it belongs to.
-      acceptedAnswers: (target.acceptedAnswers ?? []).filter(answer =>
-        keepLink("acceptedAnswers", answer, answer.meaningUuid, answer.translationUuid))
+      translations: (target.translations ?? []).map(unpair),
+      /*
+       * An accepted answer has no status column of its own, so it is written only when
+       * the row that SUPPLIES ITS TEXT is published: the Arabic meaning for an `ar`
+       * answer, the English translation for an `en` one, the word itself for German.
+       * That keeps an unreviewed Arabic gloss from reappearing as an answer, and keeps a
+       * German or English answer from vanishing because the Arabic is still in review.
+       */
+      acceptedAnswers: (target.acceptedAnswers ?? [])
+        .filter(answer => keepLink("acceptedAnswers", answer,
+          textSourceOf(answer, target, vocabUuid)))
+        .map(unpair)
     });
-    if (target.lessonItem && keepLink("lessonItems", target.lessonItem, target.item.uuid)) {
+    if (target.lessonItem && keepLink("lessonItems", target.lessonItem, vocabUuid)) {
       mapped.course.items.push(target.lessonItem);
     }
+  }
+}
+
+/** The row whose text an accepted answer repeats, and therefore whose review it shares. */
+function textSourceOf(answer, target, vocabUuid) {
+  switch (answer.language) {
+    case "ar": return answer.meaningUuid ?? target.meanings?.[0]?.uuid ?? vocabUuid;
+    case "en": return answer.translationUuid ?? target.translations?.[0]?.uuid ?? vocabUuid;
+    default: return vocabUuid;
   }
 }
 

@@ -310,12 +310,13 @@ export function migrateToCanonical(snapshot = {}, options = {}) {
 
     // One primary Arabic meaning per legacy word. Preserve wording even if the
     // learner never verified it; do not invent a meaning when none exists.
+    let meaningUuid = null;
     if (isBlank(word.arabic)) {
       // The item itself is already stored; only the absent meaning is reported, and no
       // meaning text is invented for it.
       quarantineRecord("vocabulary_meaning", legacyId, ["missing-arabic-meaning"], word, { preserve: false });
     } else {
-      const meaningUuid = deterministicUuid(NS.meaning, vocabUuid);
+      meaningUuid = deterministicUuid(NS.meaning, vocabUuid);
       dataset.vocabularyMeanings.push({
         uuid: meaningUuid,
         vocabUuid,
@@ -331,13 +332,19 @@ export function migrateToCanonical(snapshot = {}, options = {}) {
         verifiedBy: null,
         ...metaFields(now)
       });
-
-      // Accepted answers -> individual rows. German (de) and Arabic (ar) sets.
-      // German answers may score; Arabic answers are preserved as educational content
-      // but never decide correctness.
-      appendAcceptedAnswers(dataset, meaningUuid, word.acceptedAnswers, GERMAN, now);
-      appendAcceptedAnswers(dataset, meaningUuid, word.acceptedArabicAnswers, ARABIC, now);
     }
+
+    /*
+     * Accepted answers -> individual rows. German (de) and Arabic (ar) sets. German
+     * answers may score; Arabic answers are preserved as educational content but never
+     * decide correctness.
+     *
+     * Written for the WORD, outside the branch above: a learner who typed German answers
+     * for an entry that never had an Arabic meaning must not lose them because of the
+     * language that is missing.
+     */
+    appendAcceptedAnswers(dataset, { vocabUuid, meaningUuid }, word.acceptedAnswers, GERMAN, now);
+    appendAcceptedAnswers(dataset, { vocabUuid, meaningUuid }, word.acceptedArabicAnswers, ARABIC, now);
   }
 
   // ---- Review cards --------------------------------------------------------
@@ -458,13 +465,18 @@ export function migrateToCanonical(snapshot = {}, options = {}) {
   return { dataset, report };
 }
 
-function appendAcceptedAnswers(dataset, meaningUuid, list, language, now) {
+function appendAcceptedAnswers(dataset, owner, list, language, now) {
   if (!Array.isArray(list)) return;
+  const { vocabUuid, meaningUuid = null } = owner;
   const code = normalizeLanguage(language);
   list.forEach((text, index) => {
     if (isBlank(text)) return;
     dataset.acceptedAnswers.push({
-      uuid: deterministicUuid(NS.acceptedAnswer, `${meaningUuid}:${code}:${index}:${text}`),
+      // Derived from the meaning where one exists, so every identity a previous run
+      // produced is unchanged; a word with no Arabic derives from the word instead.
+      uuid: deterministicUuid(NS.acceptedAnswer,
+        `${meaningUuid ?? vocabUuid}:${code}:${index}:${text}`),
+      vocabUuid,
       meaningUuid,
       translationUuid: null,
       text,

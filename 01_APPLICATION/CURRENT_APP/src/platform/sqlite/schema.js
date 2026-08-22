@@ -119,13 +119,32 @@
  * learner means 'seven in the evening where I am' - which is a different instant
  * after a flight or a DST change. The absolute time is derived at planning time.
  *
+ * Version 11 makes English independent of Arabic.
+ *
+ * Version 2 declared that "English and Arabic carry equal educational weight", and the
+ * content service says the same in its own words — but the tables did not. A translation
+ * hung off `vocabulary_meanings`, the Arabic sense, by a NOT NULL foreign key. So English
+ * could only exist where Arabic already did, and once a review lifecycle started holding
+ * unreviewed Arabic back as `draft`, a VERIFIED English translation disappeared with it.
+ * A learner lost a translation nobody had any objection to, because of the state of a
+ * different language.
+ *
+ * So `translations` and `accepted_answers` now hang off `vocabulary_items` — the German
+ * word, which is what both languages are actually translating. `meaning_uuid` survives as
+ * an OPTIONAL pairing for a polysemous word whose senses differ, and carries no authority
+ * over whether a row exists or may be read. Each row keeps its own `content_status`, its
+ * own provenance and its own review state, and no language can suppress another.
+ *
  * Version 1 was never activated for learners (nativeStorageEnabled stayed false through
  * Gate 5), so no deployed v1 database exists and v2 is the first version any learner
- * database will see. A forward migration step becomes necessary only once a learner
- * database has actually been written.
+ * database will see. The same is true at v11: `learnerStorageSwitch` and
+ * `canonicalNativeStore` are both still off, so the only canonical stores that exist are
+ * the rebuildable intake artifact and the browser's content cache, which is replaced from
+ * the shipped dataset on every launch. A forward migration step becomes necessary only
+ * once a learner database has actually been written.
  */
 
-export const SCHEMA_VERSION = 10;
+export const SCHEMA_VERSION = 11;
 
 export const SCHEMA_STATEMENTS = [
   `CREATE TABLE IF NOT EXISTS learner_profiles (
@@ -214,7 +233,12 @@ export const SCHEMA_STATEMENTS = [
 
   `CREATE TABLE IF NOT EXISTS translations (
     uuid TEXT PRIMARY KEY,
-    meaning_uuid TEXT NOT NULL,
+    -- English translates the GERMAN WORD, not the Arabic sense. Hanging it off the item
+    -- is what stops one language's review state from deciding another's existence.
+    vocab_uuid TEXT NOT NULL,
+    -- Optional: which Arabic sense this English matches, for a polysemous word. Never
+    -- required, and never consulted to decide whether the row may be read.
+    meaning_uuid TEXT,
     english_text TEXT NOT NULL,
     normalized_english TEXT NOT NULL,
     explanation TEXT,
@@ -228,13 +252,18 @@ export const SCHEMA_STATEMENTS = [
     updated_at INTEGER NOT NULL,
     revision INTEGER NOT NULL DEFAULT 1,
     deleted INTEGER NOT NULL DEFAULT 0,
+    FOREIGN KEY (vocab_uuid) REFERENCES vocabulary_items(uuid) ON DELETE CASCADE,
     FOREIGN KEY (meaning_uuid) REFERENCES vocabulary_meanings(uuid) ON DELETE CASCADE
   )`,
 
+  `CREATE INDEX IF NOT EXISTS idx_translations_vocab ON translations (vocab_uuid)`,
   `CREATE INDEX IF NOT EXISTS idx_translations_meaning ON translations (meaning_uuid)`,
 
   `CREATE TABLE IF NOT EXISTS accepted_answers (
     uuid TEXT PRIMARY KEY,
+    -- The word the answer belongs to. An accepted German or English answer must not
+    -- vanish because the Arabic sense beside it is still awaiting review.
+    vocab_uuid TEXT NOT NULL,
     meaning_uuid TEXT,
     translation_uuid TEXT,
     text TEXT NOT NULL,
@@ -246,8 +275,11 @@ export const SCHEMA_STATEMENTS = [
     updated_at INTEGER NOT NULL,
     revision INTEGER NOT NULL DEFAULT 1,
     deleted INTEGER NOT NULL DEFAULT 0,
+    FOREIGN KEY (vocab_uuid) REFERENCES vocabulary_items(uuid) ON DELETE CASCADE,
     FOREIGN KEY (meaning_uuid) REFERENCES vocabulary_meanings(uuid) ON DELETE CASCADE
   )`,
+
+  `CREATE INDEX IF NOT EXISTS idx_accepted_answers_vocab ON accepted_answers (vocab_uuid)`,
 
   `CREATE TABLE IF NOT EXISTS grammar_topics (
     uuid TEXT PRIMARY KEY,
@@ -1392,7 +1424,8 @@ export const TABLE_SPECS = [
     entity: "translations",
     table: "translations",
     columns: [
-      ["uuid", "uuid"], ["meaning_uuid", "meaningUuid"], ["english_text", "englishText"],
+      ["uuid", "uuid"], ["vocab_uuid", "vocabUuid"],
+      ["meaning_uuid", "meaningUuid"], ["english_text", "englishText"],
       ["normalized_english", "normalizedEnglish"], ["explanation", "explanation"],
       ["content_status", "contentStatus"], ["content_version", "contentVersion"],
       ["source_reference", "sourceReference"], ["source_type", "sourceType"],
@@ -1405,7 +1438,7 @@ export const TABLE_SPECS = [
     entity: "acceptedAnswers",
     table: "accepted_answers",
     columns: [
-      ["uuid", "uuid"], ["meaning_uuid", "meaningUuid"],
+      ["uuid", "uuid"], ["vocab_uuid", "vocabUuid"], ["meaning_uuid", "meaningUuid"],
       ["translation_uuid", "translationUuid"], ["text", "text"],
       ["language", "language"], ["scoreable", "scoreable"], ["created_at", "createdAt"],
       ["updated_at", "updatedAt"], ["revision", "revision"], ["deleted", "deleted"]
