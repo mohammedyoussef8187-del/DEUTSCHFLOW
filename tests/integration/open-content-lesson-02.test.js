@@ -37,7 +37,15 @@ import { importNicosWegContent } from "../support/learner-journey-harness.js";
 
 const NOW = 1787356800000;
 const PROFILE = "local";
-const [LESSON_ONE, LESSON_TWO] = OPEN_CONTENT_ARTIFACTS;
+/*
+ * Named rather than taken by position: this suite is about the travel lesson and the one
+ * before it, which are lessons 2 and 3 of the seven-lesson curriculum. Indexing into the
+ * artifact list would re-point these tests at different content the moment a lesson is
+ * added in front of them.
+ */
+const LESSON_ONE = "00_PROJECT_CONTROL/A2_CONTENT/A2_LESSON_02_FAMILY_EVENTS.json";
+const LESSON_TWO = "00_PROJECT_CONTROL/A2_CONTENT/A2_LESSON_03_TRAVEL.json";
+const PAIR = Object.freeze([LESSON_ONE, LESSON_TWO]);
 
 const cleanup = [];
 afterEach(async () => {
@@ -61,7 +69,7 @@ async function freshStore() {
 async function importedBoth() {
   const store = await freshStore();
   const results = [];
-  for (const file of OPEN_CONTENT_ARTIFACTS) {
+  for (const file of PAIR) {
     results.push(await runOpenContent(store.repositories, built(file), {
       apply: true, now: NOW, profileUuid: PROFILE
     }));
@@ -79,8 +87,10 @@ describe("the lesson 2 artifact", () => {
   it("declares the counts it carries", () => {
     expect(artifact().recordCounts).toMatchObject({
       lessons: 1, lessonSections: 5, vocabulary: 20, sentences: 12,
-      grammarTopics: 1, grammarRules: 2, exercises: 8,
-      listeningItems: 1, remoteMediaAssets: 1, listeningSegments: 4
+      grammarTopics: 1, grammarRules: 2, exercises: 10,
+      listeningItems: 1, remoteMediaAssets: 1, listeningSegments: 4,
+      // An official pronunciation page is cited; nothing phonetic is imported.
+      pronunciationMetadata: 1
     });
   });
 
@@ -117,15 +127,17 @@ describe("the review gate applies unchanged", () => {
       vocabularyMeanings: 20,  // Arabic gloss plus the original German definition
       sentences: 4,            // the four DeutschFlow wrote
       grammarTopics: 1, grammarRules: 2, grammarExamples: 7,
-      exercises: 4
+      // Four keyed to a grammar rule that is itself a draft, plus the two
+      // learner-production prompts, which have no answer key to trace at all.
+      exercises: 6
     });
-    expect(audit.review.publishedRows + audit.review.draftRows).toBe(208);
+    expect(audit.review.publishedRows + audit.review.draftRows).toBe(216);
   });
 
   it("stores every draft row and shows none of them", async () => {
     const { results } = await importedBoth();
     const lessonTwo = results[1];
-    expect(lessonTwo.verification.drafts.stored).toBe(102);
+    expect(lessonTwo.verification.drafts.stored).toBe(110);
     expect(lessonTwo.verification.drafts.notStored).toEqual([]);
     expect(lessonTwo.verification.drafts.visible).toEqual([]);
   });
@@ -160,7 +172,7 @@ describe("lesson 2 joins the course lesson 1 created", () => {
       .toEqual(courseBefore);
   });
 
-  it("adds its own unit rather than joining the lesson 1 unit", async () => {
+  it("adds its own unit rather than joining the previous lesson's unit", async () => {
     const { services } = await importedBoth();
     const course = (await services.curriculum.courses())
       .find(entry => entry.slug === "deutschflow-open-a2");
@@ -256,7 +268,7 @@ describe("importing lesson 2 disturbs nothing", () => {
     const snapshot = async () => JSON.stringify(await store.adapter.readCanonical());
     const before = await snapshot();
 
-    for (const file of OPEN_CONTENT_ARTIFACTS) {
+    for (const file of PAIR) {
       const plan = await planImport(store.repositories, built(file).mapped);
       expect(plan.isNoop, file).toBe(true);
       const again = await runOpenContent(store.repositories, built(file), {
@@ -273,7 +285,7 @@ describe("importing lesson 2 disturbs nothing", () => {
     await importNicosWegContent(store.repositories);
     const before = JSON.parse(JSON.stringify(await store.adapter.readCanonical()));
 
-    for (const file of OPEN_CONTENT_ARTIFACTS) {
+    for (const file of PAIR) {
       await runOpenContent(store.repositories, built(file), { apply: true, now: NOW });
     }
 

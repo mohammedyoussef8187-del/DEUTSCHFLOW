@@ -34,6 +34,14 @@ import {
   LICENCE_MARKER, buildOpenContentLesson, validateOpenContent, verifyExerciseAnswerKeys
 } from "../../tools/intake/map-open-content.js";
 import { runOpenContent, readArtifact } from "../../tools/intake/run-open-content.mjs";
+
+/*
+ * This suite is about ONE lesson — Familie und Feiern — which is now lesson 2 of the
+ * seven-lesson curriculum. It is named here rather than taken from the head of the
+ * artifact list, so adding a lesson in front of it cannot silently re-point these tests
+ * at different content.
+ */
+const FAMILY_EVENTS = "00_PROJECT_CONTROL/A2_CONTENT/A2_LESSON_02_FAMILY_EVENTS.json";
 import { importNicosWegContent } from "../support/learner-journey-harness.js";
 
 const NOW = 1787356800000;
@@ -45,7 +53,7 @@ afterEach(async () => {
   while (cleanup.length) await cleanup.pop()();
 });
 
-const artifact = () => readArtifact();
+const artifact = () => readArtifact(FAMILY_EVENTS);
 
 async function freshStore() {
   const executor = createNodeSqliteExecutor(":memory:");
@@ -82,10 +90,13 @@ describe("the artifact validates", () => {
     expect(dataset.recordCounts).toMatchObject({
       courses: 1, units: 1, lessons: 1, lessonSections: 5,
       vocabulary: 19, sentences: 12, grammarTopics: 1, grammarRules: 2,
-      exercises: 8, listeningItems: 1, remoteMediaAssets: 1, listeningSegments: 10
+      exercises: 10, listeningItems: 1, remoteMediaAssets: 1, listeningSegments: 10,
+      // Metadata only: an official pronunciation page is cited, nothing is imported.
+      pronunciationMetadata: 1
     });
     expect(dataset.vocabulary).toHaveLength(19);
-    expect(dataset.exercises).toHaveLength(8);
+    // Eight deterministic plus two learner-production prompts.
+    expect(dataset.exercises).toHaveLength(10);
   });
 
   it("refuses a source that is not CC BY on an official host", () => {
@@ -174,12 +185,14 @@ describe("unreviewed content is imported but not published", () => {
   it("marks original German and Arabic as draft, and source text as imported", () => {
     const { audit } = built();
     expect(audit.review.publishedRows).toBe(110);
-    expect(audit.review.draftRows).toBe(110);
+    expect(audit.review.draftRows).toBe(118);
     expect(audit.review.draftByEntity).toMatchObject({
       vocabularyMeanings: 19,     // the Arabic gloss and the original German definition
       sentences: 7,               // sentences whose German DeutschFlow wrote
       grammarTopics: 1, grammarRules: 2, grammarExamples: 7,
-      exercises: 4                // the four whose answer key is not source vocabulary
+      // Four whose answer key is a grammar rule that is itself a draft, plus the two
+      // learner-production prompts, which have no answer key to trace at all.
+      exercises: 6
     });
     // The English translations are published even though every Arabic meaning is a
     // draft: since schema 11 neither language passes through the other.
@@ -191,8 +204,8 @@ describe("unreviewed content is imported but not published", () => {
     const { result, lesson } = await imported();
     const drafts = flattenRows(lesson.mapped)
       .filter(({ row }) => row.contentStatus === "draft");
-    expect(drafts.length).toBe(110);
-    expect(result.verification.drafts.stored).toBe(110);
+    expect(drafts.length).toBe(118);
+    expect(result.verification.drafts.stored).toBe(118);
     expect(result.verification.drafts.notStored).toEqual([]);
   });
 

@@ -23,18 +23,33 @@ import { createServices } from "../../01_APPLICATION/CURRENT_APP/src/runtime/com
 import { applyImport, planImport, verifyImport } from "./import.js";
 import { buildOpenContentLesson } from "./map-open-content.js";
 
+/** The manifest that lists the curriculum, in the order it is taught. */
+export const CURRICULUM_MANIFEST = "00_PROJECT_CONTROL/A2_COMPLETE_CONTENT_MANIFEST.json";
+
+export function readManifest(file = CURRICULUM_MANIFEST) {
+  return JSON.parse(fs.readFileSync(path.resolve(process.cwd(), file), "utf8"));
+}
+
 /**
  * Every open-content artifact, in the order it should be imported.
  *
- * Later lessons reuse the course, level and course titles the first one created, so the
- * order is the order they were authored in: an import that ran them the other way round
- * would still work — the rows are identical and the diff reports them unchanged — but
- * reading the audits in publication order is easier for a reviewer.
+ * Read from the manifest rather than listed here, so adding a lesson is a content change
+ * and not a code change, and so the import order is the curriculum order a learner meets.
+ * Later lessons reuse the course, level and course titles the first one created; running
+ * them out of order would still work — the rows are identical and the diff reports them
+ * unchanged — but reading the audits in teaching order is easier for a reviewer.
+ *
+ * The two standalone artifacts this list used to name are SUPERSEDED: the manifest's
+ * lessons 2 and 3 carry the same course, unit and lesson identities, so importing both
+ * sets would not duplicate anything, it would simply import the same lessons twice from
+ * an older build.
  */
-export const OPEN_CONTENT_ARTIFACTS = Object.freeze([
-  "00_PROJECT_CONTROL/A2_OPEN_CONTENT_FIRST_IMPORT.json",
-  "00_PROJECT_CONTROL/A2_OPEN_CONTENT_LESSON_02_IMPORT.json"
-]);
+export const OPEN_CONTENT_ARTIFACTS = Object.freeze(
+  readManifest().lessons
+    .slice()
+    .sort((a, b) => a.curriculumOrder - b.curriculumOrder)
+    .map(lesson => lesson.datasetPath)
+);
 
 export const DEFAULT_ARTIFACT = OPEN_CONTENT_ARTIFACTS[0];
 

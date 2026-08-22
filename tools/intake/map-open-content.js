@@ -87,6 +87,22 @@ const LABEL_KINDS = Object.freeze(["title", "instruction", "objective", "subtitl
 /** Record-level statuses that carry no authored language body of their own. */
 export const METADATA_STATUSES = Object.freeze(["source-metadata"]);
 
+/**
+ * The review states an artifact may declare on a record.
+ *
+ * These are the AUTHOR's summary of the record as a whole; `fieldOrigins` says which part
+ * of it still needs a person. The two are read together and the stricter one wins: a
+ * record whose review state is not `SOURCE_VERIFIED` can never publish a field the origin
+ * markers do not vouch for, and a field the origins do vouch for is still refused if the
+ * record was excluded outright.
+ */
+export const REVIEW_STATES = Object.freeze({
+  SOURCE_VERIFIED: "SOURCE_VERIFIED",
+  EDUCATOR_REVIEW_REQUIRED: "EDUCATOR_REVIEW_REQUIRED",
+  TECHNICAL_REVIEW_REQUIRED: "TECHNICAL_REVIEW_REQUIRED",
+  EXCLUDED: "EXCLUDED"
+});
+
 const SPEC_BY_ENTITY = new Map(TABLE_SPECS.map(spec => [spec.entity, spec]));
 
 const fromSource = origin => typeof origin === "string" &&
@@ -164,6 +180,7 @@ export function validateOpenContent(dataset) {
   validateRecords(dataset, issues);
   validateCounts(dataset, issues);
   validateMedia(dataset, issues);
+  validatePronunciationMetadata(dataset, issues);
 
   return { ok: issues.errors.length === 0, errors: issues.errors, warnings: issues.warnings };
 }
@@ -233,6 +250,13 @@ function validateRecords(dataset, issues) {
     }
     if (record.licence !== LICENCE_ID) {
       issues.error("record-not-cc-by", `${record.sourceId} is ${record.licence}`, where);
+    }
+    if (record.reviewStatus !== undefined && !(record.reviewStatus in REVIEW_STATES)) {
+      issues.error("unknown-review-state", record.reviewStatus, where);
+    }
+    if (record.reviewStatus === REVIEW_STATES.EXCLUDED) {
+      // An excluded record has no business being in a batch that will be written.
+      issues.error("excluded-record-present", record.sourceId, where);
     }
 
     validateCanonicalRows(record, where, issues);
@@ -326,6 +350,35 @@ function validateMedia(dataset, issues) {
   }
 }
 
+/**
+ * Pronunciation is metadata until it is measured.
+ *
+ * A lesson may record that an official pronunciation page exists for its chapter. That is
+ * a citation, not teaching material: IPA, phonemes and model audio are exactly the things
+ * that cannot be inferred from a page, so a record claiming any of them — or claiming to
+ * be learner-ready — is refused rather than imported and quietly believed. Nothing here
+ * maps to a canonical row, so no pronunciation screen can ever show it.
+ */
+function validatePronunciationMetadata(dataset, issues) {
+  for (const [index, record] of (dataset.pronunciationMetadata ?? []).entries()) {
+    const where = `pronunciationMetadata[${index}]`;
+    if (record.learnerReady !== false) {
+      issues.error("pronunciation-claims-learner-ready", String(record.learnerReady), where);
+    }
+    for (const field of ["ipa", "phoneme", "modelAudio"]) {
+      if (record[field] !== null && record[field] !== undefined) {
+        issues.error("pronunciation-metadata-fabricated", `${field}: ${record[field]}`, where);
+      }
+    }
+    if (record.canonicalTarget) {
+      issues.error("pronunciation-metadata-would-be-written", record.sourceId, where);
+    }
+    if (!isOfficial(record.sourceUrl)) {
+      issues.error("pronunciation-host-not-official", record.sourceUrl ?? "(none)", where);
+    }
+  }
+}
+
 /** Canonical rows a record carries, with the key they sit under. */
 function canonicalRowsOf(record) {
   const target = record.canonicalTarget ?? {};
@@ -413,6 +466,13 @@ function canonicalRowsOf(record) {
  * text at all is a container and is published with its record.
  */
 export function publicationOf(record, entity, row, context = {}) {
+  /*
+   * A record the author excluded is never published, whatever its fields say. Every other
+   * review state is a statement that a PERSON still has to look, which the field origins
+   * then localise — so it restricts rather than permits, and the field rules below decide.
+   */
+  if (record.reviewStatus === REVIEW_STATES.EXCLUDED) return DRAFT_STATUS;
+
   if (row?.language) {
     /* A language the artifact declares as source-derived is published. Anything else is
        DeutschFlow wording: the changes notice states in the artifact itself that the
@@ -802,9 +862,21 @@ function buildAudit(dataset, records, statuses, withheldLinks, now) {
     }
   }
 
+  const reviewStates = {};
+  for (const { record } of records) {
+    if (!record.reviewStatus) continue;
+    reviewStates[record.reviewStatus] = (reviewStates[record.reviewStatus] ?? 0) + 1;
+  }
+
   return {
     generatedAt: now,
     artifactType: dataset.importContract?.artifactType ?? null,
+    /* Metadata the artifact cites but deliberately does not import. */
+    pronunciationMetadata: (dataset.pronunciationMetadata ?? []).map(record => ({
+      sourceId: record.sourceId, sourceUrl: record.sourceUrl ?? null,
+      reviewStatus: record.reviewStatus ?? null, learnerReady: record.learnerReady === true,
+      canonicalRows: 0
+    })),
     datasetVersion: dataset.datasetVersion ?? null,
     licence: LICENCE_ID,
     licenceUrl: dataset.attributionBundle?.licenceUrl ?? null,
@@ -820,6 +892,8 @@ function buildAudit(dataset, records, statuses, withheldLinks, now) {
     review: {
       publishedRows: publishedTotal,
       draftRows: draftTotal,
+      /* What the artifact itself says still needs a person, by state. */
+      reviewStates,
       publishedByEntity: byEntity.published,
       draftByEntity: byEntity.draft,
       fieldOrigins: origins,
