@@ -1,38 +1,78 @@
 # Codex Handoff — Complete A2 Content
 
-## Deliverable
+## Delivery identity
 
-Seven ordered CC BY 4.0 A2 lesson datasets are listed in `00_PROJECT_CONTROL/A2_COMPLETE_CONTENT_MANIFEST.json`. Each dataset has a colocated per-lesson handoff so work can resume from another account without rescanning sources.
+- Agent: Codex
+- Branch: `codex/a2-complete-content`
+- Starting commit: `8f5a12d912834b906b06ab89d58ca343fe02a417` (`origin/mobile-foundation`)
+- Lesson 02 source-content commit: `8323bffd982e9ba030dfa691e397bf4ca4c25804`
+- Seven-lesson curriculum commit: `1d2c91c7c269717163a15ed6b8d14d2de7691cb7`
+- Final handoff commit: branch tip `origin/codex/a2-complete-content` (exact SHA is reported with the pushed delivery because a commit cannot contain its own SHA)
 
-## Intake boundary
+## Seven lessons
 
-- Use the existing open-content intake validator and canonical mapper unchanged.
-- Process lessons in manifest order and require preview/diff before each apply.
-- Apply only through the repository transaction boundary.
-- Do not write learner, SRS, progress, settings, favorite, ignored, or flag state.
-- Preserve deterministic source IDs and canonical UUIDs exactly.
-- Keep Arabic accepted answers non-scoreable.
-- Do not bundle remote media; retain source URL, attribution, and CC BY changes notice.
-- Pronunciation records are metadata-only and must not be promoted to learner-ready content.
+1. Alltag organisieren und einkaufen
+2. Familie und Feiern: über die Vergangenheit sprechen
+3. Reisen planen und von Reisen erzählen
+4. Gesund leben und beim Arzt sprechen
+5. Über Wohnen, Beziehungen und Arbeit sprechen
+6. Über Bildung und umweltbewusstes Handeln sprechen
+7. In der Stadt nach dem Weg fragen und Kultur erleben
 
-## Review gates
+## Coverage and counts
 
-- Educator review required: 372 records.
-- Technical media review required: 7 records.
-- Source-verified pronunciation metadata: 7 records.
-- Open production prompts are intentionally ungraded.
+- A2 coverage: COMPLETE for all seven required domains and core learner-material categories.
+- Non-blocking PARTIAL areas: pronunciation is verified metadata only; cross-lesson mastery sequencing remains an application concern.
+- Vocabulary: 139 unique records.
+- Sentences/context: 74 records.
+- Grammar: 7 topics / 14 rules.
+- Exercises: 70 total — 56 deterministic German-answer exercises and 14 ungraded writing/speaking prompts.
+- Listening/audio: 7 listening items / 7 remote-only media metadata records / 32 segments.
+- Pronunciation metadata: 7 source-verified, non-learner-ready records; IPA, phoneme, and model-audio fields remain null.
+- Review required: 372 educator-review records and 7 technical-media-review records.
+- Excluded records: 0. Excluded source categories include all Klett/Netzwerk publisher-authored content, bundled media binaries, and guessed technical or pronunciation facts.
 
-## Exact continuation sequence
+## Files created or updated
 
-1. Open `00_PROJECT_CONTROL/A2_COMPLETE_CONTENT_MANIFEST.json`.
-2. For the current lesson, open its JSON and adjacent `A2_LESSON_XX_HANDOFF.md`.
-3. Run the existing open-content validator and preview/diff without applying.
-4. Complete educator review; complete technical review for the remote media record.
-5. Import transactionally through the existing repository path and run post-import verification.
-6. Repeat in manifest order; do not alter Nicos, learner, or SRS rows.
+- `00_PROJECT_CONTROL/A2_COMPLETE_CONTENT_MANIFEST.json`
+- `00_PROJECT_CONTROL/A2_COMPLETE_COVERAGE_MATRIX.md`
+- `00_PROJECT_CONTROL/A2_CONTENT/` — exactly 7 lesson JSON datasets and 7 adjacent continuation handoffs.
+- `00_PROJECT_CONTROL/A2_OPEN_CONTENT_LESSON_02_IMPORT.json`
+- `00_PROJECT_CONTROL/CODEX_HANDOFF_A2_OPEN_CONTENT_LESSON_02.md`
+- `00_PROJECT_CONTROL/CODEX_HANDOFF_A2_COMPLETE.md`
+- `00_PROJECT_CONTROL/CURRENT_WORK_STATUS.md`
 
-## Validation command
+No application/runtime, schema, learner, SRS, or Nicos file was modified.
 
-`npm test`
+## Validation results
 
-The content-artifact validation result and exact branch commit are reported with the delivery; no runtime file is modified by this branch.
+- Existing open-content validator: PASS for 7/7 datasets, zero errors and zero warnings.
+- Cross-artifact validation: PASS — exactly 7 datasets and 7 continuation handoffs; valid JSON; 139 unique vocabulary IDs; all source relationships resolve; deterministic IDs map successfully; answer options match declared accepted answers; 14 production prompts have no fabricated answer key; Arabic scoreable count is zero; manifest paths and totals reconcile.
+- Existing canonical mapper: PASS for 7/7 datasets.
+- Full regression suite: PASS — 68 test files, 1,162 tests, 0 failures.
+
+## Intake boundary and exact next action
+
+Claude should consume `00_PROJECT_CONTROL/A2_COMPLETE_CONTENT_MANIFEST.json`, then process each lesson in manifest order through the existing open-content validator and canonical mapper. Require preview/diff before every apply, write only through the repository transaction boundary, and run post-import verification. Do not modify learner/SRS state, bundle remote media, score Arabic support text, or promote pronunciation metadata.
+
+Before publication, complete the 372 educator reviews and 7 media technical reviews. Open production prompts remain intentionally ungraded.
+
+Exact cherry-pick sequence from a current implementation branch:
+
+```powershell
+git fetch origin
+git cherry-pick 8323bffd982e9ba030dfa691e397bf4ca4c25804 1d2c91c7c269717163a15ed6b8d14d2de7691cb7 origin/codex/a2-complete-content
+```
+
+Then run:
+
+```powershell
+npm test
+```
+
+## Remaining genuine A2 gaps / blockers
+
+- No missing material-content domain blocks implementation.
+- Educator approval is required before publishing the 372 review-pending educational records.
+- Technical verification is required before treating any of the 7 remote media records as offline-playable or technically complete.
+- Learner-ready pronunciation content is intentionally absent; verified source relationships are present as metadata only. This is non-blocking under the approved stop rule.
