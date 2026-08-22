@@ -535,6 +535,7 @@ because the drafts were never shipped.
     redistribution rights are deliberately unresolved.
 4.  **No promotion tool exists yet.** Moving a row from `draft` to `imported` currently means
     editing the artifact and re-importing. A reviewer-facing path is the natural next task.
+
 ## Open-Licensed A2 Lesson 02 Preparation (2026-08-22)
 
 *   Documentation/content branch `codex/a2-open-content-lesson-02` adds an implementation-ready second lesson, **Reisen planen und von Reisen erzählen**, from official COERLL Deutsch im Blick Kapitel 6 and Grimm Grammar sources under CC BY 4.0.
