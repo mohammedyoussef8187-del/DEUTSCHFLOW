@@ -2,7 +2,7 @@
 
 - **branch:** `mobile-foundation` — not merged to `main`
 - **starting commit:** `dbf272e` (content review); curriculum baseline reviewed `453be35`
-- **final commit:** see `FINAL` below
+- **final commit:** `b0a0634`
 - **scope:** RC-1 … RC-5 only, then final application completion. No lesson authored, no
   unit added, no CEFR or educator review performed. RC-6, RC-7, RC-8 and every
   WORDING_IMPROVEMENT were deliberately left alone.
