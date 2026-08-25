@@ -4,12 +4,110 @@
   `git push origin claude/open-content:mobile-foundation`; never merged to `main`)
 - **starting commit:** `65109d9`, plus the Gemini audit commit `4c6b280` cherry-picked as
   `8bc08c0`
-- **commit SHA:** `8c5eebb` (`fix: let approval and re-import coexist, and make the review queue an artifact`)
+- **commit SHA:** `fbace01` (`chore: regenerate and re-verify the educator review queue`), on top of `c8e6914`
 - **phase:** Educator Review / Release Candidate preparation
 
 ---
 
-## Work completed
+## Review-queue artifact: discrepancy investigated and resolved — NOT a data loss
+
+**Reported:** `tools/intake/artifacts/open-content-audit.json` is not present in commit
+`c8e6914`.
+
+**Confirmed and corrected:** the report is accurate about `c8e6914` and misleading about
+the repository. `git show <commit>` prints only the DIFF that commit introduced, and
+`c8e6914` is the documentation-only commit. The artifact was introduced one commit
+earlier, in `8c5eebb`, and has been present in the repository tree ever since:
+
+```
+$ git ls-tree c8e6914 tools/intake/artifacts/
+100644 blob 8c1843c2…  tools/intake/artifacts/open-content-audit.json
+
+$ git ls-tree origin/mobile-foundation tools/intake/artifacts/open-content-audit.json
+100644 blob 8c1843c2…  tools/intake/artifacts/open-content-audit.json
+```
+
+The same blob is on the pushed branch. No artifact was ever lost, and nothing had to be
+recovered. The queue was nevertheless regenerated from the existing pipeline and
+re-validated, which is what the rest of this section records.
+
+### Regeneration
+
+Regenerated with the existing mechanism — no second generator, no new format:
+
+```
+node tools/intake/run-open-content.mjs --db <scratch>.db --apply
+```
+
+The scratch database is outside the repository, so no tracked file other than the audit
+itself could change. The regenerated artifact differs from the committed one **in exactly
+one line**: `generatedAt`. Every queue entry, grouping and count is identical.
+
+### Validation of the regenerated artifact
+
+| check | result |
+|---|---|
+| file exists | ✅ `tools/intake/artifacts/open-content-audit.json`, 526,084 bytes |
+| valid JSON | ✅ parses |
+| queue entries | **686** |
+| distinct UUIDs | **686** — deduplicated, no repeats |
+| `educatorReview.total` | **686** — matches the previously reported count exactly |
+| grouping present | ✅ `byLanguage`, `byEntity`, `byLesson` (7 lessons) |
+| entries missing a required field | **0** (uuid, entity, contentType, language, kind, text, sourceReference, lessonUuid, lessonTitle, lessonSourceId, reviewStatus) |
+| entries with no text | **0** |
+| entries with no citation | **0** |
+| technical review | 7 remote media + 7 pronunciation citations |
+
+**Language breakdown:** `ar` 425 · `de` 121 · `en` 97 · untagged 43 (rows whose text lives
+in a column rather than a language-tagged row — grammar topics, rules, exercises).
+
+**Entity breakdown:** vocabularyMeanings 139 · exerciseTexts 114 · sentenceTexts 113 ·
+grammarTexts 105 · curriculumTexts 61 · sentences 39 · listeningSegmentTexts 32 ·
+grammarExamples 24 · exercises 22 · listeningTexts 16 · grammarRules 14 · grammarTopics 7.
+
+**Count difference from the previously reported 686:** none. The regenerated count is 686.
+
+### Git tracking verification
+
+```
+$ git status --short tools/intake/artifacts/open-content-audit.json
+ M tools/intake/artifacts/open-content-audit.json          # tracked, timestamp only
+
+$ git check-ignore -v tools/intake/artifacts/open-content-audit.json
+(no output, exit 1)                                        # NOT ignored by any rule
+
+$ git ls-files tools/intake/artifacts/open-content-audit.json
+tools/intake/artifacts/open-content-audit.json             # tracked
+```
+
+`.gitignore` excludes only `tools/intake/artifacts/*.db`, with a comment stating that the
+artifacts beside the database ARE committed. `.git/info/exclude` is empty. There is no
+generated-artifact rule that could have excluded this file, and none was added or removed.
+
+### Commands executed
+
+- `node tools/intake/run-open-content.mjs --db <scratch>.db --apply` — regeneration
+- `node -e` structural validation of the regenerated JSON (counts, dedupe, fields)
+- `git ls-tree` / `git show` / `git status` / `git check-ignore -v` / `git ls-files`
+- `npx vitest run tests/integration/educator-review-readiness.test.js` — **17/17**
+
+No executable code changed, so the full regression was not re-run; it stood at
+**1236/1236 across 73 files** at `8c5eebb` and is unaffected.
+
+### Files changed by this task
+
+| File | Change |
+|---|---|
+| `tools/intake/artifacts/open-content-audit.json` | regenerated (only `generatedAt` differs) |
+| `00_PROJECT_CONTROL/CLAUDE_HANDOFF_CURRENT.md` | this section |
+
+`01_APPLICATION/` untouched. The canonical learner-facing dataset, publication gates,
+scoring, SRS, learner data, content statuses, IDs and every existing review decision are
+unchanged.
+
+---
+
+## Work completed (previous task — Release Candidate preparation)
 
 No new audit was run and no product scope was added. Three changes, each needed to make
 release preparation possible without touching a review gate.
@@ -160,13 +258,16 @@ Not closable from a desktop or browser, and deliberately not attempted:
 ## Genuine blockers
 
 **None.** The three pending categories above are intentional gates: two human reviews and
-one hardware validation. No engineering work is waiting on anything else.
+one hardware validation. No engineering work is waiting on anything else, and the review
+queue is present, tracked and validated.
 
 ## Exact next action
 
-Hand `tools/intake/artifacts/open-content-audit.json` to the German/Arabic educator and
-work the queue by language. To apply an approval: set `content_status` to `verified` on the
-listed `uuid` through the repository write API (never raw SQL), re-run
+**Resume Gemini/Antigravity educator review using
+`tools/intake/artifacts/open-content-audit.json` as the authoritative review queue.**
+
+To apply an approval afterwards: set `content_status` to `verified` on the listed `uuid`
+through the repository write API (never raw SQL), re-run
 `tools/intake/run-open-content.mjs --apply` so the links withheld from unpublished content
-are recreated, then `tools/intake/export-canonical.mjs`. Both steps are now safe to repeat:
-the re-import treats an approved row as unchanged rather than as a conflict.
+are recreated, then `tools/intake/export-canonical.mjs`. Both steps are safe to repeat: the
+re-import treats an approved row as unchanged rather than as a conflict.
