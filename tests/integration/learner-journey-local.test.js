@@ -145,14 +145,19 @@ describe("consume the learning content", () => {
 
   it("renders an honest empty state where nothing is authored", async () => {
     const harness = await bootLocalLearnerHarness();
-    // No pronunciation content has been imported for any course. The route says so
-    // rather than inventing an item to fill the screen.
+    /*
+     * No pronunciation content has been imported for any course — only citations of the
+     * official pages — so the route says so rather than inventing an item to fill the
+     * screen. Grammar was empty for the same reason until the educator review released
+     * it; it is authored now, so it is here.
+     */
     const { data } = await harness.navigate("learn-pronunciation");
     expect(data.items).toEqual([]);
     expect(data.item).toBeNull();
 
     const grammar = await harness.navigate("learn-grammar");
-    expect(grammar.data.topics).toEqual([]);
+    expect(grammar.data.topics).toHaveLength(7);
+    expect(grammar.data.topics.every(topic => topic.rules.length > 0)).toBe(true);
   });
 });
 

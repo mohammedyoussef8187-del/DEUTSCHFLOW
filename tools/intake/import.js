@@ -315,16 +315,30 @@ export function pruneUnchanged(mapped, unchanged) {
     entry.options.length || entry.targets.length);
 
   /*
-   * A listening activity is kept or dropped whole. Its rows are only ever planned when
-   * the item itself is present, so pruning the item out from under its own segments
-   * would hide them from the row count and silently drop a real change.
+   * A listening activity is kept or dropped whole, but its CHILD rows are pruned.
+   *
+   * The item has to survive: its rows are only ever planned when it is present, so
+   * pruning it out from under its own segments would hide them from the row count and
+   * silently drop a real change. Its texts and segments are a different matter — writing
+   * one the store already holds would overwrite whatever lifecycle state that row has
+   * reached, which is how a transcript line an educator had verified came back as merely
+   * imported the next time an unrelated row in the same activity changed.
    */
   const listeningRows = mapped.listening?.item
     ? [mapped.listening.audio, mapped.listening.item, ...(mapped.listening.texts ?? []),
        ...(mapped.listening.speakers ?? []), ...(mapped.listening.segments ?? []),
        ...(mapped.listening.segmentTexts ?? []), ...(mapped.listening.links ?? [])]
     : [];
-  const listening = listeningRows.some(keep) ? mapped.listening : null;
+  const listening = listeningRows.some(keep)
+    ? {
+        ...mapped.listening,
+        texts: filter(mapped.listening.texts),
+        speakers: filter(mapped.listening.speakers),
+        segments: filter(mapped.listening.segments),
+        segmentTexts: filter(mapped.listening.segmentTexts),
+        links: filter(mapped.listening.links)
+      }
+    : null;
 
   const batch = {
     ...mapped,
@@ -436,8 +450,22 @@ async function writeBatch(repositories, pending, now) {
      * was first read from, and this lesson joins it through lesson_items instead.
      * Rewriting would silently move the citation to whichever episode imported last.
      */
-    if (!entry.item || await repositories.vocabulary.exists(entry.item.uuid)) {
+    const reused = Boolean(entry.item) && await repositories.vocabulary.exists(entry.item.uuid);
+    if (!entry.item || reused) {
       written.vocabularyReused += 1;
+      /*
+       * The ITEM is not rewritten — that is what keeps the citation of the page it was
+       * first read from. Its meanings, translations and accepted answers are a different
+       * question: the diff already pruned this batch to rows that really would change, so
+       * anything still here is new or corrected and belongs in the store. Skipping the
+       * whole aggregate would mean no child of an existing word could ever be written
+       * again, which is exactly what stranded the pairings an educator had just approved.
+       */
+      const children = { ...entry, item: null };
+      const pending = children.meanings.length || children.translations.length ||
+        children.acceptedAnswers.length;
+      if (!pending) continue;
+      await repositories.write.content.saveVocabulary(children, { now });
       continue;
     }
     await repositories.write.content.saveVocabulary(entry, { now });

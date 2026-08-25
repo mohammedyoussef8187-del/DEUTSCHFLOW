@@ -429,13 +429,21 @@ describe("the shipped dataset carries the curriculum", () => {
     }
   });
 
-  it("ships English for every word and Arabic for none of them", () => {
+  it("ships English and Arabic for every word, each on its own row", () => {
     const dataset = shipped();
     const open = row => (row.sourceType ?? "") === "cc-by-4.0-open-content";
 
     expect(dataset.entities.vocabularyItems.filter(open)).toHaveLength(139);
     expect(dataset.entities.translations.filter(open)).toHaveLength(139);
-    expect((dataset.entities.vocabularyMeanings ?? []).filter(open)).toHaveLength(0);
+    /* The Arabic ships now that the educator review released it. Before the review it
+       was held back while the English shipped, which is the independence this pair of
+       counts has always been here to record. */
+    const arabic = (dataset.entities.vocabularyMeanings ?? []).filter(open);
+    expect(arabic).toHaveLength(139);
+    expect(arabic.every(row => row.contentStatus === "verified")).toBe(true);
+    // English was never gated on Arabic and still is not.
+    expect(dataset.entities.translations.filter(open)
+      .every(row => row.contentStatus === "imported")).toBe(true);
   });
 
   it("ships no pronunciation row and no playable recording", () => {

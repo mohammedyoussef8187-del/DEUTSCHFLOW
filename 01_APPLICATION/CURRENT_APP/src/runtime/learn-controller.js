@@ -182,9 +182,18 @@ export function createLearnController(runtime, options = {}) {
         };
       }
     }
-    if (wanted("grammar")) {
+    /* A lesson points at a grammar TOPIC or at one of its RULES, and both need a name.
+       The rules live inside the assembled topic, so one read covers both. */
+    if (wanted("grammar") || wanted("grammar_rule") || wanted("grammar_topic")) {
       for (const topic of await services.grammar.topics()) {
         labels[topic.uuid] = { title: topic.title?.de ?? topic.slug, detail: null, lang: "de" };
+        for (const rule of topic.rules ?? []) {
+          labels[rule.uuid] = {
+            title: rule.title?.de ?? rule.slug,
+            detail: topic.title?.de ?? null,
+            lang: "de"
+          };
+        }
       }
     }
     return labels;
@@ -763,6 +772,8 @@ export function createLearnController(runtime, options = {}) {
         return { route: "learn-sentences" };
 
       case "grammar":
+      case "grammar_rule":
+      case "grammar_topic":
         return { route: "learn-grammar" };
 
       default:

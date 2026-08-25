@@ -492,13 +492,18 @@ describe("nothing that already existed is disturbed", () => {
         expect(row.contentStatus ?? "imported", `${entity} ${row.uuid}`).not.toBe("draft");
       }
     }
-    // The unreviewed rows are held back rather than shipped to every device: of this
-    // lesson's twelve sentences, the five transcribed from the source are shipped and
-    // the seven DeutschFlow wrote are not.
+    /*
+     * All twelve of this lesson's sentences ship now: five were transcribed from the
+     * source and shipped from the start, and the seven DeutschFlow wrote were released
+     * by the educator review. The two groups are still distinguishable by the lifecycle
+     * state each carries, which is what the gate was protecting.
+     */
     const lessonOne = new Set(built().mapped.sentences.map(entry => entry.sentence.uuid));
     const shippedFromLessonOne = shipped.entities.sentences
       .filter(row => lessonOne.has(row.uuid));
-    expect(shippedFromLessonOne).toHaveLength(5);
     expect(lessonOne.size).toBe(12);
+    expect(shippedFromLessonOne).toHaveLength(12);
+    expect(shippedFromLessonOne.filter(row => row.contentStatus === "imported")).toHaveLength(5);
+    expect(shippedFromLessonOne.filter(row => row.contentStatus === "verified")).toHaveLength(7);
   });
 });

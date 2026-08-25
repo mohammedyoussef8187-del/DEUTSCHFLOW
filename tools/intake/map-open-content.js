@@ -473,6 +473,16 @@ export function publicationOf(record, entity, row, context = {}) {
    */
   if (record.reviewStatus === REVIEW_STATES.EXCLUDED) return DRAFT_STATUS;
 
+  /*
+   * A completed review outranks every heuristic below it.
+   *
+   * The origin markers exist to decide what a person still has to look at. Once that
+   * person has looked and approved the row, the question they were asked is answered, and
+   * re-deriving `draft` from provenance would hold back content the reviewer released —
+   * and, worse, would keep withholding the lesson items and links that point at it.
+   */
+  if (context.approved?.has(row.uuid)) return IMPORTED_STATUS;
+
   if (row?.language) {
     /* A language the artifact declares as source-derived is published. Anything else is
        DeutschFlow wording: the changes notice states in the artifact itself that the
@@ -584,13 +594,17 @@ function normalizeAnswer(value) {
  */
 export function mapOpenContent(source, options = {}) {
   const now = options.now ?? Date.now();
+  /* Rows an educator has already approved. Empty until a review has been integrated. */
+  const approved = options.approved instanceof Set
+    ? options.approved
+    : new Set(options.approved ?? []);
   // Worked on a copy: deciding a status rewrites rows, and the caller's artifact — often
   // a parsed file a test reuses — must read the same on the second call as on the first.
   const dataset = structuredClone(source);
   const statuses = new Map();          // uuid -> imported | draft
   const records = openContentRecords(dataset);
   const exerciseVerdicts = verifyExerciseAnswerKeys(dataset);
-  const context = { exerciseVerdicts };
+  const context = { exerciseVerdicts, approved };
 
   // Pass 1: decide each row's own status and stamp the licence into its provenance.
   for (const { record } of records) {
@@ -977,13 +991,13 @@ function buildAudit(dataset, records, statuses, withheldLinks, now) {
  * Throws on a validation error: a batch that fails its own contract is not imported.
  */
 export function buildOpenContentLesson(options = {}) {
-  const { dataset, now = Date.now() } = options;
+  const { dataset, now = Date.now(), approved = null } = options;
   const validation = validateOpenContent(dataset);
   if (!validation.ok) {
     const detail = validation.errors
       .map(error => `${error.code} at ${error.where}: ${error.detail}`).join("; ");
     throw new Error(`open-content artifact refused: ${detail}`);
   }
-  const { mapped, audit } = mapOpenContent(dataset, { now });
+  const { mapped, audit } = mapOpenContent(dataset, { now, approved });
   return { dataset, mapped, audit, validation };
 }

@@ -57,6 +57,26 @@ export function readArtifact(file = DEFAULT_ARTIFACT) {
   return JSON.parse(fs.readFileSync(path.resolve(process.cwd(), file), "utf8"));
 }
 
+/** Where a completed educator review is recorded, once one exists. */
+export const DECISIONS_FILE = "tools/intake/artifacts/educator_review_decisions.json";
+
+/**
+ * The rows an educator has approved, or an empty set if no review has been integrated.
+ *
+ * Read here rather than derived from the store, so the import stays a pure function of
+ * files a reviewer can inspect: the datasets say what the content is, and the decisions
+ * file says what a person released. Only `VERIFY` counts — a correction belongs in the
+ * source artifact and a gate is the reviewer saying "not yet".
+ */
+export function readApprovedUuids(file = DECISIONS_FILE) {
+  const resolved = path.resolve(process.cwd(), file);
+  if (!fs.existsSync(resolved)) return new Set();
+  const decisions = JSON.parse(fs.readFileSync(resolved, "utf8"));
+  return new Set((decisions.decisions ?? [])
+    .filter(row => row.action === "VERIFY")
+    .map(row => row.uuid));
+}
+
 /**
  * Preview, and apply only when asked.
  *
@@ -143,10 +163,12 @@ async function main() {
     const adapter = createSqliteAdapter(store.executor);
     await adapter.initializeSchema();
     const repositories = createCanonicalRepositories(adapter);
+    const approved = readApprovedUuids();
+    if (approved.size) console.log(`educator review integrated: ${approved.size} approved rows`);
     for (const artifact of chosen) {
       console.log(`
 ════ ${artifact} ════`);
-      lessons.push(await importOne(repositories, artifact, apply));
+      lessons.push(await importOne(repositories, artifact, apply, approved));
     }
   } finally {
     store.db.close();
@@ -228,9 +250,9 @@ function writeAudit(lessons) {
   return file.split(path.sep).join("/");
 }
 
-async function importOne(repositories, artifact, apply) {
+async function importOne(repositories, artifact, apply, approved = new Set()) {
   const dataset = readArtifact(artifact);
-  const built = buildOpenContentLesson({ dataset, now: Date.now() });
+  const built = buildOpenContentLesson({ dataset, now: Date.now(), approved });
   const media = describeRemoteMedia(dataset, artifact);
 
   console.log("── licence ──");
