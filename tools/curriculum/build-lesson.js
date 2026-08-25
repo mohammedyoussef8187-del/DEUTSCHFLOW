@@ -85,6 +85,78 @@ const lifecycle = (now, reference) => ({
   ...meta(now)
 });
 
+/**
+ * The identity of one vocabulary entry inside a course.
+ *
+ * Normally a word IS its normalised German form: writing `Termin` in two lessons should
+ * produce one row that both lessons point at, which is what makes re-teaching a word free.
+ *
+ * But normalisation lower-cases, and German has pairs that differ only in case or only in
+ * meaning — `der Morgen` (morning) against `morgen` (tomorrow), the comparative `als`
+ * (than) against the temporal `als` (when). Those are different words that happen to share
+ * a surface form, and silently folding them together loses one of them completely: its
+ * article, its plural and its meaning all disappear, and the lesson that introduced it
+ * shows the learner the other word instead.
+ *
+ * `sense` is how an author says "this is a different lexeme that happens to look the same".
+ * It is deliberately opt-in: adding it to a word changes that word's uuid, so it is used
+ * only where two entries genuinely collide, and every other row keeps the identity it
+ * already has. `assertNoCollisions` below is what makes the opt-in safe — a collision an
+ * author has not resolved stops the build instead of merging.
+ */
+export function vocabularyKey(courseSlug, word) {
+  const base = `${courseSlug}:${normalizeGerman(word.de)}`;
+  return word.sense ? `${base}#${word.sense}` : base;
+}
+
+/**
+ * What two entries must agree on to be the same word.
+ *
+ * Two lessons teaching `der Termin` agree on all of it and share a row. Two entries that
+ * differ here are different words, and if they also share an identity key one of them is
+ * about to be thrown away.
+ */
+function lexicalSignature(word) {
+  return JSON.stringify([
+    word.de, word.article ?? null, word.plural ?? null, word.wordClass ?? null,
+    word.ar ?? null, word.en ?? null
+  ]);
+}
+
+/**
+ * Refuse to build a level in which two different words would collapse onto one row.
+ *
+ * This is the guard that makes the whole scheme trustworthy: the two known collisions are
+ * resolved with `sense`, and any future one — a new lesson adding `der Weg` beside `weg`,
+ * or a second meaning of an existing word — fails here with both lessons named, instead of
+ * shipping a lesson that teaches the wrong word.
+ */
+export function assertNoCollisions(level, courseSlug) {
+  const byKey = new Map();
+
+  for (const unit of level.units ?? []) {
+    for (const lesson of unit.lessons ?? []) {
+      for (const word of lesson.vocabulary ?? []) {
+        const key = vocabularyKey(courseSlug, word);
+        const signature = lexicalSignature(word);
+        const seen = byKey.get(key);
+
+        if (!seen) { byKey.set(key, { signature, word, lesson: lesson.slug }); continue; }
+        if (seen.signature === signature) continue;   // the same word, taught twice
+
+        throw new Error(
+          `vocabulary identity collision in ${level.cefr}: "${seen.word.de}" ` +
+          `(${seen.lesson}) and "${word.de}" (${lesson.slug}) both resolve to "${key}". ` +
+          `They are different entries, so one would be discarded. Give one of them a ` +
+          `distinct \`sense\` — for example { de: "${word.de}", sense: "…" }.`
+        );
+      }
+    }
+  }
+
+  return byKey.size;
+}
+
 /** German comparison form: lower case, no article, no separable-verb pipe. */
 export function normalizeGerman(value) {
   return String(value ?? "")
@@ -229,7 +301,7 @@ export function buildLesson(context, lesson, options = {}) {
   /* --- vocabulary -------------------------------------------------------------- */
   const vocabByKey = new Map();
   for (const [index, word] of (lesson.vocabulary ?? []).entries()) {
-    const key = `${frame.slug}:${normalizeGerman(word.de)}`;
+    const key = vocabularyKey(frame.slug, word);
     const vocabUuid = id(NS.vocab, key);
     vocabByKey.set(word.de, vocabUuid);
     if (word.key) vocabByKey.set(word.key, vocabUuid);

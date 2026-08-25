@@ -117,7 +117,27 @@ function sameBody(a, b) {
   return strip(a) === strip(b);
 }
 
-export function classifyRow(existing, proposed) {
+/**
+ * Whether this caller is allowed to revise a row that is already `verified`.
+ *
+ * The gate below exists to stop an importer silently overwriting something a PERSON signed
+ * off. It is not meant to stop an author correcting their own material: DeutschFlow's own
+ * lessons are written `verified` because this project is their author of record, and a
+ * confirmed defect in one of them has to be fixable by re-running the authoring engine.
+ *
+ * So authority is explicit and narrow. A caller names the one `verifiedBy` identity it
+ * speaks for, and may revise only rows carrying that identity AND written by that same
+ * author. Every other verified row — anything an educator approved, anything imported —
+ * still conflicts exactly as before. A caller that names nobody, which is every existing
+ * caller, gets the old behaviour unchanged.
+ */
+function mayRevise(existing, authority) {
+  if (!authority?.verifiedBy) return false;
+  return existing.verifiedBy === authority.verifiedBy &&
+    existing.sourceType === authority.sourceType;
+}
+
+export function classifyRow(existing, proposed, authority = null) {
   if (!existing) return { change: CHANGE.CREATE };
   if (sameContent(existing, proposed)) return { change: CHANGE.UNCHANGED };
 
@@ -142,7 +162,8 @@ export function classifyRow(existing, proposed) {
     return { change: CHANGE.UPDATE, before: meaningfulFields(existing), after: meaningfulFields(proposed) };
   }
 
-  if (existing.contentStatus && !UPDATABLE_STATUSES.includes(existing.contentStatus)) {
+  if (existing.contentStatus && !UPDATABLE_STATUSES.includes(existing.contentStatus) &&
+      !mayRevise(existing, authority)) {
     return {
       change: CHANGE.CONFLICT,
       reason: `stored row is ${existing.contentStatus}; a source change must be reviewed`,
@@ -220,13 +241,13 @@ export function flattenRows(mapped) {
  * Build the plan by reading what is already stored.
  * Read-only: it opens nothing it does not close and writes nothing at all.
  */
-export async function planImport(repositories, mapped) {
+export async function planImport(repositories, mapped, options = {}) {
   const rows = flattenRows(mapped);
   const entries = [];
 
   for (const { entity, row } of rows) {
     const existing = await repositoryFor(repositories, entity).get(row.uuid);
-    entries.push({ entity, uuid: row.uuid, ...classifyRow(existing, row) });
+    entries.push({ entity, uuid: row.uuid, ...classifyRow(existing, row, options.authority) });
   }
 
   const by = change => entries.filter(entry => entry.change === change);

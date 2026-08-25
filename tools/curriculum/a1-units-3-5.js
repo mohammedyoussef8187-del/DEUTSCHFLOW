@@ -196,7 +196,9 @@ export const UNITS_3_5 = [
           { de: "fern|sehen", ar: "يشاهد التلفاز", en: "to watch TV", wordClass: "verb", key: "fernsehen" },
           { de: "schlafen", ar: "ينام", en: "to sleep", wordClass: "verb" },
           { de: "Arbeit", article: "die", ar: "العمل", en: "work", wordClass: "noun" },
-          { de: "Morgen", article: "der", plural: "Morgen", ar: "الصباح", en: "morning", wordClass: "noun" },
+          /* The noun, distinct from the adverb `morgen` (tomorrow) taught in a1-l06. */
+          { de: "Morgen", article: "der", plural: "Morgen", ar: "الصباح", en: "morning",
+            wordClass: "noun", sense: "noun", key: "MorgenNoun" },
           { de: "Abend", article: "der", plural: "Abende", ar: "المساء", en: "evening", wordClass: "noun" },
           { de: "immer", ar: "دائماً", en: "always", wordClass: "word" }
         ],

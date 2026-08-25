@@ -16,7 +16,19 @@ import { createSqliteAdapter } from "../../01_APPLICATION/CURRENT_APP/src/platfo
 import { createCanonicalRepositories } from "../../01_APPLICATION/CURRENT_APP/src/data/canonical-repositories.js";
 import { createServices } from "../../01_APPLICATION/CURRENT_APP/src/runtime/composition-root.js";
 import { applyImport, planImport, verifyImport } from "../intake/import.js";
-import { buildLevel } from "./build-lesson.js";
+import {
+  assertNoCollisions, AUTHOR, buildLevel, SOURCE_TYPE
+} from "./build-lesson.js";
+
+/*
+ * What this runner speaks for.
+ *
+ * DeutschFlow authored these lessons and writes them `verified`, so correcting one of its
+ * own confirmed defects is re-authoring, not overruling a reviewer. The authority is
+ * limited to rows carrying both this author and this source type — an educator-approved
+ * row, or anything imported, still conflicts.
+ */
+const AUTHORITY = Object.freeze({ verifiedBy: AUTHOR, sourceType: SOURCE_TYPE });
 import { A1 } from "./a1.js";
 import { A2_EXTRA } from "./a2.js";
 
@@ -54,9 +66,15 @@ export async function runLevel(repositories, level, options = {}) {
       slug: course.slug };
   }
 
+  /*
+   * Two different words that would land on one row is a content defect, and it is silent
+   * unless something looks for it — so nothing is written until the level is known clean.
+   */
+  assertNoCollisions(level, attach?.slug ?? `deutschflow-${level.cefr.toLowerCase()}`);
+
   const { mapped, listenings } = buildLevel(level, { now, attach });
 
-  const plan = await planImport(repositories, mapped);
+  const plan = await planImport(repositories, mapped, { authority: AUTHORITY });
   if (plan.conflicts.length) {
     return { applied: false, reason: "conflicts", plan, written: null, verification: null };
   }
@@ -74,12 +92,15 @@ export async function runLevel(repositories, level, options = {}) {
         vocabulary: [], sentences: [], grammar: [], exercises: [],
         listening: entry.listening, audioAssets: [], keys: {}
       };
-      const activityPlan = await planImport(repositories, batch);
+      const activityPlan = await planImport(repositories, batch, { authority: AUTHORITY });
       if (activityPlan.conflicts.length) {
         throw new Error(`listening conflict in ${entry.lessonUuid}`);
       }
       if (!activityPlan.isNoop) await applyImport(repositories, batch, { now, plan: activityPlan });
     }
+
+    /* Superseded items go before verification, so what is checked is what a learner gets. */
+    const withdrawn = await reconcileSections(repositories, mapped, { now });
 
     const services = createServices(repositories);
     const verification = await verifyImport(services, mapped, options.profileUuid ?? "local",
@@ -90,7 +111,7 @@ export async function runLevel(repositories, level, options = {}) {
         missing: verification.missingLessons, links: verification.links.missing.length
       })}`);
     }
-    return { applied: true, reason: null, plan, written, verification };
+    return { applied: true, reason: null, plan, written, verification, withdrawn };
   });
 }
 
@@ -118,6 +139,44 @@ export async function retitleCourse(repositories, level, options = {}) {
     updated += 1;
   }
   return { updated };
+}
+
+/**
+ * Withdraw lesson items the authoring engine no longer produces.
+ *
+ * An import adds and updates; it has no opinion about what has been taken away. That is
+ * normally right — an importer should not delete what a different source contributed — but
+ * an authored SECTION is written wholly by this engine, so the items it emits for that
+ * section are the complete list, and anything else in it is left over from an earlier
+ * build.
+ *
+ * It matters because the identity of a word can legitimately change. Splitting `der Morgen`
+ * away from `morgen` gave the noun a new uuid and so a new lesson item; without this step
+ * the daily-routine lesson would show BOTH, teaching "tomorrow" beside "morning" and
+ * leaving the defect half-fixed.
+ *
+ * Only sections this build touched are considered, only their items are withdrawn, and the
+ * withdrawal is a soft delete — the vocabulary, exercises and sentences themselves are
+ * never touched, and `morgen` remains exactly where it is taught.
+ */
+export async function reconcileSections(repositories, mapped, options = {}) {
+  const now = options.now ?? Date.now();
+  const wanted = new Map();
+
+  for (const item of mapped.course.items ?? []) {
+    if (!wanted.has(item.sectionUuid)) wanted.set(item.sectionUuid, new Set());
+    wanted.get(item.sectionUuid).add(item.uuid);
+  }
+
+  const withdrawn = [];
+  for (const [sectionUuid, keep] of wanted) {
+    for (const stored of await repositories.lessonItems.find({ sectionUuid })) {
+      if (stored.deleted || keep.has(stored.uuid)) continue;
+      await repositories.lessonItems.softDelete(stored.uuid, { now });
+      withdrawn.push({ sectionUuid, uuid: stored.uuid, contentType: stored.contentType });
+    }
+  }
+  return withdrawn;
 }
 
 /** Hold the source-shaped courses out of the learner's view, structure and all. */
@@ -211,6 +270,9 @@ async function main() {
       }
       if (!result.applied) { console.log(`  not applied: ${result.reason}`); continue; }
       console.log(`  written: ${JSON.stringify(result.written)}`);
+      if (result.withdrawn?.length) {
+        console.log(`  withdrew ${result.withdrawn.length} superseded lesson item(s)`);
+      }
       console.log(`  verified: lessons ${result.verification.lessons}, ` +
         `items ${result.verification.lesson?.items}, ok ${result.verification.ok}`);
     }

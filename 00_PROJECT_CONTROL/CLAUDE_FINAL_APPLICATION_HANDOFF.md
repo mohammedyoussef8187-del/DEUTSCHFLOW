@@ -1,0 +1,217 @@
+# Claude Final Application Handoff
+
+- **branch:** `mobile-foundation` — not merged to `main`
+- **starting commit:** `dbf272e` (content review); curriculum baseline reviewed `453be35`
+- **final commit:** see `FINAL` below
+- **scope:** RC-1 … RC-5 only, then final application completion. No lesson authored, no
+  unit added, no CEFR or educator review performed. RC-6, RC-7, RC-8 and every
+  WORDING_IMPROVEMENT were deliberately left alone.
+
+---
+
+## RC status
+
+| | Status | What changed |
+| --- | --- | --- |
+| **RC-1** vocabulary identity collision | **PASS** | Fixed at the authoring engine, not in the JSON |
+| **RC-2** formal-email newlines | **PASS** | Source string single-escaped; renders as a letter |
+| **RC-3** ambiguous preposition exercise | **PASS** | Now tests the case, one correct answer |
+| **RC-4** Uhr / Stunde ambiguity | **PASS** | Prompt disambiguated; answer list not widened |
+| **RC-5** weekday / month coverage | **PASS** | All 7 weekdays and all 12 months taught |
+
+### RC-1 — how it was fixed
+
+`build-lesson.js` derived a vocabulary row's identity from `normalizeGerman(de)`, which
+lower-cases, so `der Morgen`/`morgen` and the two senses of `als` collapsed onto one row
+and the loser's article, plural and meaning were discarded.
+
+Three parts, all in the engine:
+
+1. **`vocabularyKey(courseSlug, word)`** — identity is the normalised German form plus an
+   optional `sense`. `sense` is opt-in, so every row that did not collide keeps the uuid it
+   already had; only the two genuinely different lexemes moved.
+2. **`assertNoCollisions(level, courseSlug)`** — the runner refuses to build a level in
+   which two entries differing in article, plural, word class or meaning would land on one
+   key. A future `der Weg`/`weg` fails the build with both lessons named instead of merging.
+3. **`reconcileSections`** — an import adds and updates but never removes, so the
+   superseded lesson item would have stayed and the daily-routine lesson would have shown
+   `morgen` *and* `der Morgen`. Items an authored section no longer emits are now
+   soft-deleted. Two were withdrawn; the vocabulary rows themselves were not touched.
+
+Confirmed after regeneration, in the shipped dataset and in the browser:
+
+```
+a1-l09-tagesablauf   der Morgen = الصباح        (article der, plural Morgen)
+a1-l06-woche         morgen     = غداً
+a2-l16-praeteritum   als        = عندما (للماضي)
+a2-l12-vergleich     als        = من (في المقارنة)
+```
+
+### One dependency this required
+
+The lifecycle gate refused the corrections: six rows were `verified`, and
+`classifyRow` treats a body change to a verified row as a conflict. That gate is right and
+was not weakened. Instead `classifyRow`/`planImport` take an optional **authority** — a
+caller names the one `verifiedBy` identity it speaks for and may revise only rows carrying
+both that identity and that `sourceType`. The curriculum runner passes
+`{ verifiedBy: "DeutschFlow", sourceType: "deutschflow-original" }`, so DeutschFlow can
+correct its own material. Educator-approved rows and all imported content still conflict
+exactly as before, and every existing caller passes no authority and is unaffected.
+
+### RC-5 — which option was taken
+
+**Option A.** The lesson is titled *Tage, Monate, Termine* and its `am/im/um` rule already
+used `im Mai` and `im Juli`, so narrowing the objective would have left the grammar rule
+referring to words the curriculum never taught. Added `Mittwoch` and `Donnerstag` (the
+graded answer `Mittwoch` was previously untaught) and all twelve months. Vocabulary for
+that lesson: 10 → 24 entries. No new lesson.
+
+---
+
+## Also fixed — outside RC-1…RC-5, application layer only
+
+24 authored A2 vocabulary entries carry the article inside `german` *and* in the `article`
+column, and the label renderer concatenated both: `der der Grund`, `das das Erlebnis`, on
+nine of the ten authored A2 lessons. This was **not** in the review's confirmed list and no
+curriculum file was edited for it. `learn-controller.js` now prepends the article only when
+the word does not already start with it, which repairs all 24 and tolerates either shape.
+
+The underlying data inconsistency is unresolved and is recorded below as a follow-up.
+
+---
+
+## Files changed
+
+```
+tools/curriculum/build-lesson.js        vocabularyKey, assertNoCollisions
+tools/curriculum/run-curriculum.mjs     collision guard, authority, reconcileSections
+tools/intake/import.js                  optional authorship authority on classifyRow/planImport
+tools/curriculum/a1-units-1-2.js        RC-4 prompt, RC-5 weekdays + months
+tools/curriculum/a1-units-3-5.js        RC-1 der Morgen sense
+tools/curriculum/a1-units-6-8.js        RC-3 exercise
+tools/curriculum/a2-units-8-12.js       RC-1 temporal als sense, RC-2 email template
+01_APPLICATION/CURRENT_APP/src/runtime/learn-controller.js   article-tolerant label
+01_APPLICATION/CURRENT_APP/sw.js        cache bumped to rc6-2026-08-25
+01_APPLICATION/CURRENT_APP/data/canonical-content.json       regenerated by the pipeline
+tests/integration/confirmed-fixes.test.js                    new, 13 tests
+00_PROJECT_CONTROL/CLAUDE_FINAL_APPLICATION_HANDOFF.md       this file
+```
+
+Generated output was not hand-edited: `canonical-content.json` comes from
+`run-curriculum.mjs --apply` followed by `export-canonical.mjs`.
+
+## Final curriculum counts
+
+| category | ENTITY | CANONICAL | REFERENCED | ORPHANED |
+| --- | ---: | ---: | ---: | ---: |
+| Courses | 4 | 2 | 2 | 0 |
+| Units | 23 | 20 | 20 | 0 |
+| Lessons | 48 | 35 | 35 | 0 |
+| Sections | 263 | 260 | 260 | 0 |
+| Lesson items | 1005 | 979 | 979 | 0 |
+| Vocabulary | 442 | 442 | 431 | 0 |
+| Grammar rules | 64 | 64 | 64 | 0 |
+| Exercises | 296 | 296 | 282 | 0 |
+| Listening | 15 | 15 | 14 | 0 |
+
+A1 18 lessons / 8 units · A2 17 lessons / 12 units · empty learner-visible lessons **0**.
+Vocabulary rose by 16 (14 for RC-5, plus `der Morgen` and temporal `als`); lesson items by
+14 net (16 added, 2 superseded items withdrawn).
+
+## Canonical integrity
+
+```
+ORPHAN_REFERENCES  = 0
+INVALID_REFERENCES = 0
+```
+
+`export-canonical.mjs` reports `referential integrity: closed`;
+`integrity-check.mjs` exits 0. The pipeline is idempotent — a third consecutive run plans
+`create 0 update 0 conflicts 0` and withdraws nothing.
+
+## Automated tests
+
+**1292 passing / 77 files**, zero failures (baseline was 1279 / 76).
+Thirteen tests were added, all guarding the five fixes and the shapes that caused them:
+the identity rule, the collision guard on both real levels, no lesson showing one word
+twice, no shipped string containing the characters backslash-n, each corrected exercise,
+weekday and month coverage, and the doubled-article regression through the real controller.
+
+## Learner journey — PASS
+
+Chromium, cleared IndexedDB, against the regenerated dataset. All thirteen required steps:
+
+1. fresh learner opens the app · 2. resumes at A1 lesson 1 (`Hallo! Ich heiße …`)
+3. lesson renders — 8 sections, 25 items, **0 unlabelled** · 4. teaching sections present
+5-6. `bin` rejected · 7. `heiße` accepted · 8. progress 1/18 (6%)
+9. resume advances to `Woher kommst du?` · 10. survives reload · 11. A2 reachable
+12. six representative lessons render (A1 #1/#6/#18, A2 #1/#9/#17), 0 unlabelled
+13. all five corrected defects verified absent, and 0 doubled articles across both courses
+
+## Web production build — PASS
+
+No-build static ESM app. Vendor bundles verified current (a rebuild changed only embedded
+comment paths, an artefact of this worktree's junctioned `node_modules`, and was reverted
+rather than committed). Service-worker cache bumped to `deutschflow-pro-rc6-2026-08-25` so
+existing installs pick up the new dataset instead of serving the old one; the precache list
+already includes `/data/canonical-content.json`, which is what makes the curriculum
+available offline.
+
+## Capacitor / iOS — COMPLETE (configuration and code)
+
+Verified in this environment:
+
+- `capacitor.config.json` correct — appId `com.deutschflow.app`, webDir
+  `01_APPLICATION/CURRENT_APP`, `CapacitorSQLite` iOS database location and keychain prefix
+- `npx cap add ios` succeeds and generates the Xcode project (`ios/App/App.xcodeproj`)
+- `npx cap sync ios` succeeds; web assets **including the 3.6 MB dataset** are copied into
+  `ios/App/App/public`
+- Capacitor 8 produces an **SPM** project; `@capacitor-community/sqlite@8.1.1` is both
+  declared as a package dependency and linked into the app target — the two exact greps
+  `codemagic.yaml` asserts both match
+- the CI gate `grep "nativeStorageEnabled = false"` still matches
+  (`bootstrap-persistence.js:71`), so the workflow will not fail vacuously
+- `ios/` and `android/` stay gitignored **by existing project decision** — they are build
+  output regenerated on the macOS build machine. The locally generated `ios/` was removed
+  after verification; its `Package.swift` carried a Windows absolute path, which is an
+  artefact of generating on Windows from a worktree and which macOS CI regenerates
+  correctly.
+- `codemagic.yaml` already implements the full path: toolchain check → `npm ci` → full test
+  suite → native-storage-off assertion → generate → sync → SPM verification → resolve →
+  unsigned compile → boot simulator → build → install → launch → two-phase persistence
+  harness → assert results. A separate signed-device workflow is present and stays inactive
+  until Apple credentials are configured.
+
+Storage feature gates left off as required: `learnerStorageSwitch = false`,
+`canonicalNativeStore = false`, `nativeStorageEnabled = false`.
+
+## Native device verification — NOT PERFORMED
+
+`NATIVE_DEVICE_VERIFICATION_PENDING`. This environment is Windows with no macOS, no Xcode
+and no Apple hardware, so nothing was compiled, installed or launched on a simulator or a
+device. Everything platform-independent is complete and the macOS workflow that performs
+that verification is committed and triggered on pushes to `mobile-foundation`.
+
+## Genuine remaining blockers
+
+None for the web application.
+
+External conditions, unchanged:
+
+- **native device verification** — needs macOS/Xcode or the Codemagic run
+- **Apple signing credentials** — the signed-device workflow is inactive without them
+- **audio production** — 7 learner-referenced listening activities are script-only
+- **pronunciation** — no content authored
+
+Content follow-ups deliberately **not** done, in scope order:
+
+- the 24 A2 vocabulary entries whose `de` field repeats its own article. The renderer now
+  compensates, so nothing is learner-visible, but the data is still inconsistent and the
+  clean fix is to drop the article prefix from `de` in `a2-units-8-12.js`
+- RC-6, RC-7, RC-8 and all WORDING_IMPROVEMENTs from the review, explicitly out of scope
+- an independent (non-self) content review, and a word-list-level CEFR audit
+
+## Next owner
+
+Push triggers `ios-capacitor-validation` on Codemagic; read that run for the native result.
+Nothing else is pending on this branch.

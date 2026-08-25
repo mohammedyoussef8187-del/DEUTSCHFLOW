@@ -602,7 +602,7 @@ export const A2_UNITS = [
                 ar: "الرسالة الرسمية الألمانية لها هيكل ثابت يُتوقّع منك: تحية («Sehr geehrte Damen und Herren,» إذا لم تعرف الاسم، أو «Sehr geehrter Herr Meier,» / «Sehr geehrte Frau Meier,»)، ثم سبب الكتابة في جملة، ثم الطلب، ثم الخاتمة «Mit freundlichen Grüßen» واسمك. بعد الفاصلة في التحية تبدأ الجملة التالية بحرف صغير.",
                 en: "A fixed four-part structure: salutation, reason, request, sign-off; the line after the salutation comma starts lower case."
               },
-              formation: { de: "Sehr geehrte Damen und Herren,\\nich schreibe Ihnen, weil …\\nKönnten Sie mir bitte … ?\\nMit freundlichen Grüßen\\nAmir Hassan" },
+              formation: { de: "Sehr geehrte Damen und Herren,\n\nich schreibe Ihnen, weil …\n\nKönnten Sie mir bitte … ?\n\nMit freundlichen Grüßen\nAmir Hassan" },
               usage: { ar: "استعمل Sie وIhnen وIhr دائماً في الرسالة الرسمية، وبحرف كبير." },
               mistake: { ar: "خطأ شائع: بدء الرسالة بـ «Hallo» إلى جهة رسمية، أو كتابة «ihnen» بحرف صغير." },
               examples: [
@@ -768,7 +768,9 @@ export const A2_UNITS = [
           { de: "früher", ar: "سابقاً", en: "in the past", wordClass: "word", key: "frueher" },
           { de: "das Erlebnis", article: "das", plural: "Erlebnisse", ar: "التجربة؛ الحدث", en: "experience", wordClass: "noun", key: "Erlebnis" },
           { de: "die Erinnerung", article: "die", plural: "Erinnerungen", ar: "الذكرى", en: "memory", wordClass: "noun", key: "Erinnerung" },
-          { de: "als", ar: "عندما (للماضي)", en: "when (past)", wordClass: "conjunction", key: "alsPast" },
+          /* The temporal conjunction, distinct from the comparative `als` in a2-l12. */
+          { de: "als", ar: "عندما (للماضي)", en: "when (past)", wordClass: "conjunction",
+            sense: "temporal", key: "alsPast" },
           { de: "plötzlich", ar: "فجأة", en: "suddenly", wordClass: "word", key: "ploetzlich" }
         ],
         sentences: [

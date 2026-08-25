@@ -153,6 +153,23 @@ export function createLearnController(runtime, options = {}) {
    * Arabic is tried before giving up — and the slug, which is never a label, is used only
    * when nothing was written.
    */
+  /**
+   * A noun with its article, without saying the article twice.
+   *
+   * Entries are not consistent about where the article lives: most carry a bare `german`
+   * plus an `article` column, but some carry it inside `german` as well. Concatenating
+   * blindly turned two dozen A2 words into "der der Grund". The article is prepended only
+   * when the word does not already start with it.
+   */
+  function withArticle(article, german) {
+    const word = String(german ?? "").trim();
+    if (!article) return word;
+    /* Compared directly rather than with a built regex: `\s` inside a template literal
+       is not an escape, so the obvious `^${article}\s` silently never matches. */
+    const prefix = `${article} `.toLowerCase();
+    return word.toLowerCase().startsWith(prefix) ? word : `${article} ${word}`;
+  }
+
   function pickLabel(...candidates) {
     for (const value of candidates) {
       if (value?.de) return { title: value.de, lang: "de" };
@@ -173,7 +190,7 @@ export function createLearnController(runtime, options = {}) {
     if (wanted("vocabulary")) {
       for (const entry of await services.content.allEntries()) {
         labels[entry.uuid] = {
-          title: [entry.article, entry.german].filter(Boolean).join(" "),
+          title: withArticle(entry.article, entry.german),
           detail: entry.primary?.arabic ?? null,
           lang: "de"
         };

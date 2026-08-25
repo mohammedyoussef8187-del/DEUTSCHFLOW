@@ -145,8 +145,11 @@ export const UNITS_6_8 = [
             instruction: { ar: "اختر الصيغة الصحيحة." }, prompt: { de: "Das Geld ist in ___ Tasche." } },
           { type: "type_answer", answer: "im", practises: ["wo-dativ"],
             instruction: { ar: "اكتب الاختصار من in + dem." }, prompt: { de: "Ich bin ___ Bad." } },
-          { type: "type_answer", answer: "unter", practises: ["unter"],
-            instruction: { ar: "أكمل بحرف الجر المناسب." }, prompt: { de: "Die Tasche ist ___ dem Bett." } },
+          /* The gap tests the CASE, not which spatial relation the author had in mind:
+             neben, vor, hinter and auf are all correct German in the original frame. */
+          { type: "type_answer", answer: "dem", practises: ["wo-dativ"],
+            instruction: { ar: "أكمل بأداة التعريف في حالة الجر." },
+            prompt: { de: "Die Tasche ist unter ___ Bett." } },
           { type: "type_answer", answer: "der Schrank", practises: ["Schrank"],
             instruction: { ar: "اكتب الكلمة مع أداة التعريف." }, prompt: { ar: "الخزانة" } },
           { type: "type_answer", answer: "der Schlüssel", practises: ["Schlüssel"],

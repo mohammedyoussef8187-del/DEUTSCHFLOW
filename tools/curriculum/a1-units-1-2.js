@@ -422,8 +422,10 @@ export const UNITS_1_2 = [
             instruction: { ar: "أكمل بحرف الجر الصحيح." }, prompt: { de: "Der Kurs beginnt ___ neun Uhr." } },
           { type: "type_answer", answer: "beginnt", practises: ["beginnen"],
             instruction: { ar: "أكمل بالصيغة الصحيحة من beginnen." }, prompt: { de: "Der Film ___ um acht." } },
+          /* "الساعة" on its own also translates `die Stunde`, which this lesson teaches. */
           { type: "type_answer", answer: "die Uhr", practises: ["Uhr"],
-            instruction: { ar: "اكتب الكلمة مع أداة التعريف." }, prompt: { ar: "الساعة" } },
+            instruction: { ar: "اكتب الكلمة مع أداة التعريف." },
+            prompt: { ar: "الساعة (الجهاز / التوقيت)" } },
           { type: "multiple_choice", answer: "Wie spät ist es?", options: ["Wie spät ist es?", "Wie alt ist es?", "Wo ist es?"],
             instruction: { ar: "كيف تسأل عن الوقت؟" }, prompt: { de: "…?" } },
           { type: "self_assessed",
@@ -436,15 +438,34 @@ export const UNITS_1_2 = [
       {
         slug: "a1-l06-woche", ordering: 3,
         title: { de: "Tage, Monate, Termine", en: "Days, months, appointments", ar: "الأيام والشهور والمواعيد" },
-        objective: { ar: "تسمّي أيام الأسبوع والشهور وتحدّد موعداً." },
+        objective: { ar: "تسمّي أيام الأسبوع كلها والشهور، وتحدّد موعداً." },
         context: { ar: "تريد أن تحجز موعداً وتتفق مع صديق على يوم." },
         canDo: { ar: "أستطيع الاتفاق على يوم وموعد." },
         vocabulary: [
+          /* All seven, because the lesson grades a weekday answer and every graded answer
+             must be a word the lesson taught. Mittwoch in particular is the answer to the
+             listening question below. */
           { de: "Montag", article: "der", ar: "الاثنين", en: "Monday", wordClass: "noun" },
           { de: "Dienstag", article: "der", ar: "الثلاثاء", en: "Tuesday", wordClass: "noun" },
+          { de: "Mittwoch", article: "der", ar: "الأربعاء", en: "Wednesday", wordClass: "noun" },
+          { de: "Donnerstag", article: "der", ar: "الخميس", en: "Thursday", wordClass: "noun" },
           { de: "Freitag", article: "der", ar: "الجمعة", en: "Friday", wordClass: "noun" },
           { de: "Samstag", article: "der", ar: "السبت", en: "Saturday", wordClass: "noun" },
           { de: "Sonntag", article: "der", ar: "الأحد", en: "Sunday", wordClass: "noun" },
+          /* The months the objective promises and the am/im/um rule already uses. They are
+             a closed set learned as a block, not twelve separate concepts. */
+          { de: "Januar", article: "der", ar: "يناير", en: "January", wordClass: "noun" },
+          { de: "Februar", article: "der", ar: "فبراير", en: "February", wordClass: "noun" },
+          { de: "März", article: "der", ar: "مارس", en: "March", wordClass: "noun" },
+          { de: "April", article: "der", ar: "أبريل", en: "April", wordClass: "noun" },
+          { de: "Mai", article: "der", ar: "مايو", en: "May", wordClass: "noun" },
+          { de: "Juni", article: "der", ar: "يونيو", en: "June", wordClass: "noun" },
+          { de: "Juli", article: "der", ar: "يوليو", en: "July", wordClass: "noun" },
+          { de: "August", article: "der", ar: "أغسطس", en: "August", wordClass: "noun" },
+          { de: "September", article: "der", ar: "سبتمبر", en: "September", wordClass: "noun" },
+          { de: "Oktober", article: "der", ar: "أكتوبر", en: "October", wordClass: "noun" },
+          { de: "November", article: "der", ar: "نوفمبر", en: "November", wordClass: "noun" },
+          { de: "Dezember", article: "der", ar: "ديسمبر", en: "December", wordClass: "noun" },
           { de: "Woche", article: "die", plural: "Wochen", ar: "الأسبوع", en: "week", wordClass: "noun" },
           { de: "Monat", article: "der", plural: "Monate", ar: "الشهر", en: "month", wordClass: "noun" },
           { de: "heute", ar: "اليوم", en: "today", wordClass: "word" },
