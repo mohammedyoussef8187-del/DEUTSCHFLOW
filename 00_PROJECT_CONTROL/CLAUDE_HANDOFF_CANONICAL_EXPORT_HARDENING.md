@@ -3,7 +3,7 @@
 - **branch:** `mobile-foundation` (isolated worktree `claude/open-content`, pushed with
   `git push origin claude/open-content:mobile-foundation`; never merged to `main`)
 - **baseline commit:** `79a85ea`
-- **result commit:** see `RESULT` below
+- **result commit:** `453be35`
 - **scope:** canonical export referential-integrity hardening + release metrics correction.
   No curriculum authored, changed, or removed.
 
