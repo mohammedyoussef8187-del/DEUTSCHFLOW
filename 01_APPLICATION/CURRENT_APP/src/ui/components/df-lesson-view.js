@@ -18,6 +18,11 @@
  * Each item is a button that announces `item-select` with the item it stands for. The
  * component decides nothing about what that means — the host routes it — but a lesson
  * whose parts cannot be opened is a table of contents, not a lesson.
+ *
+ * It also renders what the lesson TEACHES. A section carries text as well as items — the
+ * objective it opens with, the situation it happens in, a reading passage, the mistakes to
+ * watch for, the summary at the end — and a screen that showed only the items would be a
+ * list of exercises rather than a lesson. Each kind is presented as what it is.
  */
 
 import { LitElement, html, css, nothing } from "../../../vendor/lit.js";
@@ -30,9 +35,33 @@ const LABELS = Object.freeze({
   completed: "مكتمل"
 });
 
+/** How each kind of section text is introduced to the learner. */
+const TEACHING_LABEL = Object.freeze({
+  objective: "الهدف",
+  "can-do": "بعد هذا الدرس",
+  context: "الموقف",
+  passage: "النص",
+  "passage-translation": "الترجمة",
+  summary: "الخلاصة",
+  mistake: "خطأ شائع"
+});
+
+/* The order teaching text is read in: why we are here, then the situation, then the text
+   itself, then what to avoid, then what to carry away. */
+const TEACHING_ORDER = Object.freeze([
+  "objective", "can-do", "context", "title", "passage", "passage-translation",
+  "summary", "mistake"
+]);
+
+/** Kinds whose body is German and must be read left to right inside an RTL page. */
+const GERMAN_TEACHING = Object.freeze(["passage"]);
+
 const SECTION_LABEL = Object.freeze({
   intro: "مقدمة",
   vocabulary: "المفردات",
+  context: "الجمل في السياق",
+  listening: "الاستماع",
+  production: "التعبير",
   grammar: "القواعد",
   reading: "القراءة",
   practice: "تدريب",
@@ -81,6 +110,19 @@ export class DfLessonView extends LitElement {
     .section-head { display: flex; gap: 8px; align-items: baseline; }
     .section-title { font-size: 14px; font-weight: 700; }
     .items { margin: 8px 0 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+    .teaching { display: grid; gap: 10px; margin-block-start: 10px; }
+    .teach {
+      border-inline-start: 3px solid var(--border, #e2e8f0);
+      padding-inline-start: 10px;
+    }
+    .teach-label {
+      display: block; font-size: 12px; font-weight: 700;
+      color: var(--muted, #64748b); margin-block-end: 2px;
+    }
+    .teach-body { margin: 0; line-height: 1.7; white-space: pre-wrap; }
+    .teach.mistake { border-inline-start-color: var(--warning, #d97706); }
+    .teach.objective { border-inline-start-color: var(--accent, #2563eb); }
+    .teach .de { direction: ltr; unicode-bidi: isolate; text-align: start; }
     .detail { color: var(--muted); font-size: 12px; }
     .item:hover, .item:focus-visible { border-color: var(--accent, currentColor); }
     .item {
@@ -143,16 +185,44 @@ export class DfLessonView extends LitElement {
     `;
   }
 
+  /** One piece of what the section teaches, labelled by what kind of thing it is. */
+  #renderTeaching(kind, values) {
+    const arabic = values?.ar ?? null;
+    const german = values?.de ?? null;
+    const english = values?.en ?? null;
+    const body = arabic ?? german ?? english;
+    if (!body) return nothing;
+    const isGerman = !arabic && (german || GERMAN_TEACHING.includes(kind));
+
+    return html`
+      <div class="teach ${kind}">
+        <span class="teach-label">${TEACHING_LABEL[kind] ?? kind}</span>
+        <p class="teach-body ${isGerman ? "de" : ""}" lang=${isGerman ? "de" : "ar"} dir="auto"
+          >${body}</p>
+        ${arabic && german ? html`<p class="teach-body de" lang="de" dir="ltr">${german}</p>` : nothing}
+      </div>
+    `;
+  }
+
   #renderSection(section) {
     const status = this.#sectionStatus(section.uuid);
-    const name = section.title?.en || SECTION_LABEL[section.kind] || section.slug;
+    const name = SECTION_LABEL[section.kind] || section.title?.ar || section.title?.en || section.slug;
+    const teaching = section.teaching ?? {};
+    const kinds = TEACHING_ORDER.filter(kind => teaching[kind])
+      .concat(Object.keys(teaching).filter(kind => !TEACHING_ORDER.includes(kind)));
+
     return html`
       <div class="section" data-section=${section.uuid} data-kind=${section.kind}>
         <div class="section-head">
           <span class="section-title">${name}</span>
           ${status === "completed" ? html`<span class="pill">${LABELS.completed}</span>` : nothing}
         </div>
-        <ul class="items">${section.items.map(item => this.#renderItem(item))}</ul>
+        ${kinds.length
+          ? html`<div class="teaching">${kinds.map(kind => this.#renderTeaching(kind, teaching[kind]))}</div>`
+          : nothing}
+        ${section.items.length
+          ? html`<ul class="items">${section.items.map(item => this.#renderItem(item))}</ul>`
+          : nothing}
       </div>
     `;
   }
@@ -161,7 +231,7 @@ export class DfLessonView extends LitElement {
     const lesson = this.lesson;
     if (!lesson) return html`<p class="empty">${LABELS.empty}</p>`;
 
-    const title = lesson.title?.en || lesson.title?.de || lesson.slug || LABELS.untitled;
+    const title = lesson.title?.de || lesson.title?.en || lesson.slug || LABELS.untitled;
 
     return html`
       <article class="lesson">

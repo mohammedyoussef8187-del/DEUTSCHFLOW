@@ -133,6 +133,11 @@ export function buildGrammarTopics(canonical = {}) {
           ordering: rule.ordering ?? 0,
           title: ruleTitle.texts,
           explanation: explanation.texts,
+          /* How the form is built, when it is used, and what learners get wrong — the
+             parts that turn a rule from a label into something that teaches. */
+          formation: textsFor(textIndex, OWNER_TYPES.RULE, rule.uuid, "formation").texts,
+          usage: textsFor(textIndex, OWNER_TYPES.RULE, rule.uuid, "usage").texts,
+          mistake: textsFor(textIndex, OWNER_TYPES.RULE, rule.uuid, "mistake").texts,
           provenance: { title: ruleTitle.provenance, explanation: explanation.provenance },
           contentStatus: rule.contentStatus ?? null,
           examples,

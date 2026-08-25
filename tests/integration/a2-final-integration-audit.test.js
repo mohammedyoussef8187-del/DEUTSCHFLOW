@@ -41,14 +41,19 @@ describe("Independent Validation: 7-Lesson A2 Learner Journey", () => {
     const coursesData = await harness.controller.load("learn-courses");
     const openA2 = coursesData.courses.find(c => c.slug === "deutschflow-open-a2");
     
-    expect(openA2, "DeutschFlow Open A2 course must exist").toBeDefined();
-    expect(openA2.units.length, "Exactly 7 units expected").toBe(7);
+    expect(openA2, "the A2 course must exist").toBeDefined();
 
+    /*
+     * A2 has since been extended with authored units that continue past these seven.
+     * What this audit protects is that the integrated seven are still THERE and still in
+     * teaching order at the front of the level — extending a course must not reorder or
+     * quietly drop the work it was built on.
+     */
     const lessons = openA2.units.flatMap(u => u.lessons);
-    expect(lessons.length, "Exactly 7 lessons expected").toBe(7);
+    expect(lessons.length, "at least the original seven lessons").toBeGreaterThanOrEqual(7);
 
     const titles = lessons.map(l => l.title?.de || l.title?.en || l.slug);
-    expect(titles).toEqual(EXPECTED_LESSON_TITLES);
+    expect(titles.slice(0, EXPECTED_LESSON_TITLES.length)).toEqual(EXPECTED_LESSON_TITLES);
   });
 
   it("walks through Lesson 1, Lesson 4, and Lesson 7: exercise completion, grading, errors, and progress persistence", async () => {

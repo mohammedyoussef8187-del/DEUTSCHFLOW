@@ -144,6 +144,26 @@ export function createLearnController(runtime, options = {}) {
    * detail line. An item whose content is missing keeps its uuid — a dangling reference
    * should look wrong rather than be quietly dropped.
    */
+  /*
+   * Name a lesson item in whichever language it was written in.
+   *
+   * German first, because that is what the learner is here to read, but an exercise like
+   * "write the German for الاسم" is authored in Arabic and has no German prompt at all.
+   * Falling straight through to the slug printed a database identifier on the screen, so
+   * Arabic is tried before giving up — and the slug, which is never a label, is used only
+   * when nothing was written.
+   */
+  function pickLabel(...candidates) {
+    for (const value of candidates) {
+      if (value?.de) return { title: value.de, lang: "de" };
+    }
+    for (const value of candidates) {
+      if (value?.ar) return { title: value.ar, lang: "ar" };
+      if (value?.en) return { title: value.en, lang: "en" };
+    }
+    return null;
+  }
+
   async function labelLessonItems(lesson) {
     const items = (lesson.sections ?? []).flatMap(section => section.items ?? []);
     if (!items.length) return {};
@@ -161,17 +181,21 @@ export function createLearnController(runtime, options = {}) {
     }
     if (wanted("exercise")) {
       for (const exercise of await services.exercises.all()) {
+        /* The prompt is what the learner is looking at, so it names the item; the
+           instruction is the fallback for an exercise whose prompt is a bare gap. */
+        const picked = pickLabel(exercise.prompt, exercise.instruction);
         labels[exercise.uuid] = {
-          title: exercise.instruction?.de ?? exercise.prompt?.de ?? exercise.slug,
+          title: picked?.title ?? exercise.slug,
           detail: exercise.gradeable ? null : SELF_CHECKED,
-          lang: "de"
+          lang: picked?.lang ?? "de"
         };
       }
     }
     if (wanted("listening")) {
       for (const activity of await services.listening.activities()) {
+        const picked = pickLabel(activity.title);
         labels[activity.uuid] = {
-          title: activity.title?.de ?? activity.slug, detail: null, lang: "de"
+          title: picked?.title ?? activity.slug, detail: null, lang: picked?.lang ?? "de"
         };
       }
     }
@@ -216,15 +240,56 @@ export function createLearnController(runtime, options = {}) {
   }
 
   const loaders = {
-    "learn": async () => ({
-      courses: (await services.curriculum.courses()).length,
-      grammar: (await services.grammar.topics()).length,
-      sentences: (await services.sentences.all()).length,
-      exercises: (await services.exercises.all()).length,
-      listening: (await services.listening.activities()).length,
-      pronunciation: (await services.pronunciation.items()).length,
-      errors: (await services.errors.summary(profileUuid, { now: now() })).active
-    }),
+    "learn": async () => {
+      /*
+       * The hub opens onto the path, not onto a count of rows.
+       *
+       * A learner arriving here wants two things: to carry on where they stopped, and to
+       * see the levels they are working through. The tiles below that are the ways INTO
+       * the same material — grammar, sentences, listening — and stay where they were.
+       */
+      const courses = await services.curriculum.courses();
+      const levels = await services.curriculum.cefrProgress(profileUuid);
+      const resume = await services.curriculum.resume(profileUuid);
+
+      const paths = courses
+        .slice()
+        .sort((a, b) => String(a.cefrLevel).localeCompare(String(b.cefrLevel)))
+        .map(course => {
+          const lessons = (course.units ?? []).reduce((n, u) => n + (u.lessons ?? []).length, 0);
+          const level = levels.find(entry => entry.cefrLevel === course.cefrLevel) ?? null;
+          return {
+            slug: course.slug,
+            cefr: course.cefrLevel,
+            title: course.title?.de || course.title?.ar || course.slug,
+            units: (course.units ?? []).length,
+            lessons,
+            completed: level?.lessonsCompleted ?? 0,
+            percent: level?.percent ?? 0
+          };
+        });
+
+      /* The title of the lesson to resume, so the card names it rather than saying "continue". */
+      let resumeTitle = null;
+      if (resume?.lessonUuid) {
+        const course = courses.find(entry => entry.slug === resume.courseSlug) ?? null;
+        const lesson = (course?.units ?? []).flatMap(u => u.lessons ?? [])
+          .find(entry => entry.uuid === resume.lessonUuid) ?? null;
+        resumeTitle = lesson?.title?.de || lesson?.title?.ar || lesson?.slug || null;
+      }
+
+      return {
+        paths,
+        resume: resume?.lessonUuid ? { ...resume, title: resumeTitle } : null,
+        courses: courses.length,
+        grammar: (await services.grammar.topics()).length,
+        sentences: (await services.sentences.all()).length,
+        exercises: (await services.exercises.all()).length,
+        listening: (await services.listening.activities()).length,
+        pronunciation: (await services.pronunciation.items()).length,
+        errors: (await services.errors.summary(profileUuid, { now: now() })).active
+      };
+    },
 
     "learn-courses": async () => {
       const courses = await services.curriculum.courses();
@@ -300,6 +365,45 @@ export function createLearnController(runtime, options = {}) {
   const renderers = {
     "learn": data => {
       const counts = data ?? {};
+
+      /* Where the learner stopped, named, with one button that goes back to it. */
+      const resume = counts.resume
+        ? `<section class="card hero" style="border-inline-start:4px solid var(--accent,#2563eb)">
+            <div class="hero-row">
+              <div>
+                <h2 style="margin:0">تابع من حيث توقفت</h2>
+                <p style="margin:6px 0 0;color:var(--muted);font-size:13px" lang="de" dir="ltr"
+                  >${esc(counts.resume.title ?? "")}</p>
+              </div>
+              <button class="primary-btn large" data-action="learn-resume"
+                data-slug="${esc(counts.resume.courseSlug ?? "")}"
+                data-lesson="${esc(counts.resume.lessonUuid)}"
+                style="min-height:44px">تابع الدرس</button>
+            </div>
+          </section>`
+        : "";
+
+      /* The levels themselves: A1 first, then A2, each with how far along it is. */
+      const paths = (counts.paths ?? []).map(path => `
+        <button class="card interactive" data-action="learn-resume"
+          data-slug="${esc(path.slug)}" style="text-align:start;min-height:96px">
+          <strong style="display:block;font-size:17px">${esc(path.title)}</strong>
+          <span style="color:var(--muted);font-size:12px">${
+            path.units} وحدة · ${path.lessons} درساً</span>
+          <span style="display:block;margin-block-start:8px;height:6px;border-radius:999px;
+            background:var(--border,#e2e8f0);overflow:hidden">
+            <span style="display:block;height:100%;width:${Math.max(0, Math.min(100, path.percent))}%;
+              background:var(--accent,#2563eb)"></span>
+          </span>
+          <span style="color:var(--muted);font-size:12px">${
+            path.completed} من ${path.lessons} درساً مكتملاً</span>
+        </button>`).join("");
+
+      const pathSection = paths
+        ? `<div class="section-title">المسار</div>
+           <section class="grid grid-2">${paths}</section>`
+        : "";
+
       const tiles = LEARN_ROUTES.filter(route => !route.hub).map(route => {
         const key = route.id.replace("learn-", "");
         const count = counts[key] ?? 0;
@@ -311,7 +415,10 @@ export function createLearnController(runtime, options = {}) {
             count ? `${count} عنصر` : "لا يوجد محتوى بعد"}</span>
         </button>`;
       }).join("");
-      return `${head("المنهج", "الدورات والقواعد والجُمل والتمارين والاستماع والنطق.")}
+      return `${head("المنهج", "من الدرس الأول في A1 إلى نهاية A2.")}
+        ${resume}
+        ${pathSection}
+        <div class="section-title">طرق أخرى للتدريب</div>
         <section class="grid grid-3 training-grid">${tiles}</section>`;
     },
 
@@ -321,7 +428,7 @@ export function createLearnController(runtime, options = {}) {
           ${emptyState("لا توجد دورات بعد", "لم تُستورد أي دورة إلى مخزن المحتوى حتى الآن.")}`;
       }
       if (data.lesson) {
-        return `${head("الدرس", esc(data.lesson.title?.en || data.lesson.slug))}
+        return `${head("الدرس", esc(data.lesson.title?.de || data.lesson.title?.ar || data.lesson.slug))}
           ${backButton("رجوع إلى الدورة", "learn-close-lesson")}
           <div style="height:12px"></div>
           <df-lesson-view id="learn-lesson"></df-lesson-view>
@@ -624,6 +731,20 @@ export function createLearnController(runtime, options = {}) {
         view.courseSlug = dataset.slug ?? null;
         view.lessonUuid = null;
         return { reload: true };
+
+      /*
+       * Open the courses screen already pointed at something.
+       *
+       * With a lesson, that lesson opens directly — the resume card's whole purpose is to
+       * skip the two taps back to where the learner was. With only a course, the course
+       * opens at its own resume point, which `learn-courses` works out for itself.
+       */
+      case "learn-resume":
+        view.courseSlug = dataset.slug || view.courseSlug || null;
+        view.lessonUuid = dataset.lesson || null;
+        view.result = null;
+        view.answer = "";
+        return { route: "learn-courses" };
 
       case "learn-close-lesson":
         view.lessonUuid = null;

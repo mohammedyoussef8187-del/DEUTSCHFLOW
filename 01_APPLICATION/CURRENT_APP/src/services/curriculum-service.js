@@ -55,6 +55,22 @@ export const TEXT_KINDS = Object.freeze({ TITLE: "title", DESCRIPTION: "descript
 const notDeleted = row => !row.deleted;
 const byOrdering = (a, b) => (a.ordering ?? 0) - (b.ordering ?? 0);
 
+/*
+ * Courses are ordered by level first, and only then by their own ordering column.
+ *
+ * `ordering` is scoped to a course's own siblings, so several courses can legitimately
+ * carry the same number; sorting on it alone left the order down to insertion, and a
+ * beginner could be handed A2 before A1 had been offered. Level is the thing that
+ * actually sequences a curriculum, so it sorts first.
+ */
+const byLevelThenOrdering = (a, b) => {
+  const rank = level => {
+    const index = CEFR_LEVELS.indexOf(level);
+    return index === -1 ? CEFR_LEVELS.length : index;
+  };
+  return rank(a.cefrLevel) - rank(b.cefrLevel) || byOrdering(a, b);
+};
+
 function groupBy(rows, key) {
   const map = new Map();
   for (const row of (rows ?? []).filter(notDeleted)) {
@@ -99,8 +115,36 @@ function coverageOf(values) {
  * @param {object} canonical curriculum tables
  * @returns {Array} courses in order, each with levels, units, lessons, sections, items
  */
+/**
+ * Every text written on one owner, grouped by kind and then by language.
+ *
+ * `textFor` answers one question — what is the title? — which is all a navigation tree
+ * needs. A lesson screen needs the rest of what was written, and it needs to know which
+ * kind each piece is so it can present an objective differently from a warning about a
+ * common mistake.
+ */
+function teachingTexts(byOwner, ownerType, ownerUuid) {
+  const out = {};
+  for (const row of byOwner.get(`${ownerType}:${ownerUuid}`) ?? []) {
+    if (row.kind === TEXT_KINDS.TITLE) continue;
+    (out[row.kind] ??= {})[normalizeLanguage(row.language)] = row.text;
+  }
+  return out;
+}
+
+/** The same rows again, grouped only by owner, so every kind can be read at once. */
+function indexTextsByOwner(texts) {
+  const map = new Map();
+  for (const row of (texts ?? []).filter(notDeleted)) {
+    const key = `${row.ownerType}:${row.ownerUuid}`;
+    (map.get(key) ?? map.set(key, []).get(key)).push(row);
+  }
+  return map;
+}
+
 export function buildCurriculum(canonical = {}) {
   const texts = indexTexts(canonical.curriculumTexts);
+  const byOwner = indexTextsByOwner(canonical.curriculumTexts);
   const levelsByCourse = groupBy(canonical.courseLevels, "courseUuid");
   const unitsByCourse = groupBy(canonical.courseUnits, "courseUuid");
   const lessonsByUnit = groupBy(canonical.lessons, "unitUuid");
@@ -110,7 +154,7 @@ export function buildCurriculum(canonical = {}) {
 
   return (canonical.courses ?? [])
     .filter(notDeleted)
-    .sort(byOrdering)
+    .sort(byLevelThenOrdering)
     .map(course => {
       const courseTitle = textFor(texts, OWNER_TYPES.COURSE, course.uuid, TEXT_KINDS.TITLE);
 
@@ -126,6 +170,13 @@ export function buildCurriculum(canonical = {}) {
             kind: section.sectionKind,
             ordering: section.ordering ?? 0,
             title: textFor(texts, OWNER_TYPES.SECTION, section.uuid, TEXT_KINDS.TITLE),
+            /*
+             * Everything else written on this section, keyed by what it is: the objective
+             * a lesson opens with, the situation it happens in, a reading passage, the
+             * mistakes to watch for, the closing summary. A section is where a lesson
+             * TEACHES, and a screen that only had its title could only ever list content.
+             */
+            teaching: teachingTexts(byOwner, OWNER_TYPES.SECTION, section.uuid),
             items: (itemsBySection.get(section.uuid) ?? []).sort(byOrdering).map(item => ({
               uuid: item.uuid,
               contentType: item.contentType,
@@ -143,6 +194,8 @@ export function buildCurriculum(canonical = {}) {
             unitUuid: unit.uuid,
             courseUuid: course.uuid,
             title: lessonTitle,
+            objective: textFor(texts, OWNER_TYPES.LESSON, lesson.uuid, "objective"),
+            canDo: textFor(texts, OWNER_TYPES.LESSON, lesson.uuid, "can-do"),
             contentStatus: lesson.contentStatus ?? null,
             sections,
             prerequisites: (prereqsByLesson.get(lesson.uuid) ?? []).map(p => p.requiresLessonUuid),

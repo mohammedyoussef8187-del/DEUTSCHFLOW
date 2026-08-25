@@ -99,18 +99,31 @@ describe("select a course and a lesson", () => {
     expect(data.course.slug).toBe(firstStudyable.slug);
   });
 
-  it("still lists the structure-only course, and it is still openable", async () => {
+  it("no longer offers the structure-only courses as courses", async () => {
+    /*
+     * The Netzwerk chapter list and the Nicos import are a real record of what was
+     * registered, and their rows are still in the store — but a chapter with no lesson
+     * inside it is not something a learner can take, so they are withheld from the
+     * published view rather than presented as a course of twelve empty screens.
+     */
     const harness = await bootLocalLearnerHarness();
     const listed = await harness.navigate("learn-courses");
-    expect(listed.data.courses.map(course => course.slug)).toContain("netzwerk-neu-a2");
+    const slugs = listed.data.courses.map(course => course.slug);
 
-    await harness.act("learn-course", { slug: "netzwerk-neu-a2" });
+    expect(slugs).not.toContain("netzwerk-neu-a2");
+    expect(slugs).not.toContain("nicos-weg-a2");
+    expect(slugs).toContain("deutschflow-a1");
+  });
+
+  it("shows only courses whose every lesson has content", async () => {
+    const harness = await bootLocalLearnerHarness();
     const { data } = await harness.navigate("learn-courses");
-    expect(data.course.slug).toBe("netzwerk-neu-a2");
-    const chapters = data.course.units.flatMap(unit => unit.lessons);
-    expect(chapters).toHaveLength(12);
-    // Registered chapters, no invented lessons inside them.
-    expect(chapters.every(chapter => chapter.sections.length === 0)).toBe(true);
+
+    const empty = data.courses.flatMap(course =>
+      course.units.flatMap(unit => unit.lessons))
+      .filter(lesson => lesson.sections.length === 0)
+      .map(lesson => lesson.slug);
+    expect(empty).toEqual([]);
   });
 
   it("opens a real lesson and shows its sections of real content", async () => {
@@ -155,8 +168,9 @@ describe("consume the learning content", () => {
     expect(data.items).toEqual([]);
     expect(data.item).toBeNull();
 
+    /* Grammar, by contrast, is authored across both levels and every topic teaches. */
     const grammar = await harness.navigate("learn-grammar");
-    expect(grammar.data.topics).toHaveLength(7);
+    expect(grammar.data.topics.length).toBeGreaterThanOrEqual(30);
     expect(grammar.data.topics.every(topic => topic.rules.length > 0)).toBe(true);
   });
 });
@@ -185,10 +199,9 @@ describe("a lesson leads somewhere", () => {
 
   it("shows a word with its German form and its reviewed Arabic meaning", async () => {
     const harness = await bootLocalLearnerHarness();
-    /* The Nicos lesson, whose Arabic gloss came from the source and is published. The
-       open-content lesson deliberately has none yet — its Arabic is a draft awaiting an
-       educator — and a word there shows its German alone. */
-    await harness.act("learn-course", { slug: "nicos-weg-a2" });
+    /* A DeutschFlow lesson, whose Arabic gloss is authored with the word rather than
+       waiting on an upstream review, so a learner sees the meaning next to the form. */
+    await harness.act("learn-course", { slug: "deutschflow-a1" });
     const { data } = await openLesson(harness);
 
     const word = data.lesson.sections.flatMap(s => s.items)
