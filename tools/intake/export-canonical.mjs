@@ -23,6 +23,16 @@
  * learner. Both the exporter and the services decide this with the same `isPublished`,
  * so the file and the screens can never disagree about what is published.
  *
+ * AND IT EXPORTS A CLOSED GRAPH. Publication is a per-ROW decision, and a dataset is a
+ * graph: withholding a draft section left its items exported and pointing at nothing.
+ * Those rows are invisible to any reader that walks the tree from a course downwards —
+ * so they never reached a learner — but they were downloaded by every device and they
+ * inflated every count taken from the flat tables, which is how a release report comes
+ * to claim more exercises than a learner can ever meet. After the publication filter the
+ * dataset is therefore closed under every relationship the schema declares: a row that
+ * can no longer reach a real parent is dropped from the FILE, and stays untouched in the
+ * source database, where it is still a perfectly good row awaiting its parent's release.
+ *
  *   node tools/intake/export-canonical.mjs [--db <file>] [--out <file>] [--pretty]
  */
 
@@ -32,6 +42,9 @@ import { DatabaseSync } from "node:sqlite";
 import { createSqliteAdapter } from "../../01_APPLICATION/CURRENT_APP/src/platform/sqlite/adapter.js";
 import { SCHEMA_VERSION, TABLE_SPECS } from "../../01_APPLICATION/CURRENT_APP/src/platform/sqlite/schema.js";
 import { publishedRows } from "../../01_APPLICATION/CURRENT_APP/src/content/publication.js";
+import {
+  integrityReport, pruneOrphans
+} from "../../01_APPLICATION/CURRENT_APP/src/content/referential-integrity.js";
 
 /**
  * Tables that hold something a person did, rather than something an editor authored.
@@ -62,6 +75,7 @@ export async function exportCanonicalContent(adapter) {
   let total = 0;
   let withheldTotal = 0;
 
+  const published = {};
   for (const entity of CONTENT_ENTITIES) {
     const stored = await adapter.selectAll(entity);
     const rows = publishedRows(stored);
@@ -69,6 +83,17 @@ export async function exportCanonicalContent(adapter) {
       withheld[entity] = stored.length - rows.length;
       withheldTotal += stored.length - rows.length;
     }
+    published[entity] = rows;
+  }
+
+  /*
+   * Close the graph. This runs to a fixed point, because withholding a course orphans its
+   * units, dropping those orphans their lessons, and so on down to the items and texts.
+   */
+  const pruned = pruneOrphans(published);
+
+  for (const entity of CONTENT_ENTITIES) {
+    const rows = pruned.entities[entity] ?? [];
     if (!rows.length) continue;              // an empty table says nothing; omit it
     entities[entity] = rows;
     counts[entity] = rows.length;
@@ -77,7 +102,10 @@ export async function exportCanonicalContent(adapter) {
 
   return {
     schemaVersion: await adapter.schemaVersion(),
-    entities, counts, total, withheld, withheldTotal
+    entities, counts, total, withheld, withheldTotal,
+    orphaned: pruned.removed, orphanedTotal: pruned.removedTotal, passes: pruned.passes,
+    /* Proof, in the returned value, that what is about to be written is closed. */
+    integrity: integrityReport(entities)
   };
 }
 
@@ -145,6 +173,16 @@ async function main() {
         console.log(`  ${entity}: ${count}`);
       }
     }
+    if (exported.orphanedTotal) {
+      console.log(`dropped ${exported.orphanedTotal} rows left without a parent ` +
+        `(${exported.passes} passes) — still present in the source store:`);
+      for (const [entity, count] of Object.entries(exported.orphaned)) {
+        console.log(`  ${entity}: ${count}`);
+      }
+    }
+    console.log(`referential integrity: ${
+      exported.integrity.ok ? "closed" : `${exported.integrity.total} BROKEN REFERENCES`}`);
+    if (!exported.integrity.ok) process.exitCode = 4;
   } finally {
     store.close();
   }
