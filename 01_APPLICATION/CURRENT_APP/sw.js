@@ -13,7 +13,7 @@
  * list every file here.
  */
 
-const CACHE = "deutschflow-pro-rc6-2026-08-25";
+const CACHE = "deutschflow-pro-rc7-2026-08-25";
 
 // Enough to boot offline even before anything else has been visited.
 const SHELL = [

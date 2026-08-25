@@ -1,5 +1,6 @@
 import { DAY, MINUTE, DEFAULT_SETTINGS, esc, clamp, round, randomUnit, randomInt, shuffle, sample, uniqueBy, localDateKey, startOfLocalDay, formatDate, formatRelative } from "./core/utils.js";
 import { ARTICLES, normalizeGerman, normalizeArabic, foldGerman, splitArticle, inferItemType } from "./core/text.js";
+import { triageLegacyEntry, EXCLUDED_VERDICTS, VERDICT } from "./content/legacy-triage.js";
 import { levenshtein, validateGermanAnswer, validateArticleAnswer, validateArabicAnswer, arabicTokenScore, evaluateArabicAdvisory, isSelfAssessedSkill } from "./exercises/answer-evaluator.js";
 import { createCard, scheduleCard, cardMastery, automaticRating, skillLabel, skillWeight, wordMastery, wordStatus, cardStatus, preferredSkills, nextSkillUnlocks } from "./srs/scheduler.js";
 import { createRepositories } from "./data/repositories.js";
@@ -93,15 +94,28 @@ import {
     if(word.itemType==="sentence"&&gTokens>=6&&aTokens>0&&aTokens/gTokens<.48)issues.push("الترجمة العربية مختصرة بصورة تحتاج مراجعة");
     if(/^[\d\W_]+$/.test(g))issues.push("لا يحتوي على كلمة ألمانية صالحة");
     if(/\b(seite|aufgabe|lektion|kapitel)\s*\d+/i.test(g))issues.push("مرجع كتاب أو تمرين داخل المدخل");
-    if(/[<>\[\]{}]|\.{3,}/.test(g))issues.push("رموز أو جزء مبتور يحتاج مراجعة");
+    /* An ellipsis is a SLOT, not damage: `von ... bis`, `Was bedeutet ...?`, `zwar ...
+       aber` are patterns a learner fills in. Only brackets and angle characters, which
+       German never uses, mean the row was broken by extraction. */
+    if(/[<>\[\]{}]/.test(g))issues.push("رموز أو جزء مبتور يحتاج مراجعة");
     if(word.itemType==="sentence"&&!/[.!?…]$/.test(g.trim())&&gTokens>=7)issues.push("جملة طويلة دون نهاية واضحة");
     if(/^die\s+[A-ZÄÖÜ][a-zäöüß]+$/.test(g)&&/^(هو|هي|يفعل|يكون|يذهب|يعود)$/.test(normalizeArabic(a)))issues.push("احتمال تعارض بين اسم ألماني وترجمة فعلية عامة");
     return issues;
   }
+  /*
+   * Build one learner word from one legacy row.
+   *
+   * The triage runs FIRST and decides whether this row is teachable at all. A row it
+   * excludes still produces a word object — callers expect one per seed row — but the word
+   * is marked `excluded`, and the seed bootstrap drops it before anything is stored. That
+   * keeps the decision in one place and keeps the raw row untouched in seed-data.js.
+   */
   function applyPatchToSeed(seed){
     const p=DATA_PATCHES[seed.id]||{};
-    const german=p.german??seed.de;
-    const arabic=p.arabic??seed.ar;
+    const triage=triageLegacyEntry(seed);
+    const excluded=EXCLUDED_VERDICTS.includes(triage.verdict);
+    const german=p.german??triage.german??seed.de;
+    const arabic=p.arabic??triage.arabic??seed.ar;
     const pronunciation=p.pronunciation??seed.pr??"";
     let article=(p&&Object.prototype.hasOwnProperty.call(p,"article")?p.article:(seed.art??splitArticle(german).article));
     let itemType=p.itemType??seed.it??inferItemType(german,article);
@@ -122,15 +136,22 @@ import {
       acceptedArabicAnswers:Array.isArray(p.acceptedArabicAnswers)?p.acceptedArabicAnswers:[],
       sourceRow:seed.row??null,
       favorite:false,
-      ignored:DATA_EXCLUSIONS.has(seed.id),
+      ignored:excluded||DATA_EXCLUSIONS.has(seed.id),
+      excluded,
+      triageVerdict:triage.verdict,
       userFlagged:false,
       createdAt:Date.now(),
       updatedAt:Date.now(),
       qualityStatus:"ok",
       qualityIssues:[],
-      qualityNote:p.qualityNote||(DATA_EXCLUSIONS.get(seed.id)||"")
+      qualityNote:p.qualityNote||triage.reason||(DATA_EXCLUSIONS.get(seed.id)||"")
     };
-    word.qualityIssues=qualityIssues(word);
+    /*
+     * An excluded row is already decided, so it is not also proposed as somebody's task.
+     * Flagging it would put it back in the review queue, which is the behaviour this
+     * whole path exists to remove.
+     */
+    word.qualityIssues=excluded?[]:qualityIssues(word);
     word.qualityStatus=word.qualityIssues.length?"review":"ok";
     return word;
   }

@@ -178,9 +178,12 @@ export function createIndexedDbAdapter(DF, environment = globalThis) {
         migration={type:"legacy",count:words.length};
       }else{
         const seed=Array.isArray(environment.SEED)?environment.SEED:[];
-        const words=seed.map(DF.applyPatchToSeed);
+        /* Rows the triage excluded never become learner words. They stay in seed-data.js,
+           which is the evidence; what is dropped here is only their publication. */
+        const triaged=seed.map(DF.applyPatchToSeed);
+        const words=triaged.filter(w=>!w.excluded);
         await bulkPut("words",words);
-        migration={type:"seed",count:words.length};
+        migration={type:"seed",count:words.length,excluded:triaged.length-words.length};
       }
     }
     settings={...DF.DEFAULT_SETTINGS,...(settings||await getMeta("settings",{}))};
