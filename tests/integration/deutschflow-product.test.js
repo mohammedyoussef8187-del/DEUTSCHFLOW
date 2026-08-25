@@ -181,7 +181,13 @@ describe("nothing on screen is a database identifier", () => {
       }
     }
     expect(slugLabelled).toEqual([]);
-  });
+    /*
+     * Every item of every lesson of both courses, through the real controller. It costs
+     * about a second alone and several times that when the whole suite runs beside it, so
+     * the budget matches the work rather than the five-second default — a release gate
+     * that fails on a busy machine certifies nothing.
+     */
+  }, 30_000);
 });
 
 describe("scoring is honest", () => {

@@ -195,7 +195,14 @@ describe("a noun is never labelled with its article twice", () => {
       }
     }
     expect(doubled).toEqual([]);
-  });
+    /*
+     * Walking every lesson of both courses through the real controller takes about a
+     * second on its own, and rather longer when seventy-eight files are running beside it.
+     * The default five-second budget was enough in isolation and occasionally was not
+     * under load, which made this the one unreliable gate in the suite. The work is
+     * genuinely this size, so the budget says so instead.
+     */
+  }, 30_000);
 });
 
 describe("RC-3, RC-4, RC-5 — every graded answer is the only right one, and is taught", () => {
