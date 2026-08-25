@@ -2,7 +2,7 @@
 
 - **branch:** `mobile-foundation` — not merged to `main`
 - **starting commit:** `6189b1d`
-- **final commit:** see `FINAL` below
+- **final commit:** `a4afefa`
 
 ---
 
