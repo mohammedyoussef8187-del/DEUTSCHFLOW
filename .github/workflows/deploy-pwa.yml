@@ -1,0 +1,38 @@
+name: Deploy DeutschFlow PWA
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - mobile-foundation
+    paths:
+      - "01_APPLICATION/CURRENT_APP/**"
+      - ".github/workflows/deploy-pwa.yml"
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+      - name: Upload PWA
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: 01_APPLICATION/CURRENT_APP
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4

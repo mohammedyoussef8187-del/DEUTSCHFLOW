@@ -9,7 +9,8 @@ import * as triage from "../../01_APPLICATION/CURRENT_APP/src/content/legacy-tri
 
 const appPath = path.resolve(process.cwd(), "01_APPLICATION/CURRENT_APP/src/app.js");
 const source = fs.readFileSync(appPath, "utf8");
-const coreEnd = source.indexOf('\n(function(){\n  "use strict";\n  const DF=window.DF;');
+const coreBoundary = /\r?\n\(function\(\)\{\r?\n\s*"use strict";\r?\n\s*const DF=window\.DF;/.exec(source);
+const coreEnd = coreBoundary?.index ?? -1;
 
 if (coreEnd < 0) throw new Error("Could not locate the legacy core boundary in app.js");
 

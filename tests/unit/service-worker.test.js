@@ -28,6 +28,7 @@ function makeWorker({ online = true } = {}) {
       addEventListener: (type, fn) => { listeners[type] = fn; },
       skipWaiting: vi.fn(),
       clients: { claim: vi.fn() },
+      registration: { scope: "https://app.test/" },
       location: { origin: "https://app.test" }
     },
     caches: {
@@ -57,7 +58,12 @@ describe("service worker", () => {
     listeners.install(e);
     await e.promise;
     const cached = [...store.keys()];
-    for (const asset of ["/index.html", "/styles.css", "/src/app.js", "/data/seed-data.js"]) {
+    for (const asset of [
+      "https://app.test/index.html",
+      "https://app.test/styles.css",
+      "https://app.test/src/app.js",
+      "https://app.test/data/seed-data.js"
+    ]) {
       expect(cached, `missing ${asset}`).toContain(asset);
     }
   });
@@ -97,7 +103,7 @@ describe("service worker", () => {
 
   it("serves the shell for navigations when offline", async () => {
     const { listeners, store } = makeWorker({ online: false });
-    store.set("/index.html", "shell-html");
+    store.set("https://app.test/index.html", "shell-html");
     let responded;
     listeners.fetch({
       request: { method: "GET", mode: "navigate", url: "https://app.test/words" },

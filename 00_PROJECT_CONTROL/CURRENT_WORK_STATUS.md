@@ -3,7 +3,7 @@
 This is the single canonical handoff file for **DeutschFlow** to track progress across sequential agent invocations.
 
 ## Metadata
-*   **Last AI/Agent Used:** OpenAI Codex — Netzwerk source-verification and implementation preparation only; Claude remains primary implementation agent
+*   **Last AI/Agent Used:** OpenAI Codex — temporary installable PWA release path
 *   **baseline Git commit:** `80599f5bf1aa9ea6dcd52aa42339df2c8bb67e27`
 *   **second pass Git commit:** `2ce3631946f6fe962c48488048a7eaf4ac144e68`
 *   **audit Git commit:** `103970456900e24f6a8f6c85346248d34812aaa5`
@@ -19,14 +19,24 @@ This is the single canonical handoff file for **DeutschFlow** to track progress 
 *   **UI migration complete Git commit:** `60f2526` (feat: migrate the multiple-choice answers to Lit)
 *   **option (c) work Git commit:** `e872810` (fix: make the PWA actually work offline)
 *   **Gate 5 simulator PASSED commit:** `16807f9` (validated in Codemagic)
-*   **Last Update Timestamp:** 2026-08-22
+*   **Last Update Timestamp:** 2026-08-30
 
 ## Current Context
 *   **Current Phase:** PHASE 4 — MIGRATION MAPPING + SQLITE PARITY VALIDATION
 *   **Current Delivery Priority:** MOBILE FIRST — iOS/iPadOS + Android
 *   **Phase Status:** PHASE 2 AND PHASE 3 COMPLETE. PHASE 4 COMPLETE (migration mapping, SQLite parity, backup/restore Gate 2, real-data dry-run). PHASE 5 STARTED: Capacitor 8 mobile foundation and native SQLite executor implemented and contract-tested. Real learner storage NOT switched; on-device verification (Gate 5) NOT yet performed.
 *   **Implementation Status:** ACTIVE ON `mobile-foundation`
-*   **Current Task:** Netzwerk neu A2 Kapitel 2 adapter implementation is prepared from verified official-source metadata. No adapter/runtime implementation was made by Codex. Native storage remains GATED OFF; on-device verification still requires user-only device actions.
+*   **Current Task:** Temporary iPhone/iPad PWA distribution is implementation-complete and ready to publish through GitHub Pages. Native storage remains GATED OFF; signed TestFlight/App Store distribution still waits for Apple Developer approval.
+
+## Temporary Installable PWA Release (2026-08-30)
+*   Added a GitHub Pages deployment workflow for the exact `01_APPLICATION/CURRENT_APP` release tree; it runs manually or when `mobile-foundation` changes the app.
+*   Converted manifest, icon, service-worker, shell and offline fallback URLs from domain-root paths to scope-relative paths, so the app works both at a root domain and under a GitHub Pages repository subpath.
+*   Service-worker registration now works on HTTPS and localhost, keeps a scope matching the hosted app directory, and precaches the curriculum plus the iOS installation helper.
+*   Added an iPhone/iPad-only install panel explaining Safari → Share → Add to Home Screen. It stays absent after standalone installation.
+*   Learner storage and all native gates are unchanged: IndexedDB remains active; native SQLite, notifications and the learner storage switch remain off.
+*   Added four PWA installability tests and updated the service-worker harness for scoped URLs. Also made the existing legacy-core test boundary tolerant of CRLF line endings; no runtime code or learner data changed for that repair.
+*   Verification: all five web release endpoints returned HTTP 200; `npm test` passed **1340 / 1340 tests across 79 files**; `git diff --check` reported no whitespace errors (line-ending notices only).
+*   Remaining user action: in GitHub repository settings, select **Pages → Source: GitHub Actions**, then push `mobile-foundation` or run **Deploy DeutschFlow PWA** manually. Open the resulting HTTPS URL in Safari and add it to the Home Screen.
 
 ## Netzwerk neu A2 Adapter Preparation (documentation only, 2026-08-22)
 *   Traced the successful Nicos Weg intake through extraction, normalization, parsing, validation, canonical mapping, preview/diff, repository transactions, service verification, and its unit/integration fixtures.

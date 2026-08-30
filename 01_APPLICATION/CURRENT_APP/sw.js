@@ -13,20 +13,22 @@
  * list every file here.
  */
 
-const CACHE = "deutschflow-pro-rc7-2026-08-25";
+const CACHE = "deutschflow-pwa-rc8-2026-08-30";
+const scopedUrl = path => new URL(path, self.registration.scope).href;
 
 // Enough to boot offline even before anything else has been visited.
 const SHELL = [
-  "/index.html",
-  "/manifest.webmanifest",
-  "/icon-192.png",
-  "/icon-512.png",
-  "/styles.css",
-  "/src/app.js",
-  "/data/seed-data.js",
+  "./index.html",
+  "./manifest.webmanifest",
+  "./icon-192.png",
+  "./icon-512.png",
+  "./styles.css",
+  "./src/app.js",
+  "./src/install-help.js",
+  "./data/seed-data.js",
   // The curriculum has to be on the device before the device goes offline.
-  "/data/canonical-content.json"
-];
+  "./data/canonical-content.json"
+].map(scopedUrl);
 
 self.addEventListener("install", e => e.waitUntil(
   caches.open(CACHE)
@@ -49,7 +51,7 @@ self.addEventListener("fetch", e => {
   if (e.request.method !== "GET") return;
 
   if (e.request.mode === "navigate") {
-    e.respondWith(fetch(e.request).catch(() => caches.match("/index.html")));
+    e.respondWith(fetch(e.request).catch(() => caches.match(scopedUrl("./index.html"))));
     return;
   }
 

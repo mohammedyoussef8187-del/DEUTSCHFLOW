@@ -176,3 +176,16 @@ This log is the immutable record of approved design, product, and technical deci
     6.  **Bundle Identifier:** `com.deutschflow.app` is a **placeholder** and must be confirmed before any App Store or Play submission.
 *   **Outstanding User-Only Actions:** `npx cap add ios` requires macOS with Xcode 26; `npx cap add android` requires the Android SDK. Apple Developer enrollment, signing, and provisioning remain user-only.
 *   **Implementation Status:** Executor implemented and contract-tested on a workstation. On-device verification is Stop Gate 5 and is NOT yet performed.
+
+## [DF-015] Temporary Installable PWA Distribution Before Apple Approval
+*   **Status:** APPROVED
+*   **Date:** 2026-08-30
+*   **Approving Authority:** User
+*   **Context:** The learner needs to start using DeutschFlow on iPhone before Apple Developer enrollment/signing is approved.
+*   **Decision:**
+    1.  Publish the existing shared web application as an HTTPS Progressive Web App and install it from Safari using **Add to Home Screen**.
+    2.  This is a temporary distribution path and does not replace the approved Capacitor/iOS architecture.
+    3.  Keep learner persistence on the existing IndexedDB path; do not enable native SQLite, native notifications, or the learner storage switch before their existing gates pass.
+    4.  Keep manual backup/restore available and warn that clearing Safari website data can remove temporary PWA learner data.
+    5.  Use path-relative PWA assets so the same release works at a domain root or a hosted subpath such as GitHub Pages.
+    6.  Apple Developer membership is not required to install the PWA; it remains required for signed TestFlight/App Store distribution.

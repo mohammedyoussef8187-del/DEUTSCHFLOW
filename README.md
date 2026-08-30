@@ -2,6 +2,20 @@
 
 DeutschFlow is a structured German Learning System that progressively upgrades an existing vocabulary trainer into a comprehensive educational platform.
 
+## Temporary iPhone/iPad PWA Distribution
+
+Until Apple Developer signing is available, the current application can be published as an
+installable Progressive Web App from `01_APPLICATION/CURRENT_APP`.
+
+The repository includes `.github/workflows/deploy-pwa.yml`. After GitHub Pages is configured
+to use **GitHub Actions**, a push to `mobile-foundation` that changes the current app publishes
+the PWA automatically. No Apple Developer account is required for this web installation.
+
+On iPhone or iPad: open the published HTTPS link in Safari, tap **Share**, choose
+**Add to Home Screen**, then tap **Add**. Learner data remains local in IndexedDB, so users
+should keep manual backups and must not clear Safari website data while this temporary PWA is
+their active installation.
+
 ## Project Navigation
 
 For AI agents, developers, and tools, please refer to the specific entry point files for instructions and context:
